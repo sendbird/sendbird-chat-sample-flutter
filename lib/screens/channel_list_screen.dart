@@ -15,7 +15,7 @@ class ChannelListScreen extends StatefulWidget {
 class _ChannelListScreenState extends State<ChannelListScreen>
     with ChannelEventHandler {
   SendbirdSdk sdk = SendbirdSdk();
-  GroupChannelListQuery query = GroupChannelListQuery();
+  GroupChannelListQuery query = GroupChannelListQuery()..limit = 15;
   User currentUser;
   List<GroupChannel> groupChannels = [];
   bool isLoading = false;
@@ -33,26 +33,15 @@ class _ChannelListScreenState extends State<ChannelListScreen>
     // });
   }
 
-  Future<List<GroupChannel>> getGroupChannels() async {
-    try {
-      final query = GroupChannelListQuery()
-        // ..includeEmptyChannel = true
-        // ..memberStateFilter = MemberStateFilter.joined
-        // ..order = GroupChannelListOrder.latestLastMessage
-        ..limit = 15;
-      return await query.loadNext();
-    } catch (e) {
-      print('channel_list_view: getGroupChannel: ERROR: $e');
-      return [];
-    }
-  }
+  Future<List<GroupChannel>> getGroupChannels() async {}
 
   @override
   void initState() {
     super.initState();
     currentUser = sdk.getCurrentUser();
     sdk.addChannelHandler('unique-key-for-handler', this);
-    updateGroupChannels();
+    isLoading = true;
+    loadChannelList();
   }
 
   // @override
@@ -114,37 +103,48 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       return Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: groupChannels.length,
-            itemBuilder: (context, index) {
-              GroupChannel channel = groupChannels[index];
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
-                child: InkWell(
-                  child: ChannelListItem(channel),
-                  onTap: () {
-                    gotoChannel(channel);
-                  },
-                ),
-              );
-            },
-          ),
-        )
-      ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        await loadChannelList(reload: true);
+      },
+      child: ListView.builder(
+        itemCount: groupChannels.length,
+        itemBuilder: (context, index) {
+          final channel = groupChannels[index];
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+            child: InkWell(
+              child: ChannelListItem(channel),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChannelScreen(channel: channel),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
   // Sendbird logic
 
-  void gotoChannel(GroupChannel channel) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChannelScreen(channel: channel),
-      ),
-    );
+  Future<void> loadChannelList({bool reload = false}) async {
+    try {
+      if (reload) query = GroupChannelListQuery()..limit = 15;
+      final res = await query.loadNext();
+      setState(() {
+        isLoading = false;
+        if (reload)
+          groupChannels = res;
+        else
+          groupChannels.addAll(res);
+      });
+    } catch (e) {
+      print('channel_list_view: getGroupChannel: ERROR: $e');
+    }
   }
 }
