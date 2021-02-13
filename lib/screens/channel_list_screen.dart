@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -20,21 +21,6 @@ class _ChannelListScreenState extends State<ChannelListScreen>
   List<GroupChannel> groupChannels = [];
   bool isLoading = false;
 
-  Future<void> updateGroupChannels() async {
-    // this.isLoading = true;
-
-    // List<GroupChannel> newChannels = await getGroupChannels();
-    // if (newChannels == this.groupChannels) {
-    //   return;
-    // }
-    // setState(() {
-    //   this.isLoading = false;
-    //   this.groupChannels = newChannels;
-    // });
-  }
-
-  Future<List<GroupChannel>> getGroupChannels() async {}
-
   @override
   void initState() {
     super.initState();
@@ -44,16 +30,37 @@ class _ChannelListScreenState extends State<ChannelListScreen>
     loadChannelList();
   }
 
+  /// Update list view with either by overriding channel event handler methods
+  /// or use stream (see _bulidStreamBuilder())
+  //
   // @override
-  // void onUserJoined(GroupChannel channel, User user) {
-  //   if (user.userId == SendbirdSdk().getCurrentUser().userId) {
+  // void onChannelChanged(BaseChannel channel) {
+  //   final index = groupChannels
+  //       .indexWhere((element) => element.channelUrl == channel.channelUrl);
+
+  //   if (index != -1) {
   //     setState(() {
-  //       this.groupChannels = [channel, ...groupChannels];
+  //       groupChannels[index] = channel;
   //     });
   //   }
   // }
 
-  // TODO: channel change handler + other event handlers
+  /// Update chanel list when new message has been arrived
+  @override
+  void onMessageReceived(BaseChannel channel, BaseMessage message) {
+    final index = groupChannels
+        .indexWhere((element) => element.channelUrl == channel.channelUrl);
+
+    if (index != -1) {
+      setState(() {
+        groupChannels[index] = channel;
+      });
+    } else {
+      setState(() {
+        groupChannels.insert(0, channel);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,23 +117,41 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       child: ListView.builder(
         itemCount: groupChannels.length,
         itemBuilder: (context, index) {
-          final channel = groupChannels[index];
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
-            child: InkWell(
-              child: ChannelListItem(channel),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChannelScreen(channel: channel),
-                  ),
-                );
-              },
-            ),
-          );
+          return _buildStreamBuilder(index);
         },
       ),
+    );
+  }
+
+  /// Stream builder with channel change stream
+  Widget _buildStreamBuilder(int index) {
+    final channel = groupChannels[index];
+
+    return StreamBuilder(
+      initialData: groupChannels[index],
+      // use channelChangedStream to update channel list item
+      // Multiple streams can be combined with using framework such as rxdart
+      // and update channe list with multiple streams
+      // (message recevies, channel changed, etc)
+      stream: sdk
+          .channelChangedStream()
+          .where((c) => c.channelUrl == groupChannels[index].channelUrl),
+      builder: (ctx, snapshot) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+          child: InkWell(
+            child: ChannelListItem(channel),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChannelScreen(channel: channel),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 

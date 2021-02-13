@@ -257,9 +257,9 @@ packages:
   sendbirdsdk:
     dependency: "direct main"
     description:
-      name: sendbirdsdk
-      url: "https://dl.cloudsmith.io/public/sendbird/sendbird-sdk-flutter/dart/"
-    source: hosted
+      path: "../messaging-flutter"
+      relative: true
+    source: path
     version: "3.0.0"
   shared_preferences:
     dependency: transitive

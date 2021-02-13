@@ -1,62 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sendbird_flutter/components/avatar_view.dart';
+import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class ChannelListItem extends StatelessWidget {
   final GroupChannel channel;
-  final currentUser = SendbirdSdk().getCurrentUser();
+  final currentUserId = SendbirdSdk().getCurrentUser()?.userId;
 
   ChannelListItem(this.channel);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: _buildAvatars(),
+      leading: AvatarView(
+        channel: this.channel,
+        currentUserId: currentUserId,
+        width: 40,
+        height: 40,
+      ),
       tileColor: Colors.white,
-      title: _buildTitle(),
+      title: ChannelTitleTextView(this.channel, currentUserId),
       subtitle: Text(channel?.lastMessage?.message ?? ''),
       trailing: _buildTailing(context),
-    );
-  }
-
-  Widget _buildTitle() {
-    List<String> namesList = [
-      for (final member in channel.members)
-        if (member.userId != currentUser.userId) member.nickname
-    ];
-    final titleText = namesList.join(", ");
-    return Text(
-      titleText,
-      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-    );
-  }
-
-  Widget _buildAvatars() {
-    // Generate a channel image from avatars of users, excluding current user
-    int crossAxisCount = 1;
-    if (channel.memberCount > 3) {
-      crossAxisCount = 2;
-    } else {
-      (channel.memberCount / 2).round();
-    }
-    return Container(
-      width: 40,
-      height: 40,
-      child: RawMaterialButton(
-        shape: CircleBorder(),
-        clipBehavior: Clip.hardEdge,
-        onPressed: () {},
-        child: GridView.count(crossAxisCount: crossAxisCount, children: [
-          for (final member in channel.members)
-            if (member.userId != currentUser.userId &&
-                member.profileUrl.isNotEmpty)
-              Image(
-                image: NetworkImage(member.profileUrl),
-                fit: BoxFit.cover,
-              )
-        ]),
-      ),
     );
   }
 
