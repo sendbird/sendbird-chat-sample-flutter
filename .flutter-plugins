@@ -1,5 +1,7 @@
 # This is a generated file; do not edit or check into version control.
 device_info=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/device_info-1.0.0/
+flutter_plugin_android_lifecycle=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-1.0.11/
+image_picker=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/image_picker-0.6.7+22/
 path_provider_linux=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-0.0.1+2/
 path_provider_windows=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-0.0.4+3/
 shared_preferences=/Users/wooyoung.chung/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.12+4/

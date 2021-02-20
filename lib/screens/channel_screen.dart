@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/components/message_item.dart';
@@ -30,16 +31,21 @@ class _ChannelScreenState extends State<ChannelScreen> {
   StreamSubscription messageSubs;
   bool isLoading = false;
 
+  final picker = ImagePicker();
+
   @override
   void initState() {
-    _loadMessages(channel: widget.channel);
+    _loadMessages(channel: widget.channel, reload: true);
     lstController.addListener(_scrollListener);
 
     messageSubs = sdk
         .messageReceiveStream(channelUrl: widget.channel.channelUrl)
         .listen((message) {
-      messages.insert(0, message);
+      setState(() {
+        messages.insert(0, message);
+      });
     });
+
     super.initState();
   }
 
@@ -66,6 +72,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 // physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   //bind message into item
+                  //this can be streambuilder
                   final message = messages[index];
                   final isMyMessage =
                       message.sender?.userId == currentUser.userId;
@@ -138,6 +145,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
             children: <Widget>[
               GestureDetector(
                 onTap: () {
+                  getImage();
                   //show option view for camera or library
                 },
                 child: Container(
@@ -203,9 +211,22 @@ class _ChannelScreenState extends State<ChannelScreen> {
     }
     if (lstController.offset <= lstController.position.minScrollExtent &&
         !lstController.position.outOfRange) {
-      print("reach the top ${this.messages.length}");
-      print("last message: ${this.messages.first.message}");
+      //reach bottom
     }
+  }
+
+  // picker
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        print('${pickedFile.path}');
+      } else {
+        print('No image selected.');
+      }
+    });
   }
 
   // Sendbird logic
@@ -221,19 +242,18 @@ class _ChannelScreenState extends State<ChannelScreen> {
 
     isLoading = true;
 
+    final ts = reload ? DateTime.now().millisecondsSinceEpoch : timestamp;
     try {
-      final messages = await channel.getMessagesByTimestamp(
-        timestamp ?? DateTime.now().millisecondsSinceEpoch * 1000,
-        MessageListParams()
-          ..reverse = true
-          ..previousResultSize = 20,
-      );
+      final params = MessageListParams()
+        ..isInclusive = false
+        ..includeThreadInfo = true
+        ..reverse = true
+        ..previousResultSize = 20;
+      final messages = await channel.getMessagesByTimestamp(ts, params);
+
       setState(() {
         isLoading = false;
-
         this.messages = reload ? messages : this.messages + messages;
-        print("message length : ${this.messages.length}");
-        print("last message: ${this.messages.first.message}");
       });
     } catch (e) {
       isLoading = false;
