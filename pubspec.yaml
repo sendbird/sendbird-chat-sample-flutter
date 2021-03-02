@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.16.1
+  provider: ^2.0.0 
   sendbirdsdk:
     # path: '../messaging-flutter'
     hosted:

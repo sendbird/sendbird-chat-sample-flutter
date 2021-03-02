@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/components/message_item.dart';
+import 'package:sendbird_flutter/view_models/channel_view_model.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
@@ -19,72 +21,41 @@ class ChannelScreen extends StatefulWidget {
 }
 
 class _ChannelScreenState extends State<ChannelScreen> {
-  final ScrollController lstController = ScrollController();
-  final TextEditingController inputController = new TextEditingController();
-
-  List<BaseMessage> messages = [];
-
-  File uploadFile;
-
-  SendbirdSdk sdk = SendbirdSdk();
-  User currentUser = SendbirdSdk().getCurrentUser();
-  StreamSubscription messageSubs;
-  bool isLoading = false;
-
-  final picker = ImagePicker();
+  ChannelViewModel model;
 
   @override
   void initState() {
-    _loadMessages(channel: widget.channel, reload: true);
-    lstController.addListener(_scrollListener);
+    // _loadMessages(channel: widget.channel, reload: true);
+    // lstController.addListener(_scrollListener);
 
-    messageSubs = sdk
-        .messageReceiveStream(channelUrl: widget.channel.channelUrl)
-        .listen((message) {
-      setState(() {
-        messages.insert(0, message);
-      });
-    });
-
+    model = ChannelViewModel(channel: widget.channel);
+    model.loadMessages(reload: true);
     super.initState();
   }
 
   @override
   void dispose() {
     super.dispose();
-    messageSubs?.cancel();
+    // model.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildNavigationBar(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                controller: lstController,
-                itemCount: messages.length,
-                shrinkWrap: true,
-                reverse: true,
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                // physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  //bind message into item
-                  //this can be streambuilder
-                  final message = messages[index];
-                  final isMyMessage =
-                      message.sender?.userId == currentUser.userId;
-                  return MessageItem(
-                    message: messages[index],
-                    isMyMessage: isMyMessage,
-                  );
-                },
+      body: ChangeNotifierProvider<ChannelViewModel>(
+        builder: (context) => model,
+        child: Consumer<ChannelViewModel>(
+          builder: (context, value, child) {
+            return SafeArea(
+              child: Column(
+                children: [
+                  _buildContent(value),
+                  _buildInputField(),
+                ],
               ),
-            ),
-            _buildInputField(),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -93,7 +64,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
   // build helpers
 
   Widget _buildNavigationBar() {
-    final currentUser = SendbirdSdk().getCurrentUser();
+    final currentUser = model.currentUser;
 
     return AppBar(
       elevation: 0,
@@ -132,6 +103,30 @@ class _ChannelScreenState extends State<ChannelScreen> {
     );
   }
 
+  Widget _buildContent(ChannelViewModel model) {
+    return Expanded(
+      child: ListView.builder(
+        controller: model.lstController,
+        itemCount: model.messages.length,
+        shrinkWrap: true,
+        reverse: true,
+        padding: EdgeInsets.only(top: 10, bottom: 10),
+        // physics: NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          //bind message into item
+          //this can be streambuilder
+          final message = model.messages[index];
+          final isMyMessage =
+              message.sender?.userId == model.currentUser.userId;
+          return MessageItem(
+            message: model.messages[index],
+            isMyMessage: isMyMessage,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildInputField() {
     return SafeArea(
       child: Align(
@@ -144,9 +139,8 @@ class _ChannelScreenState extends State<ChannelScreen> {
           child: Row(
             children: <Widget>[
               GestureDetector(
-                onTap: () {
-                  getImage();
-                  //show option view for camera or library
+                onTap: () async {
+                  await model.showPicker();
                 },
                 child: Container(
                   height: 30,
@@ -164,7 +158,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
               ),
               Expanded(
                 child: TextField(
-                  controller: inputController,
+                  controller: model.inputController,
                   decoration: InputDecoration(
                     hintText: "Write message...",
                     hintStyle: TextStyle(color: Colors.black54),
@@ -177,7 +171,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
               ),
               FloatingActionButton(
                 onPressed: () {
-                  _onSendMessage();
+                  model.onSendUserMessage();
                 },
                 child: Icon(Icons.send, color: Colors.purple, size: 20),
                 backgroundColor: Colors.white,
@@ -188,100 +182,5 @@ class _ChannelScreenState extends State<ChannelScreen> {
         ),
       ),
     );
-  }
-
-  // event listener
-
-  _scrollListener() {
-    if (lstController.offset >= lstController.position.maxScrollExtent &&
-        !lstController.position.outOfRange &&
-        !isLoading) {
-      final offset = lstController.offset;
-
-      _loadMessages(
-        channel: widget.channel,
-        timestamp: messages.last.createdAt,
-      );
-
-      lstController.animateTo(
-        offset,
-        duration: Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    }
-    if (lstController.offset <= lstController.position.minScrollExtent &&
-        !lstController.position.outOfRange) {
-      //reach bottom
-    }
-  }
-
-  // picker
-
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        print('${pickedFile.path}');
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  // Sendbird logic
-
-  Future<void> _loadMessages({
-    GroupChannel channel,
-    int timestamp,
-    bool reload = false,
-  }) async {
-    if (isLoading) {
-      return;
-    }
-
-    isLoading = true;
-
-    final ts = reload ? DateTime.now().millisecondsSinceEpoch : timestamp;
-    try {
-      final params = MessageListParams()
-        ..isInclusive = false
-        ..includeThreadInfo = true
-        ..reverse = true
-        ..previousResultSize = 20;
-      final messages = await channel.getMessagesByTimestamp(ts, params);
-
-      setState(() {
-        isLoading = false;
-        this.messages = reload ? messages : this.messages + messages;
-      });
-    } catch (e) {
-      isLoading = false;
-      print('group_channel_view.dart: getMessages: ERROR: $e');
-    }
-  }
-
-  void _onSendMessage() async {
-    if (inputController.text == '' && uploadFile == null) {
-      return;
-    }
-
-    if (uploadFile != null) {
-      // send file
-    } else if (inputController.text != '') {
-      widget.channel.sendUserMessageWithText(inputController.text).then((msg) {
-        setState(() {
-          messages.insert(0, msg);
-        });
-      }).catchError((e) {});
-      inputController.clear();
-      lstController.animateTo(
-        0.0,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    } else {
-      //ignore
-    }
   }
 }

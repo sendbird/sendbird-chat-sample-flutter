@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
-import '../utils/extensions.dart';
 
 class MessageItem extends StatelessWidget {
   final UserMessage message;

@@ -1,8 +1,5 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart' as sb;
+import 'package:sendbird_flutter/view_models/login_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -25,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     return true;
   }
+
+  final model = LoginViewModel();
 
   @override
   void initState() {
@@ -147,7 +146,22 @@ class _LoginScreenState extends State<LoginScreen> {
       textColor: Colors.white,
       disabledColor: Colors.grey,
       disabledTextColor: Colors.black,
-      onPressed: !enabled ? null : () async => initAndLoginSendbird(context),
+      onPressed: !enabled
+          ? null
+          : () async {
+              try {
+                model.appId = appIdController.text;
+                final user = await model.login(
+                  userIdController.text,
+                  nicknameController.text,
+                );
+
+                Navigator.pushNamed(context, '/channel_list');
+              } catch (e) {
+                print('login_view.dart: _signInButton: ERROR: $e');
+                _showLoginFailAlert(context);
+              }
+            },
       child: Text(
         "Sign In",
         style: TextStyle(fontSize: 20.0),
@@ -200,35 +214,5 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
-  }
-
-  // sendbird logic
-
-  void initAndLoginSendbird(BuildContext context) async {
-    try {
-      // initialize with app id
-      final sendbird = sb.SendbirdSdk(appId: appIdController.text);
-
-      // connect to sendbird server
-      final user = await sendbird.connect(userIdController.text);
-
-      final nickname = nicknameController.text.isEmpty
-          ? user.userId
-          : nicknameController.text;
-
-      // update user nickname and profile url
-      await sendbird.updateCurrentUserInfo(
-          nickname: nickname,
-          imageInfo: sb.ImageInfo.fromUrl(
-            name: 'my pic',
-            url: 'https://avatars.githubusercontent.com/u/848531?s=60&v=4',
-          ));
-
-      print('login with user id ' + user.userId + ' nickname ' + user.nickname);
-      Navigator.pushNamed(context, '/channel_list');
-    } catch (e) {
-      print('login_view.dart: _signInButton: ERROR: $e');
-      _showLoginFailAlert(context);
-    }
   }
 }
