@@ -1,12 +1,16 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class FileMessageItem extends StatelessWidget {
-  final UserMessage message;
+  final FileMessage message;
+  final File file;
   final bool isMyMessage;
 
-  FileMessageItem({this.message, this.isMyMessage});
+  FileMessageItem({this.message, this.file, this.isMyMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +24,26 @@ class FileMessageItem extends StatelessWidget {
     );
   }
 
-  Widget _myMessageView(BaseMessage message) {
+  Widget _myMessageView(FileMessage message) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(5),
         color: (!isMyMessage ? Colors.grey.shade200 : Colors.blue[200]),
       ),
-      padding: EdgeInsets.all(16),
-      child: Text(
-        message.message,
-        style: TextStyle(fontSize: 15),
-      ),
+      padding: EdgeInsets.all(4),
+      child: Container(
+          height: 120.0,
+          width: 120.0,
+          child: CachedNetworkImage(
+            fit: BoxFit.cover,
+            imageUrl: message.secureUrl ?? message.url,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+          )),
     );
   }
 
-  Widget _otherMessageView(BaseMessage message) {
+  Widget _otherMessageView(FileMessage message) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,18 +54,22 @@ class FileMessageItem extends StatelessWidget {
           children: [
             Text(message.sender.nickname),
             SizedBox(height: 5),
-            Container(
-              //username, profile, timestamp
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: (!isMyMessage ? Colors.grey.shade200 : Colors.blue[200]),
+            if (message.sendingStatus == MessageSendingStatus.succeeded)
+              Container(
+                  height: 120.0,
+                  width: 120.0,
+                  child: CachedNetworkImage(
+                    fit: BoxFit.cover,
+                    imageUrl: message.secureUrl ?? message.url,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
+            if (message.sendingStatus == MessageSendingStatus.pending)
+              Container(
+                height: 120.0,
+                width: 120.0,
+                child: CircularProgressIndicator(),
               ),
-              padding: EdgeInsets.all(16),
-              child: Text(
-                message.message,
-                style: TextStyle(fontSize: 15),
-              ),
-            ),
           ],
         ),
       ],

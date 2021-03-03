@@ -15,7 +15,7 @@ class ChannelViewModel with ChangeNotifier {
   User currentUser = SendbirdSdk().getCurrentUser();
   StreamSubscription messageSubs;
   bool isLoading = false;
-
+  bool isDisposed = false;
   final ScrollController lstController = ScrollController();
   final TextEditingController inputController = new TextEditingController();
   final picker = ImagePicker();
@@ -25,16 +25,19 @@ class ChannelViewModel with ChangeNotifier {
         .messageReceiveStream(channelUrl: channel.channelUrl)
         .listen((message) {
       messages.insert(0, message);
+      channel.markAsRead();
       notifyListeners();
     });
 
     lstController.addListener(_scrollListener);
+    channel.markAsRead();
   }
 
   @override
   void dispose() async {
     super.dispose();
     messageSubs.cancel();
+    isDisposed = true;
   }
 
   Future<void> loadMessages({
@@ -57,7 +60,7 @@ class ChannelViewModel with ChangeNotifier {
       final messages = await channel.getMessagesByTimestamp(ts, params);
       this.messages = reload ? messages : this.messages + messages;
       isLoading = false;
-      notifyListeners();
+      if (!isDisposed) notifyListeners();
     } catch (e) {
       isLoading = false;
       print('group_channel_view.dart: getMessages: ERROR: $e');
@@ -77,11 +80,14 @@ class ChannelViewModel with ChangeNotifier {
           messages.indexWhere((element) => element.requestId == msg.requestId);
       if (index != -1) {
         messages[index] = msg;
-        notifyListeners();
+        channel.markAsRead();
+        if (!isDisposed) notifyListeners();
       }
     });
 
     messages.insert(0, preMessage);
+    if (!isDisposed) notifyListeners();
+
     inputController.clear();
     lstController.animateTo(
       0.0,
@@ -100,11 +106,13 @@ class ChannelViewModel with ChangeNotifier {
           messages.indexWhere((element) => element.requestId == msg.requestId);
       if (index != -1) {
         messages[index] = msg;
-        notifyListeners();
+        if (!isDisposed) notifyListeners();
       }
     });
 
     messages.insert(0, preMessage);
+    if (!isDisposed) notifyListeners();
+
     inputController.clear();
     lstController.animateTo(
       0.0,
@@ -113,7 +121,7 @@ class ChannelViewModel with ChangeNotifier {
     );
   }
 
-  Future showPicker() async {
+  void showPicker() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       onSendFileMessage(File(pickedFile.path));

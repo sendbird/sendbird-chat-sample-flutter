@@ -16,7 +16,7 @@ class LoginViewModel {
 
       // connect to sendbird server
       final user = await sendbird.connect(userId);
-
+      sendbird.setLogLevel(LogLevel.verbose);
       final name = nickname == '' || nickname == null ? user.userId : nickname;
 
       // update user nickname and profile url

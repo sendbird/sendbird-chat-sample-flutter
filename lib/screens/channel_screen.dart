@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/components/file_message_item.dart';
 import 'package:sendbird_flutter/components/message_item.dart';
 import 'package:sendbird_flutter/view_models/channel_view_model.dart';
 
@@ -104,6 +105,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 
   Widget _buildContent(ChannelViewModel model) {
+    //FIX: need to figure out not to reload every item in list
     return Expanded(
       child: ListView.builder(
         controller: model.lstController,
@@ -118,10 +120,17 @@ class _ChannelScreenState extends State<ChannelScreen> {
           final message = model.messages[index];
           final isMyMessage =
               message.sender?.userId == model.currentUser.userId;
-          return MessageItem(
-            message: model.messages[index],
-            isMyMessage: isMyMessage,
-          );
+          if (message is FileMessage) {
+            return FileMessageItem(
+              message: model.messages[index],
+              isMyMessage: isMyMessage,
+            );
+          } else {
+            return MessageItem(
+              message: model.messages[index],
+              isMyMessage: isMyMessage,
+            );
+          }
         },
       ),
     );
@@ -140,7 +149,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
             children: <Widget>[
               GestureDetector(
                 onTap: () async {
-                  await model.showPicker();
+                  model.showPicker();
                 },
                 child: Container(
                   height: 30,
