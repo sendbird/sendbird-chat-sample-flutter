@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/components/file_message_item.dart';
 import 'package:sendbird_flutter/components/message_item.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
@@ -76,10 +77,18 @@ class _ChannelScreenState extends State<ChannelScreen> {
                   final message = messages[index];
                   final isMyMessage =
                       message.sender?.userId == currentUser.userId;
-                  return MessageItem(
-                    message: messages[index],
-                    isMyMessage: isMyMessage,
-                  );
+                  if (message is FileMessage) {
+                    return FileMessageItem(
+                      message: messages[index],
+                      file: message.localFile,
+                      isMyMessage: isMyMessage,
+                    );
+                  } else {
+                    return MessageItem(
+                      message: messages[index],
+                      isMyMessage: isMyMessage,
+                    );
+                  }
                 },
               ),
             ),
@@ -144,8 +153,8 @@ class _ChannelScreenState extends State<ChannelScreen> {
           child: Row(
             children: <Widget>[
               GestureDetector(
-                onTap: () {
-                  getImage();
+                onTap: () async {
+                  await getImage();
                   //show option view for camera or library
                 },
                 child: Container(
@@ -220,13 +229,33 @@ class _ChannelScreenState extends State<ChannelScreen> {
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        print('${pickedFile.path}');
-      } else {
-        print('No image selected.');
+    if (pickedFile == null) {
+      return;
+    }
+
+    final file = File(pickedFile.path);
+    final params = FileMessageParams.withFile(file);
+    final preMsg =
+        await widget.channel.sendFileMessage(params, onCompleted: (msg, error) {
+      final index =
+          messages.indexWhere((element) => element.requestId == msg.requestId);
+      if (index != -1) {
+        setState(() {
+          messages[index] = msg;
+        });
       }
     });
+
+    setState(() {
+      messages.insert(0, preMsg);
+    });
+
+    inputController.clear();
+    lstController.animateTo(
+      0.0,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   // Sendbird logic
@@ -262,18 +291,27 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 
   void _onSendMessage() async {
-    if (inputController.text == '' && uploadFile == null) {
+    if (inputController.text == '') {
       return;
     }
 
-    if (uploadFile != null) {
-      // send file
-    } else if (inputController.text != '') {
-      widget.channel.sendUserMessageWithText(inputController.text).then((msg) {
+    if (inputController.text != '') {
+      final preMsg = await widget.channel.sendUserMessageWithText(
+          inputController.text, onCompleted: (msg, error) {
+        final index = messages
+            .indexWhere((element) => element.requestId == msg.requestId);
+
         setState(() {
-          messages.insert(0, msg);
+          if (index != -1) {
+            messages[index] = msg;
+          }
         });
-      }).catchError((e) {});
+      });
+
+      setState(() {
+        messages.insert(0, preMsg);
+      });
+
       inputController.clear();
       lstController.animateTo(
         0.0,

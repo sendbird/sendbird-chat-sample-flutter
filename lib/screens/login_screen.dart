@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // connect to sendbird server
       final user = await sendbird.connect(userIdController.text);
-
+      sendbird.setLogLevel(sb.LogLevel.verbose);
       final nickname = nicknameController.text.isEmpty
           ? user.userId
           : nicknameController.text;
