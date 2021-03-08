@@ -23,9 +23,9 @@ class LoginViewModel {
       await sendbird.updateCurrentUserInfo(
           nickname: name,
           imageInfo: ImageInfo.fromUrl(
-            name: 'my pic',
-            url: 'https://avatars.githubusercontent.com/u/848531?s=60&v=4',
-          ));
+              name: 'my pic',
+              url: 'https://avatars.githubusercontent.com/u/848531?s=60&v=4',
+              mimeType: 'image/jpeg'));
 
       print('login with user id ' + user.userId + ' nickname ' + user.nickname);
       return user;

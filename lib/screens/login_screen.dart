@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sendbirdsdk/sendbirdsdk.dart';
+import '../styles/color.dart';
+import '../styles/text_style.dart';
 import 'package:sendbird_flutter/view_models/login_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -7,23 +10,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final appIdController =
-      TextEditingController(text: "D56438AE-B4DB-4DC9-B440-E032D7B35CEB");
   final userIdController = TextEditingController();
   final nicknameController = TextEditingController();
   bool enableSignInButton = false;
 
   bool _shouldEnableSignInButton() {
-    if (appIdController.text == null || appIdController.text == "") {
-      return false;
-    }
     if (userIdController.text == null || userIdController.text == "") {
       return false;
     }
     return true;
   }
 
-  final model = LoginViewModel();
+  final model = LoginViewModel(appId: 'D56438AE-B4DB-4DC9-B440-E032D7B35CEB');
 
   @override
   void initState() {
@@ -33,115 +31,65 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 100),
-        child: Column(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              child: Image(
-                image: AssetImage('assets/logoSendbird@3x.png'),
-                fit: BoxFit.scaleDown,
-              ),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Container(
+            padding: EdgeInsets.only(left: 24, right: 24, top: 56),
+            child: Column(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  child: Image(
+                    image: AssetImage('assets/logoSendbird@3x.png'),
+                    fit: BoxFit.scaleDown,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text('Sendbird Sample', style: TextStyles.sendbirdLogo),
+                SizedBox(height: 40),
+                _buildInputField(userIdController, 'User ID'),
+                SizedBox(height: 16),
+                _buildInputField(nicknameController, 'Nickname'),
+                SizedBox(height: 32),
+                FractionallySizedBox(
+                  widthFactor: 1,
+                  child: _signInButton(context, enableSignInButton),
+                ),
+                _buildVersionLabel(),
+              ],
             ),
-            SizedBox(height: 20),
-            Text(
-              'Sendbird Sample',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 40),
-            _buildAppIdField(),
-            SizedBox(height: 10),
-            _buildUserIdField(),
-            SizedBox(height: 10),
-            _buildNicknameField(),
-            SizedBox(height: 30),
-            FractionallySizedBox(
-              widthFactor: 1,
-              child: _signInButton(context, enableSignInButton),
-            )
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   // build helpers
 
-  Widget _buildAppIdField() {
+  Widget _buildInputField(
+      TextEditingController controller, String placeholder) {
     return TextField(
-      controller: appIdController,
+      controller: controller,
       onChanged: (value) {
         setState(() {
           enableSignInButton = _shouldEnableSignInButton();
         });
       },
+      style: TextStyles.sendbirdSubtitle1OnLight1,
       decoration: InputDecoration(
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: SBColors.primary_300, width: 2),
+        ),
         border: InputBorder.none,
-        labelText: 'App Id',
+        labelText: placeholder,
         filled: true,
         fillColor: Colors.grey[200],
-        suffixIcon: IconButton(
-          onPressed: () {
-            appIdController.clear();
-          },
-          icon: Icon(Icons.clear),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserIdField() {
-    return TextField(
-      controller: userIdController,
-      onChanged: (value) {
-        setState(() {
-          enableSignInButton = _shouldEnableSignInButton();
-        });
-      },
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        labelText: 'User Id',
-        filled: true,
-        fillColor: Colors.grey[200],
-        suffixIcon: IconButton(
-          onPressed: () {
-            userIdController.clear();
-          },
-          icon: Icon(Icons.clear),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNicknameField() {
-    return TextField(
-      controller: nicknameController,
-      onChanged: (value) {
-        setState(() {
-          enableSignInButton = _shouldEnableSignInButton();
-        });
-      },
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        labelText: 'Nick name',
-        filled: true,
-        fillColor: Colors.grey[200],
-        suffixIcon: IconButton(
-          onPressed: () {
-            userIdController.clear();
-          },
-          icon: Icon(Icons.clear),
-        ),
       ),
     );
   }
 
   Widget _signInButton(BuildContext context, bool enabled) {
     return FlatButton(
-      height: 50,
+      height: 48,
       color: enabled ? Theme.of(context).buttonColor : Colors.grey,
       textColor: Colors.white,
       disabledColor: Colors.grey,
@@ -150,8 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ? null
           : () async {
               try {
-                model.appId = appIdController.text;
-                final user = await model.login(
+                await model.login(
                   userIdController.text,
                   nicknameController.text,
                 );
@@ -164,7 +111,19 @@ class _LoginScreenState extends State<LoginScreen> {
             },
       child: Text(
         "Sign In",
-        style: TextStyle(fontSize: 20.0),
+        style: TextStyles.sendbirdButtonOnDark1,
+      ),
+    );
+  }
+
+  Widget _buildVersionLabel() {
+    return Expanded(
+      child: Align(
+        alignment: FractionalOffset.bottomCenter,
+        child: Text(
+          'SDK ' + SendbirdSdk().getSdkVersion(),
+          style: TextStyles.sendbirdCaption1OnLight2,
+        ),
       ),
     );
   }
