@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
+import '../view_models/create_channel_view_model.dart';
 import 'channel_screen.dart';
 
 class CreateChannelScreen extends StatefulWidget {
@@ -10,69 +9,13 @@ class CreateChannelScreen extends StatefulWidget {
   _CreateChannelScreenState createState() => _CreateChannelScreenState();
 }
 
-class UserSelection {
-  bool isSelected = false;
-  User user;
-  UserSelection(this.user);
-  @override
-  String toString() {
-    return "UserSelection: {isSelected: $isSelected, user: $user}";
-  }
-
-  static List<UserSelection> selectedUsersFrom(List<User> users) {
-    List<UserSelection> result = [];
-    users.forEach((user) {
-      result.add(new UserSelection(user));
-    });
-    return result;
-  }
-}
-
 class _CreateChannelScreenState extends State<CreateChannelScreen> {
-  List<UserSelection> selections = [];
-
-  Future<void> updateUsers() async {
-    List<UserSelection> newSelections = await getUsers();
-    if (newSelections == this.selections) {
-      return;
-    }
-    setState(() {
-      this.selections = newSelections;
-    });
-  }
-
-  Future<List<UserSelection>> getUsers() async {
-    try {
-      final query = ApplicationUserListQuery();
-      List<User> users = await query.loadNext();
-      return UserSelection.selectedUsersFrom(users);
-    } catch (e) {
-      print('create_channel_view: getUsers: ERROR: $e');
-      return [];
-    }
-  }
-
-  Future<GroupChannel> createChannel() async {
-    try {
-      final userIds = this
-          .selections
-          .where((selection) => selection.isSelected)
-          .map((selection) {
-        return selection.user.userId;
-      }).toList();
-      final params = GroupChannelParams()..userIds = userIds;
-      final channel = await GroupChannel.createChannel(params);
-      return channel;
-    } catch (e) {
-      print('create_channel_view: createChannel: ERROR: $e');
-      throw e;
-    }
-  }
+  final model = CreateChannelViewModel();
 
   @override
   void initState() {
     super.initState();
-    updateUsers();
+    model.updateUsers();
   }
 
   @override
@@ -100,7 +43,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           padding: EdgeInsets.all(8.0),
           splashColor: Theme.of(context).primaryColor,
           onPressed: () {
-            createChannel().then((channel) {
+            model.createChannel().then((channel) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -126,9 +69,9 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
       children: [
         Expanded(
           child: ListView.builder(
-            itemCount: selections.length,
+            itemCount: model.selections.length,
             itemBuilder: (context, index) {
-              UserSelection selection = selections[index];
+              UserSelection selection = model.selections[index];
               return _buildUserItem(selection);
             },
           ),

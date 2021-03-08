@@ -366,6 +366,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.13"
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1+1"
   rxdart:
     dependency: transitive
     description:
@@ -379,7 +386,7 @@ packages:
       path: "../messaging-flutter"
       relative: true
     source: path
-    version: "3.0.1"
+    version: "3.0.2"
   shared_preferences:
     dependency: transitive
     description:
@@ -440,7 +447,7 @@ packages:
       name: sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.2+3"
+    version: "1.3.2+4"
   sqflite_common:
     dependency: transitive
     description:

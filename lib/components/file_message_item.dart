@@ -9,14 +9,8 @@ class FileMessageItem extends StatelessWidget {
   final FileMessage message;
   final File file;
   final bool isMyMessage;
-  final double progress;
 
-  FileMessageItem({
-    this.message,
-    this.file,
-    this.isMyMessage,
-    this.progress,
-  });
+  FileMessageItem({this.message, this.file, this.isMyMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +34,12 @@ class FileMessageItem extends StatelessWidget {
       child: Container(
           height: 120.0,
           width: 120.0,
-          child: message.localFile != null
-              ? FittedBox(
-                  child: Image.file(message.localFile),
-                  fit: BoxFit.cover,
-                )
-              : CachedNetworkImage(
-                  //https://github.com/flutter/flutter/issues/25107
-                  fit: BoxFit.cover,
-                  imageUrl: message.secureUrl ?? message.url,
-                  placeholder: (context, url) => message.localFile != null
-                      ? Image.file(message.localFile)
-                      : CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                )),
+          child: CachedNetworkImage(
+            fit: BoxFit.cover,
+            imageUrl: message.secureUrl ?? message.url,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+          )),
     );
   }
 

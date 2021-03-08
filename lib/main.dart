@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:sendbird_flutter/screens/channel_list_screen.dart';
 import 'screens/create_channel_screen.dart';
 import 'screens/login_screen.dart';
-// import 'channel_list_view.dart';
-// import 'create_channel_view.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
