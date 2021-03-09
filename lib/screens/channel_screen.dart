@@ -1,13 +1,10 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/components/file_message_item.dart';
-import 'package:sendbird_flutter/components/message_item.dart';
+import 'package:sendbird_flutter/components/message_input.dart';
+import 'package:sendbird_flutter/components/user_message_item.dart';
 import 'package:sendbird_flutter/view_models/channel_view_model.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
@@ -26,9 +23,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
 
   @override
   void initState() {
-    // _loadMessages(channel: widget.channel, reload: true);
-    // lstController.addListener(_scrollListener);
-
     model = ChannelViewModel(channel: widget.channel);
     model.loadMessages(reload: true);
     super.initState();
@@ -37,7 +31,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
   @override
   void dispose() {
     super.dispose();
-    // model.dispose();
   }
 
   @override
@@ -52,7 +45,14 @@ class _ChannelScreenState extends State<ChannelScreen> {
               child: Column(
                 children: [
                   _buildContent(value),
-                  _buildInputField(),
+                  MessageInput(
+                    onPressPlus: () {
+                      model.showPicker();
+                    },
+                    onPressSend: (text) {
+                      model.onSendUserMessage(text);
+                    },
+                  )
                 ],
               ),
             );
@@ -96,7 +96,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                   ],
                 ),
               ),
-              Icon(Icons.settings, color: Colors.black54),
+              // Icon(Icons.settings, color: Colors.black54),
             ],
           ),
         ),
@@ -118,77 +118,28 @@ class _ChannelScreenState extends State<ChannelScreen> {
           //bind message into item
           //this can be streambuilder
           final message = model.messages[index];
+          final prev = (index < model.messages.length - 1)
+              ? model.messages[index + 1]
+              : null;
+          final next = index == 0 ? null : model.messages[index - 1];
           final isMyMessage =
               message.sender?.userId == model.currentUser.userId;
           if (message is FileMessage) {
             return FileMessageItem(
-              message: model.messages[index],
+              curr: message,
+              prev: prev,
+              next: next,
               isMyMessage: isMyMessage,
             );
           } else {
-            return MessageItem(
-              message: model.messages[index],
+            return UserMessageItem(
+              curr: message,
+              prev: prev,
+              next: next,
               isMyMessage: isMyMessage,
             );
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildInputField() {
-    return SafeArea(
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          padding: EdgeInsets.only(left: 10, bottom: 10, top: 10),
-          height: 60,
-          width: double.infinity,
-          color: Colors.white,
-          child: Row(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () async {
-                  model.showPicker();
-                },
-                child: Container(
-                  height: 30,
-                  width: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.purple),
-                  ),
-                  child: Icon(Icons.add, color: Colors.purple, size: 24),
-                ),
-              ),
-              SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: TextField(
-                  controller: model.inputController,
-                  decoration: InputDecoration(
-                    hintText: "Write message...",
-                    hintStyle: TextStyle(color: Colors.black54),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 15,
-              ),
-              FloatingActionButton(
-                onPressed: () {
-                  model.onSendUserMessage();
-                },
-                child: Icon(Icons.send, color: Colors.purple, size: 20),
-                backgroundColor: Colors.white,
-                elevation: 0,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -35,8 +35,12 @@ class AvatarView extends StatelessWidget {
             Image(image: NetworkImage(member.profileUrl), fit: BoxFit.cover)
       ];
     } else if (user != null) {
-      // images = [Image(image: NetworkImage(user.profileUrl), fit: BoxFit.cover)];
-      images = [Image(image: AssetImage('assets/iconMembersCustom@3x.png'))];
+      if (user.profileUrl != '')
+        images = [
+          Image(image: NetworkImage(user.profileUrl), fit: BoxFit.cover)
+        ];
+      else
+        images = [Image(image: AssetImage('assets/iconAvatarLight@3x.png'))];
     }
 
     return Container(

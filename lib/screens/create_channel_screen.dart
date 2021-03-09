@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 import '../view_models/create_channel_view_model.dart';
@@ -65,18 +66,23 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
   }
 
   Widget body(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: model.selections.length,
-            itemBuilder: (context, index) {
-              UserSelection selection = model.selections[index];
-              return _buildUserItem(selection);
-            },
-          ),
-        ),
-      ],
+    return ChangeNotifierProvider<CreateChannelViewModel>(
+      builder: (context) => model,
+      child: Consumer<CreateChannelViewModel>(builder: (context, value, child) {
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: model.selections.length,
+                itemBuilder: (context, index) {
+                  UserSelection selection = model.selections[index];
+                  return _buildUserItem(selection);
+                },
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 

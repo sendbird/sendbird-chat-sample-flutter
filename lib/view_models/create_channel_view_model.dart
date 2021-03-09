@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
-class CreateChannelViewModel {
+class CreateChannelViewModel with ChangeNotifier {
   List<UserSelection> selections = [];
+  final query = ApplicationUserListQuery();
 
   Future<void> updateUsers() async {
     List<UserSelection> newSelections = await getUsers();
@@ -9,12 +11,13 @@ class CreateChannelViewModel {
       return null;
     }
 
-    selections = newSelections;
+    selections =
+        selections.isEmpty ? newSelections : selections + newSelections;
+    notifyListeners();
   }
 
   Future<List<UserSelection>> getUsers() async {
     try {
-      final query = ApplicationUserListQuery();
       List<User> users = await query.loadNext();
       return UserSelection.selectedUsersFrom(users);
     } catch (e) {

@@ -17,7 +17,6 @@ class ChannelViewModel with ChangeNotifier {
   bool isLoading = false;
   bool isDisposed = false;
   final ScrollController lstController = ScrollController();
-  final TextEditingController inputController = new TextEditingController();
   final picker = ImagePicker();
 
   ChannelViewModel({this.channel}) {
@@ -67,14 +66,13 @@ class ChannelViewModel with ChangeNotifier {
     }
   }
 
-  void onSendUserMessage() async {
-    final message = inputController.text;
+  void onSendUserMessage(String message) async {
     if (message == '') {
       return;
     }
 
-    final preMessage = await channel.sendUserMessageWithText(message,
-        onCompleted: (msg, error) {
+    final preMessage =
+        channel.sendUserMessageWithText(message, onCompleted: (msg, error) {
       // messages.repl(0, msg);
       final index =
           messages.indexWhere((element) => element.requestId == msg.requestId);
@@ -88,7 +86,6 @@ class ChannelViewModel with ChangeNotifier {
     messages.insert(0, preMessage);
     if (!isDisposed) notifyListeners();
 
-    inputController.clear();
     lstController.animateTo(
       0.0,
       duration: Duration(milliseconds: 300),
@@ -113,7 +110,6 @@ class ChannelViewModel with ChangeNotifier {
     messages.insert(0, preMessage);
     if (!isDisposed) notifyListeners();
 
-    inputController.clear();
     lstController.animateTo(
       0.0,
       duration: Duration(milliseconds: 300),
