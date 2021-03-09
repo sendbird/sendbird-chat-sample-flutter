@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbird_flutter/components/admin_message_item.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/components/file_message_item.dart';
@@ -37,26 +38,19 @@ class _ChannelScreenState extends State<ChannelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildNavigationBar(),
-      body: ChangeNotifierProvider<ChannelViewModel>(
-        builder: (context) => model,
-        child: Consumer<ChannelViewModel>(
-          builder: (context, value, child) {
-            return SafeArea(
-              child: Column(
-                children: [
-                  _buildContent(value),
-                  MessageInput(
-                    onPressPlus: () {
-                      model.showPicker();
-                    },
-                    onPressSend: (text) {
-                      model.onSendUserMessage(text);
-                    },
-                  )
-                ],
-              ),
-            );
-          },
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildContent(),
+            MessageInput(
+              onPressPlus: () {
+                model.showPicker();
+              },
+              onPressSend: (text) {
+                model.onSendUserMessage(text);
+              },
+            )
+          ],
         ),
       ),
     );
@@ -104,43 +98,47 @@ class _ChannelScreenState extends State<ChannelScreen> {
     );
   }
 
-  Widget _buildContent(ChannelViewModel model) {
-    //FIX: need to figure out not to reload every item in list
-    return Expanded(
-      child: ListView.builder(
-        controller: model.lstController,
-        itemCount: model.messages.length,
-        shrinkWrap: true,
-        reverse: true,
-        padding: EdgeInsets.only(top: 10, bottom: 10),
-        // physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          //bind message into item
-          //this can be streambuilder
-          final message = model.messages[index];
-          final prev = (index < model.messages.length - 1)
-              ? model.messages[index + 1]
-              : null;
-          final next = index == 0 ? null : model.messages[index - 1];
-          final isMyMessage =
-              message.sender?.userId == model.currentUser.userId;
-          if (message is FileMessage) {
-            return FileMessageItem(
-              curr: message,
-              prev: prev,
-              next: next,
-              isMyMessage: isMyMessage,
-            );
-          } else {
-            return UserMessageItem(
-              curr: message,
-              prev: prev,
-              next: next,
-              isMyMessage: isMyMessage,
-            );
-          }
-        },
-      ),
+  Widget _buildContent() {
+    return ChangeNotifierProvider<ChannelViewModel>(
+      builder: (context) => model,
+      child: Consumer<ChannelViewModel>(builder: (context, value, child) {
+        return Expanded(
+          child: ListView.builder(
+            controller: model.lstController,
+            itemCount: model.messages.length,
+            shrinkWrap: true,
+            reverse: true,
+            padding: EdgeInsets.only(top: 10, bottom: 10),
+            itemBuilder: (context, index) {
+              final message = model.messages[index];
+              final prev = (index < model.messages.length - 1)
+                  ? model.messages[index + 1]
+                  : null;
+              final next = index == 0 ? null : model.messages[index - 1];
+              final isMyMessage =
+                  message.sender?.userId == model.currentUser.userId;
+
+              if (message is FileMessage) {
+                return FileMessageItem(
+                  curr: message,
+                  prev: prev,
+                  next: next,
+                  isMyMessage: isMyMessage,
+                );
+              } else if (message is AdminMessage) {
+                return AdminMessageItem(curr: message);
+              } else {
+                return UserMessageItem(
+                  curr: message,
+                  prev: prev,
+                  next: next,
+                  isMyMessage: isMyMessage,
+                );
+              }
+            },
+          ),
+        );
+      }),
     );
   }
 }

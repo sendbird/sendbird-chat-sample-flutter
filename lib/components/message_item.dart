@@ -19,17 +19,19 @@ class MessageItem extends StatelessWidget {
 
   Widget get content => null;
 
-  String get currTime => DateFormat('kk:mm a')
+  String get _currTime => DateFormat('kk:mm a')
       .format(DateTime.fromMillisecondsSinceEpoch(curr.createdAt));
-
-  bool get isContinuous => _isContinuous(prev, curr);
 
   MessageItem({this.curr, this.prev, this.next, this.isMyMessage});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 14, right: 14, top: isContinuous ? 2 : 16),
+      padding: EdgeInsets.only(
+        left: 14,
+        right: 14,
+        top: _isContinuous(prev, curr) ? 2 : 16,
+      ),
       child: Align(
         alignment: isMyMessage ? Alignment.topRight : Alignment.topLeft,
         child: isMyMessage ? _bulidRightWidget() : _buildLeftWidget(),
@@ -42,10 +44,15 @@ class MessageItem extends StatelessWidget {
         Container(child: content, constraints: BoxConstraints(maxWidth: 240));
     List<Widget> children = _timestampDefaultWidget(curr) + [wrap];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: children,
+    return Column(
+      children: [
+        if (!_isSameDate(prev, curr)) _dateWidget(curr),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: children,
+        )
+      ],
     );
   }
 
@@ -57,10 +64,15 @@ class MessageItem extends StatelessWidget {
         [Column(children: lst)] +
         _timestampDefaultWidget(curr);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: children,
+    return Column(
+      children: [
+        if (!_isSameDate(prev, curr)) _dateWidget(curr),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: children,
+        )
+      ],
     );
   }
 
@@ -83,22 +95,49 @@ class MessageItem extends StatelessWidget {
     return false;
   }
 
-  List<Widget> _timestampDefaultWidget(BaseMessage message) {
-    if (!_isContinuous(curr, next)) {
-      return [
-        if (!isMyMessage) SizedBox(width: 3),
-        Text(
-          currTime,
-          style: TextStyles.sendbirdCaption4OnLight3,
-        ),
-        if (isMyMessage) SizedBox(width: 3)
-      ];
+  bool _isSameDate(BaseMessage p, BaseMessage c) {
+    if (p == null || c == null) {
+      return false;
     }
-    return [];
+
+    final pt = DateTime.fromMillisecondsSinceEpoch(p.createdAt);
+    final ct = DateTime.fromMillisecondsSinceEpoch(c.createdAt);
+
+    return pt.year == ct.year && pt.month == ct.month && pt.day == ct.day;
+  }
+
+  Widget _dateWidget(BaseMessage message) {
+    final date = DateTime.fromMillisecondsSinceEpoch(message.createdAt);
+    final format = DateFormat('E, MMM d').format(date);
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: SBColors.onlight_03,
+      ),
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+      child: Text(
+        '$format',
+        style: TextStyles.sendbirdCaption1OnDark1,
+      ),
+    );
+  }
+
+  List<Widget> _timestampDefaultWidget(BaseMessage message) {
+    return !_isContinuous(curr, next)
+        ? [
+            if (!isMyMessage) SizedBox(width: 3),
+            Text(
+              _currTime,
+              style: TextStyles.sendbirdCaption4OnLight3,
+            ),
+            if (isMyMessage) SizedBox(width: 3)
+          ]
+        : [];
   }
 
   List<Widget> _nameDefaultWidget(BaseMessage message) {
-    return !isContinuous
+    return !_isContinuous(prev, curr)
         ? [
             Text(message.sender.nickname),
             SizedBox(height: 4),
@@ -107,7 +146,7 @@ class MessageItem extends StatelessWidget {
   }
 
   List<Widget> _avatarDefaultWidget(BaseMessage message) {
-    return !isContinuous
+    return !_isContinuous(curr, next)
         ? [
             AvatarView(user: message.sender, width: 26, height: 26),
             SizedBox(width: 12),
