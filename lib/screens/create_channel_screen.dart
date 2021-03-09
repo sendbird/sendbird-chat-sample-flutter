@@ -69,18 +69,22 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     return ChangeNotifierProvider<CreateChannelViewModel>(
       builder: (context) => model,
       child: Consumer<CreateChannelViewModel>(builder: (context, value, child) {
-        return Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: model.selections.length,
-                itemBuilder: (context, index) {
-                  UserSelection selection = model.selections[index];
-                  return _buildUserItem(selection);
-                },
-              ),
-            ),
-          ],
+        return ListView.builder(
+          controller: model.lstController,
+          itemCount: model.itemCount,
+          itemBuilder: (context, index) {
+            if (index == model.selections.length && model.hasNext) {
+              return Center(
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            UserSelection selection = model.selections[index];
+            return _buildUserItem(selection);
+          },
         );
       }),
     );

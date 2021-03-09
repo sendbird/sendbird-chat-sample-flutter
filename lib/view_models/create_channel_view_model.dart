@@ -4,6 +4,17 @@ import 'package:sendbirdsdk/sendbirdsdk.dart';
 class CreateChannelViewModel with ChangeNotifier {
   List<UserSelection> selections = [];
   final query = ApplicationUserListQuery();
+  final ScrollController lstController = ScrollController();
+
+  int get itemCount => query.hasNext && selections.length != 0
+      ? selections.length + 1
+      : selections.length;
+
+  bool get hasNext => query.hasNext;
+
+  CreateChannelViewModel() {
+    lstController.addListener(_scrollListener);
+  }
 
   Future<void> updateUsers() async {
     List<UserSelection> newSelections = await getUsers();
@@ -40,6 +51,18 @@ class CreateChannelViewModel with ChangeNotifier {
     } catch (e) {
       print('create_channel_view: createChannel: ERROR: $e');
       throw e;
+    }
+  }
+
+  _scrollListener() {
+    if (lstController.offset >= lstController.position.maxScrollExtent &&
+        !lstController.position.outOfRange &&
+        !query.loading) {
+      updateUsers();
+    }
+    if (lstController.offset <= lstController.position.minScrollExtent &&
+        !lstController.position.outOfRange) {
+      //reach bottom
     }
   }
 }
