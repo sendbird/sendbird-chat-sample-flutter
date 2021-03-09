@@ -15,7 +15,7 @@ class ChannelViewModel with ChangeNotifier {
   User currentUser = SendbirdSdk().getCurrentUser();
   StreamSubscription messageSubs;
 
-  bool hasNext = true;
+  bool hasNext = false;
   bool isLoading = false;
   bool isDisposed = false;
 
