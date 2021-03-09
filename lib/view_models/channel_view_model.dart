@@ -14,10 +14,15 @@ class ChannelViewModel with ChangeNotifier {
 
   User currentUser = SendbirdSdk().getCurrentUser();
   StreamSubscription messageSubs;
+
+  bool hasNext = true;
   bool isLoading = false;
   bool isDisposed = false;
+
   final ScrollController lstController = ScrollController();
   final picker = ImagePicker();
+
+  int get itemCount => hasNext ? messages.length + 1 : messages.length;
 
   ChannelViewModel({this.channel}) {
     messageSubs = sdk
@@ -58,6 +63,7 @@ class ChannelViewModel with ChangeNotifier {
         ..previousResultSize = 20;
       final messages = await channel.getMessagesByTimestamp(ts, params);
       this.messages = reload ? messages : this.messages + messages;
+      hasNext = messages.length == 20;
       isLoading = false;
       if (!isDisposed) notifyListeners();
     } catch (e) {
@@ -71,8 +77,8 @@ class ChannelViewModel with ChangeNotifier {
       return;
     }
 
-    final preMessage =
-        channel.sendUserMessageWithText(message, onCompleted: (msg, error) {
+    final preMessage = channel.sendUserMessageWithText(message.trim(),
+        onCompleted: (msg, error) {
       // messages.repl(0, msg);
       final index =
           messages.indexWhere((element) => element.requestId == msg.requestId);

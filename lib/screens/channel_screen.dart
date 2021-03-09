@@ -105,11 +105,21 @@ class _ChannelScreenState extends State<ChannelScreen> {
         return Expanded(
           child: ListView.builder(
             controller: model.lstController,
-            itemCount: model.messages.length,
+            itemCount: model.itemCount,
             shrinkWrap: true,
             reverse: true,
             padding: EdgeInsets.only(top: 10, bottom: 10),
             itemBuilder: (context, index) {
+              if (index == model.messages.length && model.hasNext) {
+                return Center(
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
               final message = model.messages[index];
               final prev = (index < model.messages.length - 1)
                   ? model.messages[index + 1]
