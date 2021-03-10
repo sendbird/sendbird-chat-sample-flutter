@@ -62,7 +62,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
     final currentUser = model.currentUser;
 
     return AppBar(
-      elevation: 0,
+      elevation: 1,
       automaticallyImplyLeading: false,
       toolbarHeight: 65,
       backgroundColor: Colors.white,

@@ -37,6 +37,9 @@ class CreateChannelViewModel with ChangeNotifier {
     }
   }
 
+  List<UserSelection> get selectedUsers =>
+      selections.where((s) => s.isSelected).toList();
+
   Future<GroupChannel> createChannel() async {
     try {
       final userIds = this

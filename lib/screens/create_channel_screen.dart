@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 import '../view_models/create_channel_view_model.dart';
@@ -24,18 +26,21 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: navigationBar(),
-      body: body(context),
+      body: SafeArea(child: body(context)),
     );
   }
 
   Widget navigationBar() {
+    final selectedCountText =
+        model.selectedUsers.length == 0 ? '' : model.selectedUsers.length;
+
     return AppBar(
       leading: BackButton(color: Theme.of(context).buttonColor),
       toolbarHeight: 65,
-      elevation: 0,
+      elevation: 1,
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
-      title: Text('Select members', style: TextStyle(color: Colors.black)),
+      title: Text('New channel', style: TextStyles.sendbirdH1OnLight1),
       actions: [
         FlatButton(
           textColor: Theme.of(context).primaryColor,
@@ -56,8 +61,8 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
             });
           },
           child: Text(
-            "Create",
-            style: TextStyle(fontSize: 20.0),
+            "$selectedCountText Create",
+            style: TextStyles.sendbirdButtonPrimary300,
           ),
         )
       ],
@@ -69,13 +74,14 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     return ChangeNotifierProvider<CreateChannelViewModel>(
       builder: (context) => model,
       child: Consumer<CreateChannelViewModel>(builder: (context, value, child) {
-        return ListView.builder(
+        return ListView.separated(
           controller: model.lstController,
           itemCount: model.itemCount,
           itemBuilder: (context, index) {
             if (index == model.selections.length && model.hasNext) {
               return Center(
                 child: Container(
+                  margin: EdgeInsets.only(top: 10, bottom: 10),
                   width: 30,
                   height: 30,
                   child: CircularProgressIndicator(),
@@ -84,6 +90,12 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
             }
             UserSelection selection = model.selections[index];
             return _buildUserItem(selection);
+          },
+          separatorBuilder: (context, index) {
+            return Container(
+                margin: EdgeInsets.only(left: 70),
+                height: 1,
+                color: SBColors.onlight_04);
           },
         );
       }),
@@ -97,7 +109,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           selection.user.nickname.isEmpty
               ? selection.user.userId
               : selection.user.nickname,
-          style: TextStyle(color: Colors.black)),
+          style: TextStyles.sendbirdSubtitle1OnLight1),
       controlAffinity: ListTileControlAffinity.platform,
       value: SendbirdSdk().getCurrentUser().userId == selection.user.userId ||
           selection.isSelected,
