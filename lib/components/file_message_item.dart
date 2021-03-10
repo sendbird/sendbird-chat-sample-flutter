@@ -35,7 +35,11 @@ class FileMessageItem extends MessageItem {
                     (curr as FileMessage).url,
                 placeholder: (context, url) => Container(
                   color: SBColors.primary_300,
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
                   width: 30,
                   height: 30,
                 ),

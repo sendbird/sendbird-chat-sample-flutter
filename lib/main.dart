@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:sendbird_flutter/screens/channel_list_screen.dart';
+import 'package:sendbird_flutter/styles/color.dart';
 import 'screens/create_channel_screen.dart';
 import 'screens/login_screen.dart';
 
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "Gellix",
         primaryColor: Color(0xff742DDD),
         buttonColor: Color(0xff742DDD),
+        accentColor: SBColors.primary_300,
         textTheme: TextTheme(
             headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
             headline6: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold)),
