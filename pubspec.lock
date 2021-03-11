@@ -275,6 +275,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.7"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.4"
   octo_image:
     dependency: transitive
     description:
@@ -372,7 +379,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1+1"
+    version: "4.3.3"
   rxdart:
     dependency: transitive
     description:
@@ -383,9 +390,9 @@ packages:
   sendbirdsdk:
     dependency: "direct main"
     description:
-      name: sendbirdsdk
-      url: "https://dl.cloudsmith.io/public/sendbird/sendbird-sdk-flutter/dart/"
-    source: hosted
+      path: "../messaging-flutter"
+      relative: true
+    source: path
     version: "3.0.3"
   shared_preferences:
     dependency: transitive

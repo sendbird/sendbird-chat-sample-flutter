@@ -17,12 +17,22 @@ class MessageItem extends StatelessWidget {
   final BaseMessage next;
   final bool isMyMessage;
 
+  final Function(Offset) onLongPress;
+  final Function(Offset) onPress;
+
   Widget get content => null;
 
   String get _currTime => DateFormat('kk:mm a')
       .format(DateTime.fromMillisecondsSinceEpoch(curr.createdAt));
 
-  MessageItem({this.curr, this.prev, this.next, this.isMyMessage});
+  MessageItem({
+    this.curr,
+    this.prev,
+    this.next,
+    this.isMyMessage,
+    this.onPress,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +50,14 @@ class MessageItem extends StatelessWidget {
   }
 
   Widget _bulidRightWidget() {
-    final wrap =
-        Container(child: content, constraints: BoxConstraints(maxWidth: 240));
+    final wrap = Container(
+      child: GestureDetector(
+          // onLongPress: () => onLongPress(currentPos),
+          onTapDown: (details) => onPress(details.globalPosition),
+          child: content),
+      constraints: BoxConstraints(maxWidth: 240),
+    );
+
     List<Widget> children = _timestampDefaultWidget(curr) + [wrap];
 
     return Column(
@@ -51,14 +67,20 @@ class MessageItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: children,
-        )
+        ),
       ],
     );
   }
 
   Widget _buildLeftWidget() {
-    final wrap =
-        Container(child: content, constraints: BoxConstraints(maxWidth: 240));
+    final wrap = Container(
+      child: GestureDetector(
+          // onLongPress: () => onLongPress(currentPos),
+          onTapDown: (details) => onPress(details.globalPosition),
+          child: content),
+      constraints: BoxConstraints(maxWidth: 240),
+    );
+
     List<Widget> lst = _nameDefaultWidget(curr) + [wrap];
     List<Widget> children = _avatarDefaultWidget(curr) +
         [Column(children: lst)] +

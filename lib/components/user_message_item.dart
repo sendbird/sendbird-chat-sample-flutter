@@ -10,11 +10,15 @@ class UserMessageItem extends MessageItem {
     BaseMessage prev,
     BaseMessage next,
     bool isMyMessage,
+    Function onPress,
+    Function onLongPress,
   }) : super(
           curr: curr,
           prev: prev,
           next: next,
           isMyMessage: isMyMessage,
+          onPress: onPress,
+          onLongPress: onLongPress,
         );
 
   @override

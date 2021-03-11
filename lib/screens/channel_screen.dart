@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/components/admin_message_item.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
@@ -39,18 +39,37 @@ class _ChannelScreenState extends State<ChannelScreen> {
     return Scaffold(
       appBar: _buildNavigationBar(),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildContent(),
-            MessageInput(
-              onPressPlus: () {
-                model.showPicker();
-              },
-              onPressSend: (text) {
-                model.onSendUserMessage(text);
-              },
-            )
-          ],
+        child: p.ChangeNotifierProvider<ChannelViewModel>(
+          create: (context) => model,
+          child: Column(
+            children: [
+              // p.Selector<ChannelViewModel, List<BaseMessage>>(
+              //   selector: (_, model) => model.messages,
+              //   builder: (c, msgs, child) {
+              //     return _buildContent();
+              //   },
+              // ),
+              _buildContent(),
+              p.Selector<ChannelViewModel, bool>(
+                selector: (_, model) => model.isEditing,
+                builder: (c, editing, child) {
+                  return MessageInput(
+                    onPressPlus: () {
+                      model.showPicker();
+                    },
+                    onPressSend: (text) {
+                      model.onSendUserMessage(text);
+                    },
+                    onEditing: (text) {
+                      model.onUpdateMessage(text);
+                    },
+                    placeholder: model.selectedMessage?.message,
+                    isEditing: editing,
+                  );
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -99,56 +118,69 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 
   Widget _buildContent() {
-    return ChangeNotifierProvider<ChannelViewModel>(
-      builder: (context) => model,
-      child: Consumer<ChannelViewModel>(builder: (context, value, child) {
-        return Expanded(
-          child: ListView.builder(
-            controller: model.lstController,
-            itemCount: model.itemCount,
-            shrinkWrap: true,
-            reverse: true,
-            padding: EdgeInsets.only(top: 10, bottom: 10),
-            itemBuilder: (context, index) {
-              if (index == model.messages.length && model.hasNext) {
-                return Center(
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+    // return ChangeNotifierProvider<ChannelViewModel>(
+    //   builder: (context) => model,
+    return p.Consumer<ChannelViewModel>(builder: (context, value, child) {
+      return Expanded(
+        child: ListView.builder(
+          controller: model.lstController,
+          itemCount: model.itemCount,
+          shrinkWrap: true,
+          reverse: true,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.only(top: 10, bottom: 10),
+          itemBuilder: (context, index) {
+            if (index == model.messages.length && model.hasNext) {
+              return Center(
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
 
-              final message = model.messages[index];
-              final prev = (index < model.messages.length - 1)
-                  ? model.messages[index + 1]
-                  : null;
-              final next = index == 0 ? null : model.messages[index - 1];
-              final isMyMessage =
-                  message.sender?.userId == model.currentUser.userId;
+            final message = model.messages[index];
+            final prev = (index < model.messages.length - 1)
+                ? model.messages[index + 1]
+                : null;
+            final next = index == 0 ? null : model.messages[index - 1];
 
-              if (message is FileMessage) {
-                return FileMessageItem(
-                  curr: message,
-                  prev: prev,
-                  next: next,
-                  isMyMessage: isMyMessage,
-                );
-              } else if (message is AdminMessage) {
-                return AdminMessageItem(curr: message);
-              } else {
-                return UserMessageItem(
-                  curr: message,
-                  prev: prev,
-                  next: next,
-                  isMyMessage: isMyMessage,
-                );
-              }
-            },
-          ),
-        );
-      }),
-    );
+            if (message is FileMessage) {
+              return FileMessageItem(
+                curr: message,
+                prev: prev,
+                next: next,
+                isMyMessage: message.isMyMessage,
+                onPress: (pos) {
+                  model.showMessageMenu(
+                    context: context,
+                    message: message,
+                    pos: pos,
+                  );
+                },
+              );
+            } else if (message is AdminMessage) {
+              return AdminMessageItem(curr: message);
+            } else {
+              return UserMessageItem(
+                curr: message,
+                prev: prev,
+                next: next,
+                isMyMessage: message.isMyMessage,
+                onPress: (pos) {
+                  model.showMessageMenu(
+                    context: context,
+                    message: message,
+                    pos: pos,
+                  );
+                },
+              );
+            }
+          },
+        ),
+      );
+    });
+    // );
   }
 }

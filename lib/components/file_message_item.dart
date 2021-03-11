@@ -6,13 +6,20 @@ import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class FileMessageItem extends MessageItem {
-  FileMessageItem(
-      {FileMessage curr, BaseMessage prev, BaseMessage next, bool isMyMessage})
-      : super(
+  FileMessageItem({
+    FileMessage curr,
+    BaseMessage prev,
+    BaseMessage next,
+    bool isMyMessage,
+    Function onPress,
+    Function onLongPress,
+  }) : super(
           curr: curr,
           prev: prev,
           next: next,
           isMyMessage: isMyMessage,
+          onPress: onPress,
+          onLongPress: onLongPress,
         );
 
   @override

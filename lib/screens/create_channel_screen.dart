@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
@@ -71,9 +71,10 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
   }
 
   Widget body(BuildContext context) {
-    return ChangeNotifierProvider<CreateChannelViewModel>(
-      builder: (context) => model,
-      child: Consumer<CreateChannelViewModel>(builder: (context, value, child) {
+    return p.ChangeNotifierProvider<CreateChannelViewModel>(
+      create: (context) => model,
+      child:
+          p.Consumer<CreateChannelViewModel>(builder: (context, value, child) {
         return ListView.separated(
           controller: model.lstController,
           itemCount: model.itemCount,
@@ -139,7 +140,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           title: new Text("Channel Creation Error: $error"),
           shape: RoundedRectangleBorder(

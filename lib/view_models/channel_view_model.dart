@@ -2,22 +2,32 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
+
+enum PopupMenuType { edit, delete, copy }
 
 class ChannelViewModel with ChangeNotifier {
   List<BaseMessage> messages = [];
   GroupChannel channel;
   File uploadFile;
 
+  BaseMessage selectedMessage;
+
   SendbirdSdk sdk = SendbirdSdk();
 
   User currentUser = SendbirdSdk().getCurrentUser();
+
   StreamSubscription messageSubs;
+  StreamSubscription messageUpdateSubs;
+  StreamSubscription messageDeleteSubs;
 
   bool hasNext = false;
   bool isLoading = false;
   bool isDisposed = false;
+  bool isEditing = false;
 
   final ScrollController lstController = ScrollController();
   final picker = ImagePicker();
@@ -33,6 +43,22 @@ class ChannelViewModel with ChangeNotifier {
       notifyListeners();
     });
 
+    messageUpdateSubs = sdk
+        .messageUpdateStream(channelUrl: channel.channelUrl)
+        .listen((message) {
+      final index =
+          messages.indexWhere((e) => e.messageId == message.messageId);
+      if (index != -1) messages[index] = message;
+      notifyListeners();
+    });
+
+    messageDeleteSubs = sdk
+        .messageDeleteStream(channelUrl: channel.channelUrl)
+        .listen((messageId) {
+      messages.removeWhere((e) => e.messageId == messageId);
+      notifyListeners();
+    });
+
     lstController.addListener(_scrollListener);
     channel.markAsRead();
   }
@@ -40,8 +66,16 @@ class ChannelViewModel with ChangeNotifier {
   @override
   void dispose() async {
     super.dispose();
-    messageSubs.cancel();
+    messageDeleteSubs?.cancel();
+    messageUpdateSubs?.cancel();
+    messageSubs?.cancel();
     isDisposed = true;
+  }
+
+  void setEditing(bool value) {
+    final prev = isEditing;
+    isEditing = value;
+    if (value != prev) notifyListeners();
   }
 
   Future<void> loadMessages({
@@ -104,7 +138,7 @@ class ChannelViewModel with ChangeNotifier {
 
     final params = FileMessageParams.withFile(file);
     final preMessage =
-        await channel.sendFileMessage(params, onCompleted: (msg, error) {
+        channel.sendFileMessage(params, onCompleted: (msg, error) {
       final index =
           messages.indexWhere((element) => element.requestId == msg.requestId);
       if (index != -1) {
@@ -123,11 +157,129 @@ class ChannelViewModel with ChangeNotifier {
     );
   }
 
+  void onDeleteMessage(int messageId) async {
+    try {
+      await channel.deleteMessage(messageId);
+      notifyListeners();
+    } catch (e) {
+      //error
+    }
+  }
+
+  void onUpdateMessage(String updateText) async {
+    isEditing = false;
+
+    if (updateText == null) {
+      selectedMessage = null;
+      notifyListeners();
+      return;
+    }
+
+    if (selectedMessage == null) return;
+
+    try {
+      await channel.updateUserMessage(
+          selectedMessage.messageId, UserMessageParams(message: updateText));
+      selectedMessage = null;
+      notifyListeners();
+    } catch (e) {
+      selectedMessage = null;
+    }
+  }
+
+  void onCopyText(String text) {
+    Clipboard.setData(new ClipboardData(text: text));
+  }
+
+  // ui helpers
+
   void showPicker() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       onSendFileMessage(File(pickedFile.path));
     }
+  }
+
+  void showMessageMenu({
+    BuildContext context,
+    BaseMessage message,
+    Offset pos,
+  }) async {
+    List<PopupMenuEntry> items = [];
+    if (message.isMyMessage) {
+      items.add(_buildPopupItem(
+        'Edit',
+        'assets/iconEdit@3x.png',
+        PopupMenuType.edit,
+      ));
+    }
+    items = items +
+        [
+          PopupMenuDivider(height: 1),
+          _buildPopupItem(
+            'Copy',
+            'assets/iconCopy@3x.png',
+            PopupMenuType.copy,
+          ),
+          PopupMenuDivider(height: 1),
+          _buildPopupItem(
+            'Delete',
+            'assets/iconDelete@3x.png',
+            PopupMenuType.delete,
+          ),
+        ];
+
+    selectedMessage = message;
+
+    double x = pos.dx, y = pos.dy;
+    final height = MediaQuery.of(context).size.height;
+    if (height - pos.dy <= height / 3) y = pos.dy - 140;
+
+    final selected = await showMenu(
+        context: context,
+        // initialValue: PopupMenuType.edit,
+        position: RelativeRect.fromLTRB(x, y, pos.dx + 1, pos.dy + 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        items: items);
+
+    print(selected);
+    switch (selected) {
+      case PopupMenuType.edit:
+        setEditing(true);
+        break;
+      case PopupMenuType.copy:
+        onCopyText(selectedMessage.message);
+        selectedMessage = null;
+        break;
+      case PopupMenuType.delete:
+        onDeleteMessage(selectedMessage.messageId);
+        selectedMessage = null;
+        break;
+      default:
+        selectedMessage = null;
+        break;
+    }
+  }
+
+  Widget _buildPopupItem(String text, String imageName, PopupMenuType value) {
+    return PopupMenuItem(
+        height: 40,
+        child: Container(
+          constraints: BoxConstraints(minWidth: 180),
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(text),
+              SizedBox(width: 8),
+              ImageIcon(
+                AssetImage(imageName),
+                color: SBColors.primary_300,
+              )
+            ],
+          ),
+        ),
+        value: value);
   }
 
   _scrollListener() {
@@ -151,4 +303,9 @@ class ChannelViewModel with ChangeNotifier {
       //reach bottom
     }
   }
+}
+
+extension Message on BaseMessage {
+  bool get isMyMessage =>
+      sender?.userId == SendbirdSdk().getCurrentUser().userId;
 }

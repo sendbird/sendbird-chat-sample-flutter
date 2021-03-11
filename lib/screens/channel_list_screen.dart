@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/view_models/channel_list_view_model.dart';
 // import 'package:universal_platform/universal_platform.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
@@ -63,9 +63,9 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       child: Scaffold(
         backgroundColor: Colors.grey[200],
         appBar: navigationBar(),
-        body: ChangeNotifierProvider<ChannelListViewModel>(
-          builder: (context) => model,
-          child: Consumer<ChannelListViewModel>(
+        body: p.ChangeNotifierProvider<ChannelListViewModel>(
+          create: (context) => model,
+          child: p.Consumer<ChannelListViewModel>(
             builder: (context, value, child) {
               return _buildList(value);
             },
