@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 enum PopupMenuType { edit, delete, copy }
@@ -30,7 +32,6 @@ class ChannelViewModel with ChangeNotifier {
   bool isEditing = false;
 
   final ScrollController lstController = ScrollController();
-  final picker = ImagePicker();
 
   int get itemCount => hasNext ? messages.length + 1 : messages.length;
 
@@ -191,14 +192,87 @@ class ChannelViewModel with ChangeNotifier {
     Clipboard.setData(new ClipboardData(text: text));
   }
 
+  MessageState getMessageState(BaseMessage message) {
+    if (message.sendingStatus != MessageSendingStatus.succeeded)
+      return MessageState.none;
+
+    final readAll = channel.getUnreadMembers(message, false).length == 0;
+    final deliverAll = channel.getUndeliveredMembers(message).length == 0;
+
+    if (readAll)
+      return MessageState.read;
+    else if (deliverAll)
+      return MessageState.deliver;
+    else
+      return MessageState.none;
+  }
+
   // ui helpers
 
-  void showPicker() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  void showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+              child: Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    title: new Text(
+                      'Camera',
+                      style: TextStyles.sendbirdBody1OnLight1,
+                    ),
+                    trailing: ImageIcon(
+                      AssetImage('assets/iconCamera@3x.png'),
+                      color: SBColors.primary_300,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      showPicker(ImageSource.camera);
+                    }),
+                ListTile(
+                    title: new Text(
+                      'Photo & Video Library',
+                      style: TextStyles.sendbirdBody1OnLight1,
+                    ),
+                    trailing: ImageIcon(
+                      AssetImage('assets/iconPhoto@3x.png'),
+                      color: SBColors.primary_300,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      showPicker(ImageSource.gallery);
+                    }),
+                // ListTile(
+                //   title: new Text('Document',
+                //       style: TextStyles.sendbirdBody1OnLight1),
+                //   trailing: ImageIcon(AssetImage('assets/iconDocument@3x.png')),
+                //   onTap: () => {},
+                // ),
+                ListTile(
+                  title: new Text('Cancel'),
+                  onTap: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ));
+        });
+  }
+
+  void showPicker(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: source);
     if (pickedFile != null) {
       onSendFileMessage(File(pickedFile.path));
     }
   }
+
+  // void showFilePicker() async {
+  //   final pickedFile = await FilePicker.platform.pickFiles();
+  //   if (pickedFile != null) {
+  //     onSendFileMessage(File(pickedFile.files.single.path));
+  //   }
+  // }
 
   void showMessageMenu({
     BuildContext context,

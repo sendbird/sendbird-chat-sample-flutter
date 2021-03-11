@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:sendbird_flutter/screens/channel_list_screen.dart';
+import 'package:sendbird_flutter/screens/channel_list/channel_list_screen.dart';
 import 'package:sendbird_flutter/styles/color.dart';
-import 'screens/create_channel_screen.dart';
-import 'screens/login_screen.dart';
+import 'screens/create_channel/create_channel_screen.dart';
+import 'screens/login/login_screen.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

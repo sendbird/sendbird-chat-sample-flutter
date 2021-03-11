@@ -4,11 +4,17 @@ import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
-import 'avatar_view.dart';
+import '../../../components/avatar_view.dart';
 
 enum MessagePosition {
   continuous,
   normal,
+}
+
+enum MessageState {
+  read,
+  deliver,
+  none,
 }
 
 class MessageItem extends StatelessWidget {
@@ -16,6 +22,7 @@ class MessageItem extends StatelessWidget {
   final BaseMessage prev;
   final BaseMessage next;
   final bool isMyMessage;
+  final MessageState state;
 
   final Function(Offset) onLongPress;
   final Function(Offset) onPress;
@@ -30,12 +37,14 @@ class MessageItem extends StatelessWidget {
     this.prev,
     this.next,
     this.isMyMessage,
+    this.state,
     this.onPress,
     this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
+    print('prev ${prev.createdAt} curr $curr ${curr.createdAt}');
     return Container(
       padding: EdgeInsets.only(
         left: 14,
@@ -52,13 +61,14 @@ class MessageItem extends StatelessWidget {
   Widget _bulidRightWidget() {
     final wrap = Container(
       child: GestureDetector(
-          // onLongPress: () => onLongPress(currentPos),
+          onLongPressStart: (details) => onLongPress(details.globalPosition),
           onTapDown: (details) => onPress(details.globalPosition),
           child: content),
       constraints: BoxConstraints(maxWidth: 240),
     );
 
     List<Widget> children = _timestampDefaultWidget(curr) + [wrap];
+    //[_additionalWidgetsForRight(curr), wrap];
 
     return Column(
       children: [
@@ -75,7 +85,7 @@ class MessageItem extends StatelessWidget {
   Widget _buildLeftWidget() {
     final wrap = Container(
       child: GestureDetector(
-          // onLongPress: () => onLongPress(currentPos),
+          onLongPressStart: (details) => onLongPress(details.globalPosition),
           onTapDown: (details) => onPress(details.globalPosition),
           child: content),
       constraints: BoxConstraints(maxWidth: 240),
@@ -143,6 +153,50 @@ class MessageItem extends StatelessWidget {
         style: TextStyles.sendbirdCaption1OnDark1,
       ),
     );
+  }
+
+  Widget _additionalWidgetsForRight(BaseMessage message) {
+    //status pending -> loader
+    if (message.sendingStatus == MessageSendingStatus.pending) {
+      return Container(
+        width: 16,
+        height: 16,
+        margin: EdgeInsets.only(right: 2),
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    //status failed -> error icon
+    if (message.sendingStatus == MessageSendingStatus.failed) {
+      return Container(
+        width: 16,
+        height: 16,
+        margin: EdgeInsets.only(right: 2),
+        child: Image(image: AssetImage('assets/iconError@3x.png')),
+      );
+    }
+
+    return _stateAndTimeWidget(message);
+  }
+
+  Widget _stateAndTimeWidget(BaseMessage message) {
+    final image = state == MessageState.deliver
+        ? Image(
+            image: AssetImage('assets/iconDone@3x.png'),
+            color: Colors.grey,
+          )
+        : state == MessageState.read
+            ? Image(image: AssetImage('assets/iconDone@3x.png'))
+            : Image(image: AssetImage('assets/iconDone@3x.png'));
+
+    return Container(
+        margin: EdgeInsets.only(right: 2),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[Container(width: 16, height: 16, child: image)] +
+              _timestampDefaultWidget(message),
+        ));
   }
 
   List<Widget> _timestampDefaultWidget(BaseMessage message) {

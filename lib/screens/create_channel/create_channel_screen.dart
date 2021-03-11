@@ -4,8 +4,8 @@ import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
-import '../view_models/create_channel_view_model.dart';
-import 'channel_screen.dart';
+import 'create_channel_view_model.dart';
+import '../channel/channel_screen.dart';
 
 class CreateChannelScreen extends StatefulWidget {
   @override

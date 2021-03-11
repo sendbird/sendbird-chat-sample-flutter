@@ -7,7 +7,7 @@ import 'components/file_message_item.dart';
 import 'components/message_input.dart';
 import 'components/user_message_item.dart';
 import 'components/admin_message_item.dart';
-import 'package:sendbird_flutter/view_models/channel_view_model.dart';
+import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
@@ -56,7 +56,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 builder: (c, editing, child) {
                   return MessageInput(
                     onPressPlus: () {
-                      model.showPicker();
+                      model.showBottomSheet(context);
                     },
                     onPressSend: (text) {
                       model.onSendUserMessage(text);
@@ -147,13 +147,19 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 : null;
             final next = index == 0 ? null : model.messages[index - 1];
 
+            print('current $message');
+
             if (message is FileMessage) {
               return FileMessageItem(
                 curr: message,
                 prev: prev,
                 next: next,
+                state: model.getMessageState(message),
                 isMyMessage: message.isMyMessage,
                 onPress: (pos) {
+                  //
+                },
+                onLongPress: (pos) {
                   model.showMessageMenu(
                     context: context,
                     message: message,
@@ -168,8 +174,12 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 curr: message,
                 prev: prev,
                 next: next,
+                state: model.getMessageState(message),
                 isMyMessage: message.isMyMessage,
                 onPress: (pos) {
+                  //
+                },
+                onLongPress: (pos) {
                   model.showMessageMenu(
                     context: context,
                     message: message,

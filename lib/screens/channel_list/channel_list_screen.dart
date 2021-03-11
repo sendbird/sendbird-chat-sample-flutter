@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
-import 'package:sendbird_flutter/view_models/channel_list_view_model.dart';
+import 'package:sendbird_flutter/screens/channel_list/channel_list_view_model.dart';
 // import 'package:universal_platform/universal_platform.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
-import '../channel_screen.dart';
-import '../../components/channel_list_item.dart';
+import '../channel/channel_screen.dart';
+import 'components/channel_list_item.dart';
 
 class ChannelListScreen extends StatefulWidget {
   @override
