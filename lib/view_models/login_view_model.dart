@@ -13,10 +13,10 @@ class LoginViewModel {
     try {
       // initialize with app id
       final sendbird = SendbirdSdk(appId: appId);
+      sendbird.setLogLevel(LogLevel.nothing);
 
       // connect to sendbird server
       final user = await sendbird.connect(userId);
-      sendbird.setLogLevel(LogLevel.verbose);
       final name = nickname == '' || nickname == null ? user.userId : nickname;
 
       // update user nickname and profile url

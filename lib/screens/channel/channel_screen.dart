@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
-import 'package:sendbird_flutter/components/admin_message_item.dart';
+
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
-import 'package:sendbird_flutter/components/file_message_item.dart';
-import 'package:sendbird_flutter/components/message_input.dart';
-import 'package:sendbird_flutter/components/user_message_item.dart';
+import 'components/file_message_item.dart';
+import 'components/message_input.dart';
+import 'components/user_message_item.dart';
+import 'components/admin_message_item.dart';
 import 'package:sendbird_flutter/view_models/channel_view_model.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';

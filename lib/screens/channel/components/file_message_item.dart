@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:sendbird_flutter/components/message_item.dart';
+import 'message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
