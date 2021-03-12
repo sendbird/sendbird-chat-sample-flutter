@@ -119,8 +119,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 
   Widget _buildContent() {
-    // return ChangeNotifierProvider<ChannelViewModel>(
-    //   builder: (context) => model,
     return p.Consumer<ChannelViewModel>(builder: (context, value, child) {
       return Expanded(
         child: ListView.builder(
@@ -146,8 +144,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 ? model.messages[index + 1]
                 : null;
             final next = index == 0 ? null : model.messages[index - 1];
-
-            print('current $message');
 
             if (message is FileMessage) {
               return FileMessageItem(

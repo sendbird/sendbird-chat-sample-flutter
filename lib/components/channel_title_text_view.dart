@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class ChannelTitleTextView extends StatelessWidget {
@@ -16,7 +17,7 @@ class ChannelTitleTextView extends StatelessWidget {
     final titleText = namesList.join(", ");
     return Text(
       titleText,
-      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+      style: TextStyles.sendbirdSubtitle1OnLight1,
     );
   }
 }

@@ -7,11 +7,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
+import 'package:sendbird_flutter/utils/debounce.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 enum PopupMenuType { edit, delete, copy }
 
-class ChannelViewModel with ChangeNotifier {
+class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   List<BaseMessage> messages = [];
   GroupChannel channel;
   File uploadFile;
@@ -22,44 +23,18 @@ class ChannelViewModel with ChangeNotifier {
 
   User currentUser = SendbirdSdk().getCurrentUser();
 
-  StreamSubscription messageSubs;
-  StreamSubscription messageUpdateSubs;
-  StreamSubscription messageDeleteSubs;
-
   bool hasNext = false;
   bool isLoading = false;
   bool isDisposed = false;
   bool isEditing = false;
 
   final ScrollController lstController = ScrollController();
+  final readDebouncer = Debouncer(milliseconds: 1000);
 
   int get itemCount => hasNext ? messages.length + 1 : messages.length;
 
   ChannelViewModel({this.channel}) {
-    messageSubs = sdk
-        .messageReceiveStream(channelUrl: channel.channelUrl)
-        .listen((message) {
-      messages.insert(0, message);
-      channel.markAsRead();
-      notifyListeners();
-    });
-
-    messageUpdateSubs = sdk
-        .messageUpdateStream(channelUrl: channel.channelUrl)
-        .listen((message) {
-      final index =
-          messages.indexWhere((e) => e.messageId == message.messageId);
-      if (index != -1) messages[index] = message;
-      notifyListeners();
-    });
-
-    messageDeleteSubs = sdk
-        .messageDeleteStream(channelUrl: channel.channelUrl)
-        .listen((messageId) {
-      messages.removeWhere((e) => e.messageId == messageId);
-      notifyListeners();
-    });
-
+    sdk.addChannelHandler('channel_listener', this);
     lstController.addListener(_scrollListener);
     channel.markAsRead();
   }
@@ -67,9 +42,6 @@ class ChannelViewModel with ChangeNotifier {
   @override
   void dispose() async {
     super.dispose();
-    messageDeleteSubs?.cancel();
-    messageUpdateSubs?.cancel();
-    messageSubs?.cancel();
     isDisposed = true;
   }
 
@@ -117,13 +89,13 @@ class ChannelViewModel with ChangeNotifier {
       // messages.repl(0, msg);
       final index =
           messages.indexWhere((element) => element.requestId == msg.requestId);
-      if (index != -1) {
-        messages[index] = msg;
-        channel.markAsRead();
-        if (!isDisposed) notifyListeners();
-      }
+      if (index != -1) messages.removeAt(index);
+      print('[c] return message ${msg.message}');
+      messages.insert(0, msg);
+      messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      markAsReadDebounce();
+      if (!isDisposed) notifyListeners();
     });
-
     messages.insert(0, preMessage);
     if (!isDisposed) notifyListeners();
 
@@ -142,10 +114,11 @@ class ChannelViewModel with ChangeNotifier {
         channel.sendFileMessage(params, onCompleted: (msg, error) {
       final index =
           messages.indexWhere((element) => element.requestId == msg.requestId);
-      if (index != -1) {
-        messages[index] = msg;
-        if (!isDisposed) notifyListeners();
-      }
+      if (index != -1) messages.removeAt(index);
+      messages.insert(0, msg);
+      messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      markAsReadDebounce();
+      if (!isDisposed) notifyListeners();
     });
 
     messages.insert(0, preMessage);
@@ -263,6 +236,8 @@ class ChannelViewModel with ChangeNotifier {
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: source);
     if (pickedFile != null) {
+      // uploadFile = File(pickedFile.path);
+      // NOTE: due to image_picker's behavior need to wait until reconnect
       onSendFileMessage(File(pickedFile.path));
     }
   }
@@ -280,28 +255,36 @@ class ChannelViewModel with ChangeNotifier {
     Offset pos,
   }) async {
     List<PopupMenuEntry> items = [];
-    if (message.isMyMessage) {
+    if (message is UserMessage) {
       items.add(_buildPopupItem(
-        'Edit',
-        'assets/iconEdit@3x.png',
-        PopupMenuType.edit,
+        'Copy',
+        'assets/iconCopy@3x.png',
+        PopupMenuType.copy,
       ));
     }
-    items = items +
-        [
-          PopupMenuDivider(height: 1),
-          _buildPopupItem(
-            'Copy',
-            'assets/iconCopy@3x.png',
-            PopupMenuType.copy,
-          ),
-          PopupMenuDivider(height: 1),
-          _buildPopupItem(
-            'Delete',
-            'assets/iconDelete@3x.png',
-            PopupMenuType.delete,
-          ),
-        ];
+
+    if (message.isMyMessage && message is UserMessage) {
+      items.addAll([
+        PopupMenuDivider(height: 1),
+        _buildPopupItem(
+          'Edit',
+          'assets/iconEdit@3x.png',
+          PopupMenuType.edit,
+        )
+      ]);
+    }
+
+    if (message.isMyMessage)
+      items.addAll([
+        PopupMenuDivider(height: 1),
+        _buildPopupItem(
+          'Delete',
+          'assets/iconDelete@3x.png',
+          PopupMenuType.delete,
+        ),
+      ]);
+
+    if (items.isEmpty) return;
 
     selectedMessage = message;
 
@@ -376,6 +359,50 @@ class ChannelViewModel with ChangeNotifier {
         !lstController.position.outOfRange) {
       //reach bottom
     }
+  }
+
+  // handlers
+
+  void markAsReadDebounce() {
+    readDebouncer.run(() => this.channel.markAsRead());
+  }
+
+  @override
+  void onMessageReceived(BaseChannel channel, BaseMessage message) {
+    if (channel.channelUrl == this.channel.channelUrl) {
+      messages.insert(0, message);
+      markAsReadDebounce();
+      notifyListeners();
+    }
+  }
+
+  @override
+  void onMessageUpdated(BaseChannel channel, BaseMessage message) {
+    if (channel.channelUrl != this.channel.channelUrl) return;
+    final index = messages.indexWhere((e) => e.messageId == message.messageId);
+    if (index != -1) messages[index] = message;
+    notifyListeners();
+  }
+
+  @override
+  void onMessageDeleted(BaseChannel channel, int messageId) {
+    messages.removeWhere((e) => e.messageId == messageId);
+    notifyListeners();
+  }
+
+  @override
+  void onReadReceiptUpdated(GroupChannel channel) {
+    notifyListeners();
+  }
+
+  @override
+  void onDeliveryReceiptUpdated(GroupChannel channel) {
+    notifyListeners();
+  }
+
+  @override
+  void onChannelChanged(BaseChannel channel) {
+    notifyListeners();
   }
 }
 

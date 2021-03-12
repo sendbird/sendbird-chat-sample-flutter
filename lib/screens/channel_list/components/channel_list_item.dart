@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
@@ -13,49 +15,85 @@ class ChannelListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: AvatarView(
-        channel: this.channel,
-        currentUserId: currentUserId,
-        width: 40,
-        height: 40,
+    return Container(
+      height: 76,
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          AvatarView(
+            channel: this.channel,
+            currentUserId: currentUserId,
+            width: 56,
+            height: 56,
+          ),
+          _buildContent(context),
+          _buildTailing(context),
+        ],
       ),
-      tileColor: Colors.white,
-      title: ChannelTitleTextView(this.channel, currentUserId),
-      subtitle: Text(channel?.lastMessage?.message ?? ''),
-      trailing: _buildTailing(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    BaseMessage lastMessage = channel.lastMessage;
+    String message;
+    if (lastMessage is FileMessage) {
+      message = lastMessage.name;
+    } else {
+      message = lastMessage.message;
+    }
+
+    return Expanded(
+      child: Row(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ChannelTitleTextView(this.channel, currentUserId),
+                SizedBox(height: 2),
+                Text(
+                  message,
+                  maxLines: 2,
+                  style: TextStyles.sendbirdBody2OnLight3,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildTailing(BuildContext context) {
     DateTime lastMessageDate = DateTime.fromMillisecondsSinceEpoch(
         channel?.lastMessage?.createdAt ?? 0);
-    String lastMessageDateString = DateFormat("E").format(lastMessageDate);
+    String lastMessageDateString =
+        DateFormat("hh:mm a").format(lastMessageDate);
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(lastMessageDateString),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 20, maxWidth: 40),
-          child: TextField(
-            textAlign: TextAlign.center,
-            enabled: false,
-            enableInteractiveSelection: false,
-            decoration: channel.unreadMessageCount == 0
-                ? null
-                : new InputDecoration(
-                    border: new OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        const Radius.circular(20.0),
-                      ),
-                    ),
-                    filled: true,
-                    hintStyle: new TextStyle(color: Colors.white, fontSize: 8),
-                    hintText: "${channel.unreadMessageCount}",
-                    fillColor: Theme.of(context).primaryColor),
-          ),
+        Text(
+          lastMessageDateString,
+          style: TextStyles.sendbirdCaption2OnLight2,
         ),
+        SizedBox(height: 10),
+        if (channel.unreadMessageCount != 0)
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: SBColors.primary_300,
+            ),
+            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+            child: Text(
+              "${channel.unreadMessageCount}",
+              style: TextStyles.sendbirdCaption1OnDark1,
+            ),
+          ),
       ],
     );
   }

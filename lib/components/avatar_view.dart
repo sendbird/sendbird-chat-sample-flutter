@@ -31,11 +31,11 @@ class AvatarView extends StatelessWidget {
 
       images = [
         for (final member in channel.members)
-          if (member.userId != currentUserId && member.profileUrl != '')
+          if (member.userId != currentUserId && member.profileUrl != null)
             Image(image: NetworkImage(member.profileUrl), fit: BoxFit.cover)
       ];
     } else if (user != null) {
-      if (user.profileUrl != '')
+      if (user.profileUrl != null)
         images = [
           Image(image: NetworkImage(user.profileUrl), fit: BoxFit.cover)
         ];

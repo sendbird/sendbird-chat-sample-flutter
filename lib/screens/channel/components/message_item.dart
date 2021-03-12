@@ -44,7 +44,6 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('prev ${prev.createdAt} curr $curr ${curr.createdAt}');
     return Container(
       padding: EdgeInsets.only(
         left: 14,
@@ -67,8 +66,8 @@ class MessageItem extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: 240),
     );
 
-    List<Widget> children = _timestampDefaultWidget(curr) + [wrap];
-    //[_additionalWidgetsForRight(curr), wrap];
+    // List<Widget> children = _timestampDefaultWidget(curr) + [wrap];
+    List<Widget> children = [_additionalWidgetsForRight(curr), wrap];
 
     return Column(
       children: [
@@ -91,9 +90,13 @@ class MessageItem extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: 240),
     );
 
-    List<Widget> lst = _nameDefaultWidget(curr) + [wrap];
     List<Widget> children = _avatarDefaultWidget(curr) +
-        [Column(children: lst)] +
+        [
+          Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _nameDefaultWidget(curr) + [wrap])
+        ] +
         _timestampDefaultWidget(curr);
 
     return Column(
@@ -159,9 +162,9 @@ class MessageItem extends StatelessWidget {
     //status pending -> loader
     if (message.sendingStatus == MessageSendingStatus.pending) {
       return Container(
-        width: 16,
-        height: 16,
-        margin: EdgeInsets.only(right: 2),
+        width: 12,
+        height: 12,
+        margin: EdgeInsets.only(right: 3, bottom: 3),
         child: CircularProgressIndicator(strokeWidth: 2),
       );
     }
@@ -182,11 +185,11 @@ class MessageItem extends StatelessWidget {
   Widget _stateAndTimeWidget(BaseMessage message) {
     final image = state == MessageState.deliver
         ? Image(
-            image: AssetImage('assets/iconDone@3x.png'),
+            image: AssetImage('assets/iconDoneAll@3x.png'),
             color: Colors.grey,
           )
         : state == MessageState.read
-            ? Image(image: AssetImage('assets/iconDone@3x.png'))
+            ? Image(image: AssetImage('assets/iconDoneAll@3x.png'))
             : Image(image: AssetImage('assets/iconDone@3x.png'));
 
     return Container(
@@ -215,7 +218,7 @@ class MessageItem extends StatelessWidget {
   List<Widget> _nameDefaultWidget(BaseMessage message) {
     return !_isContinuous(prev, curr)
         ? [
-            Text(message.sender.nickname),
+            Text(message.sender.nickname ?? ''),
             SizedBox(height: 4),
           ]
         : [];
@@ -227,6 +230,6 @@ class MessageItem extends StatelessWidget {
             AvatarView(user: message.sender, width: 26, height: 26),
             SizedBox(width: 12),
           ]
-        : [];
+        : [SizedBox(width: 38, height: 26)];
   }
 }
