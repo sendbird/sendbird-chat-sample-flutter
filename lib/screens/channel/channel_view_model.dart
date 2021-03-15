@@ -175,7 +175,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     if (readAll)
       return MessageState.read;
     else if (deliverAll)
-      return MessageState.deliver;
+      return MessageState.delivered;
     else
       return MessageState.none;
   }
@@ -216,12 +216,6 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
                       Navigator.pop(context);
                       showPicker(ImageSource.gallery);
                     }),
-                // ListTile(
-                //   title: new Text('Document',
-                //       style: TextStyles.sendbirdBody1OnLight1),
-                //   trailing: ImageIcon(AssetImage('assets/iconDocument@3x.png')),
-                //   onTap: () => {},
-                // ),
                 ListTile(
                   title: new Text('Cancel'),
                   onTap: () => Navigator.pop(context),
@@ -236,18 +230,9 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: source);
     if (pickedFile != null) {
-      // uploadFile = File(pickedFile.path);
-      // NOTE: due to image_picker's behavior need to wait until reconnect
       onSendFileMessage(File(pickedFile.path));
     }
   }
-
-  // void showFilePicker() async {
-  //   final pickedFile = await FilePicker.platform.pickFiles();
-  //   if (pickedFile != null) {
-  //     onSendFileMessage(File(pickedFile.files.single.path));
-  //   }
-  // }
 
   void showMessageMenu({
     BuildContext context,
@@ -276,7 +261,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
     if (message.isMyMessage)
       items.addAll([
-        PopupMenuDivider(height: 1),
+        if (items.length != 0) PopupMenuDivider(height: 1),
         _buildPopupItem(
           'Delete',
           'assets/iconDelete@3x.png',
@@ -309,13 +294,45 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
         selectedMessage = null;
         break;
       case PopupMenuType.delete:
-        onDeleteMessage(selectedMessage.messageId);
+        _showDeleteConfirmation(context);
         selectedMessage = null;
         break;
       default:
         selectedMessage = null;
         break;
     }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = FlatButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = FlatButton(
+      child: Text("Delete"),
+      color: Colors.red,
+      onPressed: () {
+        onDeleteMessage(selectedMessage.messageId);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete message?"),
+      content: Text("Would you like to delete this message permanently?"),
+      actions: [cancelButton, continueButton],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   Widget _buildPopupItem(String text, String imageName, PopupMenuType value) {

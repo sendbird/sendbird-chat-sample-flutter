@@ -13,7 +13,7 @@ enum MessagePosition {
 
 enum MessageState {
   read,
-  deliver,
+  delivered,
   none,
 }
 
@@ -183,7 +183,7 @@ class MessageItem extends StatelessWidget {
   }
 
   Widget _stateAndTimeWidget(BaseMessage message) {
-    final image = state == MessageState.deliver
+    final image = state == MessageState.delivered
         ? Image(
             image: AssetImage('assets/iconDoneAll@3x.png'),
             color: Colors.grey,

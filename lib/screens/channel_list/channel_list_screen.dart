@@ -23,43 +23,11 @@ class _ChannelListScreenState extends State<ChannelListScreen>
     model.loadChannelList();
   }
 
-  /// Update list view with either by overriding channel event handler methods
-  /// or use stream (see _bulidStreamBuilder())
-  //
-  // @override
-  // void onChannelChanged(BaseChannel channel) {
-  //   final index = groupChannels
-  //       .indexWhere((element) => element.channelUrl == channel.channelUrl);
-
-  //   if (index != -1) {
-  //     setState(() {
-  //       groupChannels[index] = channel;
-  //     });
-  //   }
-  // }
-
-  /// Update chanel list when new message has been arrived
-  // @override
-  // void onMessageReceived(BaseChannel channel, BaseMessage message) {
-  //   final index = groupChannels
-  //       .indexWhere((element) => element.channelUrl == channel.channelUrl);
-
-  //   if (index != -1) {
-  //     setState(() {
-  //       groupChannels[index] = channel;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       groupChannels.insert(0, channel);
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Colors.white,
         appBar: navigationBar(),
         body: p.ChangeNotifierProvider<ChannelListViewModel>(
           create: (context) => model,
@@ -115,42 +83,40 @@ class _ChannelListScreenState extends State<ChannelListScreen>
         await model.loadChannelList(reload: true);
       },
       child: ListView.builder(
-        itemCount: model.groupChannels.length,
+        physics: const AlwaysScrollableScrollPhysics(),
+        controller: model.lstController,
+        itemCount: model.itemCount,
         itemBuilder: (context, index) {
+          if (index == model.groupChannels.length && model.hasNext) {
+            return Container(
+                color: Colors.white,
+                child: Center(
+                  child: Container(
+                    color: Colors.white,
+                    margin: EdgeInsets.only(top: 10, bottom: 10),
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(),
+                  ),
+                ));
+          }
+
           final channel = model.groupChannels[index];
-          return _buildStreamBuilder(model, channel);
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+            child: InkWell(
+              child: ChannelListItem(channel),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/channel',
+                  arguments: channel,
+                );
+              },
+            ),
+          );
         },
       ),
-    );
-  }
-
-  /// Stream builder with channel change stream
-  Widget _buildStreamBuilder(ChannelListViewModel model, GroupChannel channel) {
-    return StreamBuilder(
-      initialData: channel,
-      // use channelChangedStream to update channel list item
-      // Multiple streams can be combined with using framework such as rxdart
-      // and update channe list with multiple streams
-      // (message recevies, channel changed, etc)
-      stream: model.sdk
-          .channelChangedStream()
-          .where((c) => c.channelUrl == channel.channelUrl),
-      builder: (ctx, snapshot) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
-          child: InkWell(
-            child: ChannelListItem(channel),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChannelScreen(channel: channel),
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }
