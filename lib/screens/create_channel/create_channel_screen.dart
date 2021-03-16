@@ -47,7 +47,6 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           disabledColor: Colors.grey,
           disabledTextColor: Colors.black,
           padding: EdgeInsets.all(8.0),
-          splashColor: Theme.of(context).primaryColor,
           onPressed: () {
             model.createChannel().then((channel) {
               Navigator.pushReplacement(

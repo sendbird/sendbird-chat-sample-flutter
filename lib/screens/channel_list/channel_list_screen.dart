@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/screens/channel_list/channel_list_view_model.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 // import 'package:universal_platform/universal_platform.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 import '../channel/channel_screen.dart';
@@ -53,7 +54,7 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       elevation: 0,
       backgroundColor: Colors.white,
       automaticallyImplyLeading: Platform.isAndroid == true ? false : true,
-      title: Text('Channels', style: TextStyle(color: Colors.black)),
+      title: Text('Channels', style: TextStyles.sendbirdH2OnLight1),
       actions: [
         Container(
           width: 60,

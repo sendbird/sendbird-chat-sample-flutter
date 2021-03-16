@@ -1,14 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbirdsdk/sendbirdsdk.dart';
+
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/screens/channel_info/channel_info_view_model.dart';
 import 'package:sendbird_flutter/screens/channel_info/components/setting_item.dart';
 import 'package:sendbird_flutter/screens/channel_info/components/switchable_setting_item.dart';
-import 'package:sendbird_flutter/screens/channel_list/channel_list_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class ChannelInfoScreen extends StatefulWidget {
   final GroupChannel channel;
@@ -88,14 +87,27 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
       elevation: 0,
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
-      title: Text('Channel Information', style: TextStyle(color: Colors.black)),
+      title: Text('Channel Information', style: TextStyles.sendbirdH2OnLight1),
       actions: [
-        InkWell(
-          child: Text('Edit'),
-          onTap: () {
-            //show bottom up
+        FlatButton(
+          textColor: Theme.of(context).primaryColor,
+          onPressed: () {
+            model.showBottomSheet(context);
           },
+          child: Text(
+            "Edit",
+            style: TextStyles.sendbirdBody1Primary300,
+          ),
         )
+        // InkWell(
+        //   child: Text(
+        //     'Edit',
+        //     style: TextStyles.sendbirdBody1Primary300,
+        //   ),
+        //   onTap: () {
+        //     //show bottom up
+        //   },
+        // )
       ],
       centerTitle: true,
     );
