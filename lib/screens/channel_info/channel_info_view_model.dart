@@ -23,7 +23,15 @@ class ChannelInfoViewModel extends ChangeNotifier {
   }
 
   Future<void> setNotification(bool value) async {
-    notifyListeners();
+    try {
+      final option = value
+          ? GroupChannelPushTriggerOption.all
+          : GroupChannelPushTriggerOption.off;
+      await channel.setMyPushTriggerOption(option);
+      notifyListeners();
+    } catch (e) {
+      //e
+    }
   }
 
   Future<bool> leave() async {
