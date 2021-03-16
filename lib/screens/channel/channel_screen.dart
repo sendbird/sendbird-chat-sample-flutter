@@ -3,6 +3,7 @@ import 'package:provider/provider.dart' as p;
 
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/styles/color.dart';
 import 'components/file_message_item.dart';
 import 'components/message_input.dart';
 import 'components/user_message_item.dart';
@@ -110,7 +111,19 @@ class _ChannelScreenState extends State<ChannelScreen> {
                   ],
                 ),
               ),
-              // Icon(Icons.settings, color: Colors.black54),
+              GestureDetector(
+                child: ImageIcon(
+                  AssetImage('assets/iconInfo@3x.png'),
+                  color: SBColors.primary_300,
+                ),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/channel_info',
+                    arguments: widget.channel,
+                  );
+                },
+              ),
             ],
           ),
         ),

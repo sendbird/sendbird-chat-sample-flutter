@@ -43,6 +43,19 @@ class ChannelListViewModel with ChannelEventHandler, ChangeNotifier {
   }
 
   @override
+  void onUserLeaved(GroupChannel channel, User user) {
+    if (user.userId == currentUser.userId) {
+      final index = groupChannels
+          .indexWhere((element) => element.channelUrl == channel.channelUrl);
+      if (index != -1) {
+        groupChannels.removeAt(index);
+      }
+
+      notifyListeners();
+    }
+  }
+
+  @override
   void onChannelChanged(BaseChannel channel) {
     final index = groupChannels
         .indexWhere((element) => element.channelUrl == channel.channelUrl);

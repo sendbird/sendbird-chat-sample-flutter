@@ -38,11 +38,15 @@ class MyApp extends StatelessWidget {
           '/': (context) => LoginScreen(),
           '/channel_list': (context) => ChannelListScreen(),
           '/create_channel': (context) => CreateChannelScreen(),
-          '/channel_info': (context) => ChannelInfoScreen(),
+          '/channel_info': (context) =>
+              ChannelInfoScreen(channel: settings.arguments),
           '/channel': (context) => ChannelScreen(channel: settings.arguments),
         };
         WidgetBuilder builder = routes[settings.name];
-        return MaterialPageRoute(builder: (ctx) => builder(ctx));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (ctx) => builder(ctx),
+        );
       },
       theme: ThemeData(
         fontFamily: "Gellix",

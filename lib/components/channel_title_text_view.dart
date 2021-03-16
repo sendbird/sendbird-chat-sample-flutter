@@ -15,6 +15,9 @@ class ChannelTitleTextView extends StatelessWidget {
         if (member.userId != currentUserId) member.nickname
     ];
     final titleText = namesList.join(", ");
+
+    //if channel members == 2 show last seen / online
+    //otherwise just text
     return Text(
       titleText,
       style: TextStyles.sendbirdSubtitle1OnLight1,
