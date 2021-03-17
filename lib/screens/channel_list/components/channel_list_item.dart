@@ -4,7 +4,7 @@ import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-
+import '../../../utils/extensions.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class ChannelListItem extends StatelessWidget {
@@ -69,10 +69,8 @@ class ChannelListItem extends StatelessWidget {
   }
 
   Widget _buildTailing(BuildContext context) {
-    DateTime lastMessageDate = DateTime.fromMillisecondsSinceEpoch(
-        channel?.lastMessage?.createdAt ?? 0);
-    String lastMessageDateString =
-        DateFormat("hh:mm a").format(lastMessageDate);
+    int lastDate = channel?.lastMessage?.createdAt ?? 0;
+    String lastMessageDateString = lastDate.readableTimestamp();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,

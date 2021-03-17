@@ -7,6 +7,7 @@ class MessageInput extends StatefulWidget {
   final Function onPressPlus;
   final Function(String) onPressSend;
   final Function(String) onEditing;
+  final Function(String) onChanged;
   final bool isEditing;
   final inputController = TextEditingController();
 
@@ -14,6 +15,7 @@ class MessageInput extends StatefulWidget {
     this.placeholder,
     this.onPressPlus,
     this.onPressSend,
+    this.onChanged,
     this.onEditing,
     this.isEditing,
     Key key,
@@ -91,6 +93,7 @@ class _MessageInputState extends State<MessageInput> {
                 // contentPadding: EdgeInsets.only(top: 2),
               ),
               onChanged: (text) {
+                if (widget.onChanged != null) widget.onChanged(text);
                 setState(() {
                   shouldShowSendButton = text != '';
                 });

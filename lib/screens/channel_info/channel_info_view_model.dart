@@ -23,7 +23,7 @@ class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
 
   void loadChannel() async {
     try {
-      final updated = await s.GroupChannel.refreshChannel(channel.channelUrl);
+      final updated = await s.GroupChannel.refresh(channel.channelUrl);
       channel = updated;
     } catch (e) {
       //pop?

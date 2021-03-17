@@ -8,12 +8,14 @@ import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/debounce.dart';
+import 'package:sendbird_flutter/utils/extensions.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 enum PopupMenuType { edit, delete, copy }
+enum UserEngagementState { typing, online, last_seen, none }
 
 class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
-  List<BaseMessage> messages = [];
+  List<BaseMessage> _messages = [];
   GroupChannel channel;
   File uploadFile;
 
@@ -30,8 +32,47 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   final ScrollController lstController = ScrollController();
   final readDebouncer = Debouncer(milliseconds: 1000);
+  Timer _typingTimer;
 
-  int get itemCount => hasNext ? messages.length + 1 : messages.length;
+  int get itemCount => hasNext ? _messages.length + 1 : _messages.length;
+
+  bool get displayOnline => channel.members.length == 2;
+
+  UserEngagementState get engagementState {
+    if (channel.getTypingUsers().length != 0)
+      return UserEngagementState.typing;
+    else if (channel.memberCount == 2) {
+      final other =
+          channel.members.where((e) => e.userId != currentUser.userId).first;
+      if (other.isOnline)
+        return UserEngagementState.online;
+      else
+        return UserEngagementState.last_seen;
+    }
+    return UserEngagementState.none;
+  }
+
+  String get lastSeenText {
+    if (channel.memberCount != 2) return null;
+    final other =
+        channel.members.where((e) => e.userId != currentUser.userId).first;
+    final readStatus = channel.getReadStatus(false);
+    final receipt = readStatus[other.userId];
+    return (receipt['last_seen_at'] as int)?.readableLastSeen();
+  }
+
+  String get typersText {
+    final users = channel.getTypingUsers();
+    if (users.length == 1)
+      return '${users.first.nickname} is typing...';
+    else if (users.length == 2)
+      return '${users.first.nickname} and ${users.last.nickname} is typing...';
+    else if (users.length > 2)
+      return '${users.first.nickname} and ${users.length - 1} more are typing...';
+    return null;
+  }
+
+  List<BaseMessage> get messages => _messages;
 
   ChannelViewModel({this.channel}) {
     sdk.addChannelHandler('channel_listener', this);
@@ -42,6 +83,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void dispose() async {
     super.dispose();
+    channel.endTyping();
     isDisposed = true;
   }
 
@@ -69,7 +111,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
         ..reverse = true
         ..previousResultSize = 20;
       final messages = await channel.getMessagesByTimestamp(ts, params);
-      this.messages = reload ? messages : this.messages + messages;
+      _messages = reload ? messages : _messages + messages;
       hasNext = messages.length == 20;
       isLoading = false;
       if (!isDisposed) notifyListeners();
@@ -88,15 +130,16 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
         onCompleted: (msg, error) {
       // messages.repl(0, msg);
       final index =
-          messages.indexWhere((element) => element.requestId == msg.requestId);
-      if (index != -1) messages.removeAt(index);
+          _messages.indexWhere((element) => element.requestId == msg.requestId);
+      if (index != -1) _messages.removeAt(index);
       print('[c] return message ${msg.message}');
-      messages.insert(0, msg);
-      messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      _messages = [msg, ..._messages];
+      _messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       markAsReadDebounce();
       if (!isDisposed) notifyListeners();
     });
-    messages.insert(0, preMessage);
+
+    _messages = [preMessage, ..._messages];
     if (!isDisposed) notifyListeners();
 
     lstController.animateTo(
@@ -113,15 +156,15 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     final preMessage =
         channel.sendFileMessage(params, onCompleted: (msg, error) {
       final index =
-          messages.indexWhere((element) => element.requestId == msg.requestId);
-      if (index != -1) messages.removeAt(index);
-      messages.insert(0, msg);
-      messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          _messages.indexWhere((element) => element.requestId == msg.requestId);
+      if (index != -1) _messages.removeAt(index);
+      _messages = [msg, ..._messages];
+      _messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       markAsReadDebounce();
       if (!isDisposed) notifyListeners();
     });
 
-    messages.insert(0, preMessage);
+    _messages = [preMessage, ..._messages];
     if (!isDisposed) notifyListeners();
 
     lstController.animateTo(
@@ -158,6 +201,20 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
       notifyListeners();
     } catch (e) {
       selectedMessage = null;
+    }
+  }
+
+  void onTyping(bool hasText) {
+    if (!hasText) {
+      print('end typing call');
+      channel.endTyping();
+    } else {
+      channel.startTyping();
+      _typingTimer?.cancel();
+      _typingTimer = Timer(Duration(milliseconds: 3000), () {
+        print('end typing call');
+        channel.endTyping();
+      });
     }
   }
 
@@ -363,7 +420,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
       final offset = lstController.offset;
 
       loadMessages(
-        timestamp: messages.last.createdAt,
+        timestamp: _messages.last.createdAt,
       );
 
       lstController.animateTo(
@@ -387,7 +444,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl == this.channel.channelUrl) {
-      messages.insert(0, message);
+      _messages = [message, ..._messages];
       markAsReadDebounce();
       notifyListeners();
     }
@@ -396,30 +453,45 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void onMessageUpdated(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl != this.channel.channelUrl) return;
-    final index = messages.indexWhere((e) => e.messageId == message.messageId);
-    if (index != -1) messages[index] = message;
+    final index = _messages.indexWhere((e) => e.messageId == message.messageId);
+    if (index != -1) {
+      _messages = [message, ..._messages];
+      _messages.removeAt(index);
+      _messages[index] = message;
+    }
     notifyListeners();
   }
 
   @override
   void onMessageDeleted(BaseChannel channel, int messageId) {
-    messages.removeWhere((e) => e.messageId == messageId);
+    _messages = [..._messages];
+    _messages.removeWhere((e) => e.messageId == messageId);
     notifyListeners();
   }
 
   @override
   void onReadReceiptUpdated(GroupChannel channel) {
+    _messages = [..._messages];
     notifyListeners();
   }
 
   @override
   void onDeliveryReceiptUpdated(GroupChannel channel) {
+    _messages = [..._messages];
     notifyListeners();
   }
 
   @override
   void onChannelChanged(BaseChannel channel) {
     notifyListeners();
+  }
+
+  @override
+  void onTypingStatusUpdated(GroupChannel channel) {
+    print('typing call ---');
+    if (channel.channelUrl == this.channel.channelUrl) {
+      notifyListeners();
+    }
   }
 }
 

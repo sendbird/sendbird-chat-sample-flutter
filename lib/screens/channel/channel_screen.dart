@@ -4,6 +4,7 @@ import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
 import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
 import 'components/file_message_item.dart';
 import 'components/message_input.dart';
 import 'components/user_message_item.dart';
@@ -38,20 +39,19 @@ class _ChannelScreenState extends State<ChannelScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildNavigationBar(),
-      body: SafeArea(
-        child: p.ChangeNotifierProvider<ChannelViewModel>(
-          create: (context) => model,
+    return p.ChangeNotifierProvider<ChannelViewModel>(
+      create: (context) => model,
+      child: Scaffold(
+        appBar: _buildNavigationBar(),
+        body: SafeArea(
           child: Column(
             children: [
-              // p.Selector<ChannelViewModel, List<BaseMessage>>(
-              //   selector: (_, model) => model.messages,
-              //   builder: (c, msgs, child) {
-              //     return _buildContent();
-              //   },
-              // ),
-              _buildContent(),
+              p.Selector<ChannelViewModel, List<BaseMessage>>(
+                selector: (_, model) => model.messages,
+                builder: (c, msgs, child) {
+                  return _buildContent();
+                },
+              ),
               p.Selector<ChannelViewModel, bool>(
                 selector: (_, model) => model.isEditing,
                 builder: (c, editing, child) {
@@ -64,6 +64,9 @@ class _ChannelScreenState extends State<ChannelScreen> {
                     },
                     onEditing: (text) {
                       model.onUpdateMessage(text);
+                    },
+                    onChanged: (text) {
+                      model.onTyping(text != '');
                     },
                     placeholder: model.selectedMessage?.message,
                     isEditing: editing,
@@ -101,15 +104,11 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 height: 25,
               ),
               SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    //bind channel and current user data into title view
-                    ChannelTitleTextView(widget.channel, currentUser.userId)
-                  ],
-                ),
+              p.Selector<ChannelViewModel, UserEngagementState>(
+                selector: (_, model) => model.engagementState,
+                builder: (context, value, child) {
+                  return _buildTitle(value);
+                },
               ),
               GestureDetector(
                 child: ImageIcon(
@@ -131,9 +130,55 @@ class _ChannelScreenState extends State<ChannelScreen> {
     );
   }
 
+  Widget _buildTitle(UserEngagementState ue) {
+    List<Widget> headers = [
+      ChannelTitleTextView(widget.channel, model.currentUser.userId)
+    ];
+
+    switch (ue) {
+      case UserEngagementState.typing:
+        headers.addAll([SizedBox(height: 3), Text(model.typersText)]);
+        break;
+      case UserEngagementState.online:
+        headers.addAll([
+          SizedBox(height: 3),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                margin: EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Text('Online', style: TextStyles.sendbirdCaption2OnLight1)
+            ],
+          )
+        ]);
+        break;
+      case UserEngagementState.last_seen:
+        headers.addAll([SizedBox(height: 3), Text(model.lastSeenText)]);
+        break;
+      default:
+        break;
+    }
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: headers,
+      ),
+    );
+  }
+
   Widget _buildContent() {
-    return p.Consumer<ChannelViewModel>(builder: (context, value, child) {
-      return Expanded(
+    // return p.Consumer<ChannelViewModel>(builder: (context, value, child) {
+    return Expanded(
+      child: Container(
+        color: Colors.white,
         child: ListView.builder(
           controller: model.lstController,
           itemCount: model.itemCount,
@@ -199,8 +244,9 @@ class _ChannelScreenState extends State<ChannelScreen> {
             }
           },
         ),
-      );
-    });
+      ),
+    );
+    // });
     // );
   }
 }
