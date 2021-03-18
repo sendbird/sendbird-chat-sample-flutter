@@ -92,7 +92,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
       backgroundColor: Colors.white,
       flexibleSpace: SafeArea(
         child: Container(
-          padding: EdgeInsets.only(right: 16),
           child: Row(
             children: <Widget>[
               BackButton(color: Theme.of(context).primaryColor),
@@ -110,18 +109,24 @@ class _ChannelScreenState extends State<ChannelScreen> {
                   return _buildTitle(value);
                 },
               ),
-              GestureDetector(
-                child: ImageIcon(
-                  AssetImage('assets/iconInfo@3x.png'),
-                  color: SBColors.primary_300,
+              Container(
+                margin: EdgeInsets.only(right: 10),
+                width: 32,
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/channel_info',
+                      arguments: widget.channel,
+                    );
+                  },
+                  shape: CircleBorder(),
+                  child: Image.asset(
+                    "assets/iconInfo@3x.png",
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/channel_info',
-                    arguments: widget.channel,
-                  );
-                },
               ),
             ],
           ),
@@ -137,30 +142,45 @@ class _ChannelScreenState extends State<ChannelScreen> {
 
     switch (ue) {
       case UserEngagementState.typing:
-        headers.addAll([SizedBox(height: 3), Text(model.typersText)]);
-        break;
-      case UserEngagementState.online:
         headers.addAll([
           SizedBox(height: 3),
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                margin: EdgeInsets.only(right: 6),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Text('Online', style: TextStyles.sendbirdCaption2OnLight1)
-            ],
+          Text(
+            model.typersText,
+            style: TextStyles.sendbirdCaption2OnLight1,
           )
         ]);
         break;
-      case UserEngagementState.last_seen:
-        headers.addAll([SizedBox(height: 3), Text(model.lastSeenText)]);
-        break;
+      //   case UserEngagementState.online:
+      //     headers.addAll([
+      //       SizedBox(height: 3),
+      //       Row(
+      //         children: [
+      //           Container(
+      //             width: 6,
+      //             height: 6,
+      //             margin: EdgeInsets.only(right: 6),
+      //             decoration: BoxDecoration(
+      //               color: Colors.green,
+      //               shape: BoxShape.circle,
+      //             ),
+      //           ),
+      //           Text(
+      //             'Online',
+      //             style: TextStyles.sendbirdCaption2OnLight1,
+      //           )
+      //         ],
+      //       )
+      //     ]);
+      //     break;
+      //   case UserEngagementState.last_seen:
+      //     headers.addAll([
+      //       SizedBox(height: 3),
+      //       Text(
+      //         model.lastSeenText,
+      //         style: TextStyles.sendbirdCaption2OnLight1,
+      //       )
+      //     ]);
+      //     break;
       default:
         break;
     }

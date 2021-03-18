@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
 import 'package:sendbird_flutter/screens/channel_list/channel_list_view_model.dart';
+import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 // import 'package:universal_platform/universal_platform.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
@@ -51,20 +52,24 @@ class _ChannelListScreenState extends State<ChannelListScreen>
     return AppBar(
       leading: BackButton(color: Theme.of(context).primaryColor),
       toolbarHeight: 65,
-      elevation: 0,
+      elevation: 1,
       backgroundColor: Colors.white,
       automaticallyImplyLeading: Platform.isAndroid == true ? false : true,
       title: Text('Channels', style: TextStyles.sendbirdH2OnLight1),
       actions: [
         Container(
-          width: 60,
+          margin: EdgeInsets.only(right: 10),
+          width: 32,
           child: RawMaterialButton(
-            padding: EdgeInsets.fromLTRB(0, 18, 0, 18),
             onPressed: () {
               Navigator.pushNamed(context, '/create_channel');
             },
             shape: CircleBorder(),
-            child: Image.asset("assets/iconCreate@3x.png"),
+            child: Image.asset(
+              "assets/iconCreate@3x.png",
+              width: 24,
+              height: 24,
+            ),
           ),
         ),
       ],
@@ -83,10 +88,16 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       onRefresh: () async {
         await model.loadChannelList(reload: true);
       },
-      child: ListView.builder(
+      child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         controller: model.lstController,
         itemCount: model.itemCount,
+        separatorBuilder: (context, index) {
+          return Container(
+              margin: EdgeInsets.only(left: 88),
+              height: 1,
+              color: SBColors.onlight_04);
+        },
         itemBuilder: (context, index) {
           if (index == model.groupChannels.length && model.hasNext) {
             return Container(

@@ -58,7 +58,7 @@ class SwitchableSettingItem extends SettingItem {
     return Container(
         child: Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: [Switch(value: isOn, onChanged: onChanged)],
+      children: [Switch.adaptive(value: isOn, onChanged: onChanged)],
     ));
   }
 }
