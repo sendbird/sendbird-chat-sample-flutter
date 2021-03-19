@@ -40,17 +40,9 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   bool get displayOnline => channel.members.length == 2;
 
   UserEngagementState get engagementState {
-    if (channel.getTypingUsers().length != 0)
-      return UserEngagementState.typing;
-    else if (channel.memberCount == 2) {
-      final other =
-          channel.members.where((e) => e.userId != currentUser.userId).first;
-      if (other?.isOnline ?? false)
-        return UserEngagementState.online;
-      else
-        return UserEngagementState.last_seen;
-    }
-    return UserEngagementState.none;
+    return channel.getTypingUsers().length != 0
+        ? UserEngagementState.typing
+        : UserEngagementState.none;
   }
 
   String get lastSeenText {
