@@ -24,8 +24,7 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
   @override
   void initState() {
     super.initState();
-    model = ChannelInfoViewModel(widget.channel);
-    model.loadChannel();
+    model = ChannelInfoViewModel();
   }
 
   @override
@@ -49,9 +48,12 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
                     iconImageName: 'assets/iconNotifications@3x.png',
                     iconColor: SBColors.primary_300,
                     iconSize: Size(24, 24),
-                    isOn: model.isNotificationOn,
+                    isOn: model.isNotificationOn(channel: widget.channel),
                     onChanged: (value) {
-                      model.setNotification(value);
+                      model.setNotification(
+                        channel: widget.channel,
+                        value: value,
+                      );
                     },
                   ),
                   Divider(height: 1),
@@ -87,12 +89,15 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
       elevation: 0,
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
-      title: Text('Channel Information', style: TextStyles.sendbirdH2OnLight1),
+      title: Text(
+        'Channel Information',
+        style: TextStyles.sendbirdH2OnLight1,
+      ),
       actions: [
         FlatButton(
           textColor: Theme.of(context).primaryColor,
           onPressed: () {
-            model.showBottomSheet(context);
+            model.showChannelOptions(context);
           },
           child: Text(
             "Edit",
@@ -121,13 +126,13 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
         child: Column(
           children: [
             AvatarView(
-              channel: model.channel,
+              channel: widget.channel,
               width: 80,
               height: 80,
             ),
             SizedBox(height: 8),
             Text(
-              model.channel?.name ?? 'channel name',
+              widget.channel?.name ?? 'channel name',
               style: TextStyles.sendbirdH1OnLight1,
             )
           ],

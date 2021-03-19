@@ -57,7 +57,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 builder: (c, editing, child) {
                   return MessageInput(
                     onPressPlus: () {
-                      model.showBottomSheet(context);
+                      model.showPlusMenu(context);
                     },
                     onPressSend: (text) {
                       model.onSendUserMessage(text);
@@ -228,7 +228,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 curr: message,
                 prev: prev,
                 next: next,
-                state: model.getMessageState(message),
+                model: model,
                 isMyMessage: message.isMyMessage,
                 onPress: (pos) {
                   //
@@ -248,7 +248,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                 curr: message,
                 prev: prev,
                 next: next,
-                state: model.getMessageState(message),
+                model: model,
                 isMyMessage: message.isMyMessage,
                 onPress: (pos) {
                   //

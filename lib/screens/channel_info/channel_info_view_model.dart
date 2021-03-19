@@ -7,32 +7,22 @@ import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/utils.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart' as s;
 
-class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
+class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   final sdk = s.SendbirdSdk();
   final textController = TextEditingController();
 
   BuildContext _context;
-  s.GroupChannel channel;
+  // s.GroupChannel channel;
 
-  ChannelInfoViewModel(this.channel) {
+  ChannelInfoViewModel() {
     sdk.addChannelHandler('channel_info_view', this);
   }
 
-  bool get isNotificationOn =>
-      channel.myPushTriggerOption != s.GroupChannelPushTriggerOption.off;
-
-  void loadChannel() async {
-    try {
-      final updated = await s.GroupChannel.refresh(channel.channelUrl);
-      channel = updated;
-    } catch (e) {
-      //pop?
-    }
-
-    notifyListeners();
+  bool isNotificationOn({s.GroupChannel channel}) {
+    return channel.myPushTriggerOption != s.GroupChannelPushTriggerOption.off;
   }
 
-  Future<void> setNotification(bool value) async {
+  Future<void> setNotification({s.GroupChannel channel, bool value}) async {
     try {
       final option = value
           ? s.GroupChannelPushTriggerOption.all
@@ -44,7 +34,9 @@ class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
     }
   }
 
-  Future<bool> leave() async {
+  Future<bool> leave({s.GroupChannel channel}) async {
+    if (channel == null) return false;
+
     try {
       await channel.leave();
       return true;
@@ -53,7 +45,8 @@ class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
     }
   }
 
-  Future<void> updateChannel({String name, File file}) async {
+  Future<void> updateChannel(
+      {s.GroupChannel channel, String name, File file}) async {
     if (name == '' && file == null) {
       return;
     }
@@ -69,7 +62,7 @@ class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
           mimeType: 'image/jpeg',
         );
       }
-      channel = await channel.updateChannel(params);
+      await channel.updateChannel(params);
       Navigator.pop(_context);
       notifyListeners();
     } catch (e) {
@@ -77,7 +70,7 @@ class ChannelInfoViewModel extends ChangeNotifier with s.ChannelEventHandler {
     }
   }
 
-  void showBottomSheet(BuildContext context) {
+  void showChannelOptions(BuildContext context) {
     _context = context;
 
     showModalBottomSheet(

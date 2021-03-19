@@ -5,6 +5,7 @@ import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 import '../../../components/avatar_view.dart';
+import '../channel_view_model.dart';
 
 enum MessagePosition {
   continuous,
@@ -22,7 +23,7 @@ class MessageItem extends StatelessWidget {
   final BaseMessage prev;
   final BaseMessage next;
   final bool isMyMessage;
-  final MessageState state;
+  final ChannelViewModel model;
 
   final Function(Offset) onLongPress;
   final Function(Offset) onPress;
@@ -37,13 +38,14 @@ class MessageItem extends StatelessWidget {
     this.prev,
     this.next,
     this.isMyMessage,
-    this.state,
+    this.model,
     this.onPress,
     this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isCenter = isMyMessage == null;
     return Container(
       padding: EdgeInsets.only(
         left: 14,
@@ -51,9 +53,26 @@ class MessageItem extends StatelessWidget {
         top: _isContinuous(prev, curr) ? 2 : 16,
       ),
       child: Align(
-        alignment: isMyMessage ? Alignment.topRight : Alignment.topLeft,
-        child: isMyMessage ? _bulidRightWidget() : _buildLeftWidget(),
+        alignment: isCenter
+            ? Alignment.center
+            : isMyMessage
+                ? Alignment.topRight
+                : Alignment.topLeft,
+        child: isCenter
+            ? _buildCenterWidget()
+            : isMyMessage
+                ? _bulidRightWidget()
+                : _buildLeftWidget(context),
       ),
+    );
+  }
+
+  Widget _buildCenterWidget() {
+    return Column(
+      children: [
+        if (!_isSameDate(prev, curr)) _dateWidget(curr),
+        content,
+      ],
     );
   }
 
@@ -81,7 +100,7 @@ class MessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftWidget() {
+  Widget _buildLeftWidget(BuildContext ctx) {
     final wrap = Container(
       child: GestureDetector(
           onLongPressStart: (details) => onLongPress(details.globalPosition),
@@ -90,7 +109,7 @@ class MessageItem extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: 240),
     );
 
-    List<Widget> children = _avatarDefaultWidget(curr) +
+    List<Widget> children = _avatarDefaultWidget(curr, ctx) +
         [
           Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -116,7 +135,7 @@ class MessageItem extends StatelessWidget {
       return false;
     }
 
-    if (p.sender.userId != c.sender.userId) {
+    if (p.sender?.userId != c.sender?.userId) {
       return false;
     }
 
@@ -183,6 +202,7 @@ class MessageItem extends StatelessWidget {
   }
 
   Widget _stateAndTimeWidget(BaseMessage message) {
+    final state = model.getMessageState(message);
     final image = state == MessageState.delivered
         ? Image(
             image: AssetImage('assets/iconDoneAll@3x.png'),
@@ -218,16 +238,24 @@ class MessageItem extends StatelessWidget {
   List<Widget> _nameDefaultWidget(BaseMessage message) {
     return !_isContinuous(prev, curr)
         ? [
-            Text(message.sender.nickname ?? ''),
+            Text(
+              message.sender.nickname ?? '',
+              style: TextStyles.sendbirdCaption1OnLight2,
+            ),
             SizedBox(height: 4),
           ]
         : [];
   }
 
-  List<Widget> _avatarDefaultWidget(BaseMessage message) {
+  List<Widget> _avatarDefaultWidget(BaseMessage message, BuildContext ctx) {
     return !_isContinuous(curr, next)
         ? [
-            AvatarView(user: message.sender, width: 26, height: 26),
+            AvatarView(
+              user: message.sender,
+              width: 26,
+              height: 26,
+              onPressed: () => model.showProfile(ctx, message.sender),
+            ),
             SizedBox(width: 12),
           ]
         : [SizedBox(width: 38, height: 26)];

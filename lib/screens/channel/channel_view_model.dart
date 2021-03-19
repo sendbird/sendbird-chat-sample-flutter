@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sendbird_flutter/screens/channel/components/attachment_modal.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
+import 'package:sendbird_flutter/screens/channel/components/user_profile.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/debounce.dart';
@@ -35,7 +37,6 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   Timer _typingTimer;
 
   int get itemCount => hasNext ? _messages.length + 1 : _messages.length;
-
   bool get displayOnline => channel.members.length == 2;
 
   UserEngagementState get engagementState {
@@ -44,7 +45,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     else if (channel.memberCount == 2) {
       final other =
           channel.members.where((e) => e.userId != currentUser.userId).first;
-      if (other.isOnline)
+      if (other?.isOnline ?? false)
         return UserEngagementState.online;
       else
         return UserEngagementState.last_seen;
@@ -132,7 +133,6 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
       final index =
           _messages.indexWhere((element) => element.requestId == msg.requestId);
       if (index != -1) _messages.removeAt(index);
-      print('[c] return message ${msg.message}');
       _messages = [msg, ..._messages];
       _messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       markAsReadDebounce();
@@ -206,15 +206,26 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   void onTyping(bool hasText) {
     if (!hasText) {
-      print('end typing call');
       channel.endTyping();
     } else {
       channel.startTyping();
       _typingTimer?.cancel();
       _typingTimer = Timer(Duration(milliseconds: 3000), () {
-        print('end typing call');
         channel.endTyping();
       });
+    }
+  }
+
+  Future<GroupChannel> createChannel(String userId) {
+    try {
+      final params = GroupChannelParams()
+        ..operatorUserIds = [currentUser.userId]
+        ..userIds = [userId, currentUser.userId]
+        ..isDistinct = true;
+      final newChannel = GroupChannel.createChannel(params);
+      return newChannel;
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -239,56 +250,23 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   // ui helpers
 
-  void showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-              child: Container(
-            child: Wrap(
-              children: <Widget>[
-                ListTile(
-                    title: new Text(
-                      'Camera',
-                      style: TextStyles.sendbirdBody1OnLight1,
-                    ),
-                    trailing: ImageIcon(
-                      AssetImage('assets/iconCamera@3x.png'),
-                      color: SBColors.primary_300,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      showPicker(ImageSource.camera);
-                    }),
-                ListTile(
-                    title: new Text(
-                      'Photo & Video Library',
-                      style: TextStyles.sendbirdBody1OnLight1,
-                    ),
-                    trailing: ImageIcon(
-                      AssetImage('assets/iconPhoto@3x.png'),
-                      color: SBColors.primary_300,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      showPicker(ImageSource.gallery);
-                    }),
-                ListTile(
-                  title: new Text('Cancel'),
-                  onTap: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ));
-        });
+  void showProfile(BuildContext context, Sender sender) async {
+    final modal = ProfileModal(ctx: context, user: sender);
+    final goToChannel = await modal.show();
+    if (goToChannel) {
+      final newChannel = await createChannel(sender.userId);
+      Navigator.popAndPushNamed(
+        context,
+        '/channel',
+        arguments: newChannel,
+      );
+    }
   }
 
-  void showPicker(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: source);
-    if (pickedFile != null) {
-      onSendFileMessage(File(pickedFile.path));
-    }
+  void showPlusMenu(BuildContext context) async {
+    final modal = AttachmentModal(context: context);
+    final file = await modal.getFile();
+    onSendFileMessage(file);
   }
 
   void showMessageMenu({
@@ -341,7 +319,6 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         items: items);
 
-    print(selected);
     switch (selected) {
       case PopupMenuType.edit:
         setEditing(true);
@@ -443,11 +420,16 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
-    if (channel.channelUrl == this.channel.channelUrl) {
+    if (channel.channelUrl != this.channel.channelUrl) return;
+    final index = _messages.indexWhere((e) => e.messageId == message.messageId);
+    if (index != -1) {
       _messages = [message, ..._messages];
-      markAsReadDebounce();
-      notifyListeners();
+      _messages.removeAt(index);
+      _messages[index] = message;
     }
+
+    markAsReadDebounce();
+    notifyListeners();
   }
 
   @override
@@ -488,7 +470,6 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   @override
   void onTypingStatusUpdated(GroupChannel channel) {
-    print('typing call ---');
     if (channel.channelUrl == this.channel.channelUrl) {
       notifyListeners();
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 import 'package:sendbird_flutter/styles/color.dart';
+import '../channel_view_model.dart';
 import 'message_item.dart';
 
 class UserMessageItem extends MessageItem {
@@ -9,7 +10,7 @@ class UserMessageItem extends MessageItem {
     UserMessage curr,
     BaseMessage prev,
     BaseMessage next,
-    MessageState state,
+    ChannelViewModel model,
     bool isMyMessage,
     Function onPress,
     Function onLongPress,
@@ -17,7 +18,7 @@ class UserMessageItem extends MessageItem {
           curr: curr,
           prev: prev,
           next: next,
-          state: state,
+          model: model,
           isMyMessage: isMyMessage,
           onPress: onPress,
           onLongPress: onLongPress,
@@ -33,14 +34,9 @@ class UserMessageItem extends MessageItem {
         child: Text(
           curr.message,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 14,
             color: isMyMessage ? SBColors.ondark_01 : SBColors.onlight_01,
           ),
         ),
       );
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
-  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 
-class ChannelListViewModel with ChannelEventHandler, ChangeNotifier {
+class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   SendbirdSdk sdk = SendbirdSdk();
 
   GroupChannelListQuery query = GroupChannelListQuery()..limit = 10;
@@ -25,48 +25,6 @@ class ChannelListViewModel with ChannelEventHandler, ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
-    print('model dispose');
-  }
-
-  @override
-  void onMessageReceived(BaseChannel channel, BaseMessage message) {
-    final index = groupChannels
-        .indexWhere((element) => element.channelUrl == channel.channelUrl);
-
-    if (index != -1) {
-      groupChannels[index] = channel;
-    } else {
-      groupChannels.insert(0, channel);
-    }
-
-    notifyListeners();
-  }
-
-  @override
-  void onUserLeaved(GroupChannel channel, User user) {
-    if (user.userId == currentUser.userId) {
-      final index = groupChannels
-          .indexWhere((element) => element.channelUrl == channel.channelUrl);
-      if (index != -1) {
-        groupChannels.removeAt(index);
-      }
-
-      notifyListeners();
-    }
-  }
-
-  @override
-  void onChannelChanged(BaseChannel channel) {
-    final index = groupChannels
-        .indexWhere((element) => element.channelUrl == channel.channelUrl);
-
-    if (index != -1) {
-      groupChannels[index] = channel;
-    } else {
-      groupChannels.insert(0, channel);
-    }
-
-    notifyListeners();
   }
 
   Future<void> loadChannelList({bool reload = false}) async {
@@ -92,6 +50,59 @@ class ChannelListViewModel with ChannelEventHandler, ChangeNotifier {
         !lstController.position.outOfRange &&
         !isLoading) {
       loadChannelList();
+    }
+  }
+
+  @override
+  void onChannelChanged(BaseChannel channel) {
+    groupChannels = [...groupChannels];
+
+    final index = groupChannels
+        .indexWhere((element) => element.channelUrl == channel.channelUrl);
+
+    if (index != -1) {
+      groupChannels[index] = channel;
+    } else {
+      groupChannels.insert(0, channel);
+    }
+
+    notifyListeners();
+  }
+
+  // @override
+  // void onReadReceiptUpdated(GroupChannel channel) {
+  //   groupChannels = [...groupChannels];
+  //   notifyListeners();
+  // }
+
+  @override
+  void onMessageReceived(BaseChannel channel, BaseMessage message) {
+    groupChannels = [...groupChannels];
+
+    final index = groupChannels
+        .indexWhere((element) => element.channelUrl == channel.channelUrl);
+
+    if (index != -1) {
+      groupChannels[index] = channel;
+    } else {
+      groupChannels.insert(0, channel);
+    }
+
+    notifyListeners();
+  }
+
+  @override
+  void onUserLeaved(GroupChannel channel, User user) {
+    groupChannels = [...groupChannels];
+
+    if (user.userId == currentUser.userId) {
+      final index = groupChannels
+          .indexWhere((element) => element.channelUrl == channel.channelUrl);
+      if (index != -1) {
+        groupChannels.removeAt(index);
+      }
+
+      notifyListeners();
     }
   }
 }

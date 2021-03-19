@@ -101,16 +101,17 @@ class _ChannelListScreenState extends State<ChannelListScreen>
         itemBuilder: (context, index) {
           if (index == model.groupChannels.length && model.hasNext) {
             return Container(
-                color: Colors.white,
-                child: Center(
-                  child: Container(
-                    color: Colors.white,
-                    margin: EdgeInsets.only(top: 10, bottom: 10),
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(),
-                  ),
-                ));
+              color: Colors.white,
+              child: Center(
+                child: Container(
+                  color: Colors.white,
+                  margin: EdgeInsets.only(top: 10, bottom: 10),
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
           }
 
           final channel = model.groupChannels[index];

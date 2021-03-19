@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../channel_view_model.dart';
 import 'message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 
@@ -10,7 +11,7 @@ class FileMessageItem extends MessageItem {
     FileMessage curr,
     BaseMessage prev,
     BaseMessage next,
-    MessageState state,
+    ChannelViewModel model,
     bool isMyMessage,
     Function onPress,
     Function onLongPress,
@@ -18,7 +19,7 @@ class FileMessageItem extends MessageItem {
           curr: curr,
           prev: prev,
           next: next,
-          state: state,
+          model: model,
           isMyMessage: isMyMessage,
           onPress: onPress,
           onLongPress: onLongPress,
@@ -55,9 +56,4 @@ class FileMessageItem extends MessageItem {
                 errorWidget: (context, url, error) => Icon(Icons.error),
               ),
       );
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
-  }
 }

@@ -7,6 +7,7 @@ class AvatarView extends StatelessWidget {
   final String currentUserId;
   final double width;
   final double height;
+  final Function onPressed;
 
   AvatarView({
     this.channel,
@@ -14,6 +15,7 @@ class AvatarView extends StatelessWidget {
     this.currentUserId,
     this.width = 40,
     this.height = 40,
+    this.onPressed,
   });
 
   @override
@@ -49,7 +51,7 @@ class AvatarView extends StatelessWidget {
       child: RawMaterialButton(
         shape: CircleBorder(),
         clipBehavior: Clip.hardEdge,
-        onPressed: () {},
+        onPressed: onPressed,
         child: GridView.count(
           crossAxisCount: crossAxisCount,
           children: images,

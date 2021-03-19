@@ -41,7 +41,7 @@ class ChannelListItem extends StatelessWidget {
     if (lastMessage is FileMessage) {
       message = lastMessage.name;
     } else {
-      message = lastMessage.message;
+      message = lastMessage?.message ?? '';
     }
 
     return Expanded(
@@ -71,6 +71,9 @@ class ChannelListItem extends StatelessWidget {
   Widget _buildTailing(BuildContext context) {
     int lastDate = channel?.lastMessage?.createdAt ?? 0;
     String lastMessageDateString = lastDate.readableTimestamp();
+    final count = channel.unreadMessageCount <= 99
+        ? '${channel.unreadMessageCount}'
+        : '99+';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -86,9 +89,9 @@ class ChannelListItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               color: SBColors.primary_300,
             ),
-            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             child: Text(
-              "${channel.unreadMessageCount}",
+              "$count",
               style: TextStyles.sendbirdCaption1OnDark1,
             ),
           ),

@@ -13,7 +13,7 @@ class LoginViewModel {
     try {
       // initialize with app id
       final sendbird = SendbirdSdk(appId: appId);
-      sendbird.setLogLevel(LogLevel.nothing);
+      sendbird.setLogLevel(LogLevel.verbose);
 
       // connect to sendbird server
       final user = await sendbird.connect(userId);
