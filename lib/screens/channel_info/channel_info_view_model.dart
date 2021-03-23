@@ -12,9 +12,9 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   final textController = TextEditingController();
 
   BuildContext _context;
-  // s.GroupChannel channel;
+  s.GroupChannel channel;
 
-  ChannelInfoViewModel() {
+  ChannelInfoViewModel(s.GroupChannel channel) {
     sdk.addChannelHandler('channel_info_view', this);
   }
 
@@ -22,7 +22,9 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
     return channel.myPushTriggerOption != s.GroupChannelPushTriggerOption.off;
   }
 
-  Future<void> setNotification({s.GroupChannel channel, bool value}) async {
+  Future<void> setNotification(bool value) async {
+    if (channel == null) return;
+
     try {
       final option = value
           ? s.GroupChannelPushTriggerOption.all
@@ -34,7 +36,7 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
     }
   }
 
-  Future<bool> leave({s.GroupChannel channel}) async {
+  Future<bool> leave() async {
     if (channel == null) return false;
 
     try {

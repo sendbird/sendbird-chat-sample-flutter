@@ -24,7 +24,7 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
   @override
   void initState() {
     super.initState();
-    model = ChannelInfoViewModel();
+    model = ChannelInfoViewModel(widget.channel);
   }
 
   @override
@@ -50,10 +50,7 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
                     iconSize: Size(24, 24),
                     isOn: model.isNotificationOn(channel: widget.channel),
                     onChanged: (value) {
-                      model.setNotification(
-                        channel: widget.channel,
-                        value: value,
-                      );
+                      model.setNotification(value);
                     },
                   ),
                   Divider(height: 1),

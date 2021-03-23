@@ -12,6 +12,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final userIdController = TextEditingController();
   final nicknameController = TextEditingController();
+
+  bool isLoading = false;
   bool enableSignInButton = false;
 
   bool _shouldEnableSignInButton() {
@@ -97,22 +99,38 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: !enabled
           ? null
           : () async {
-              try {
-                await model.login(
-                  userIdController.text,
-                  nicknameController.text,
-                );
+              if (isLoading) return;
 
+              try {
+                setState(() {
+                  isLoading = true;
+                });
+
+                await model.login(
+                    userIdController.text, nicknameController.text);
+
+                setState(() {
+                  isLoading = false;
+                });
                 Navigator.pushNamed(context, '/channel_list');
               } catch (e) {
+                setState(() {
+                  isLoading = false;
+                });
+
                 print('login_view.dart: _signInButton: ERROR: $e');
                 _showLoginFailAlert(context);
               }
             },
-      child: Text(
-        "Sign In",
-        style: TextStyles.sendbirdButtonOnDark1,
-      ),
+      child: !isLoading
+          ? Text(
+              "Sign In",
+              style: TextStyles.sendbirdButtonOnDark1,
+            )
+          : CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
     );
   }
 
