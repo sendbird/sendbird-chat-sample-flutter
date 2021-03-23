@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sendbirdsdk/sendbirdsdk.dart';
 import '../../styles/color.dart';
 import '../../styles/text_style.dart';
@@ -90,47 +91,40 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _signInButton(BuildContext context, bool enabled) {
-    return FlatButton(
-      height: 48,
-      color: enabled ? Theme.of(context).buttonColor : Colors.grey,
-      textColor: Colors.white,
-      disabledColor: Colors.grey,
-      disabledTextColor: Colors.black,
-      onPressed: !enabled
-          ? null
-          : () async {
-              if (isLoading) return;
-
-              try {
-                setState(() {
-                  isLoading = true;
-                });
-
-                await model.login(
-                    userIdController.text, nicknameController.text);
-
-                setState(() {
-                  isLoading = false;
-                });
-                Navigator.pushNamed(context, '/channel_list');
-              } catch (e) {
-                setState(() {
-                  isLoading = false;
-                });
-
-                print('login_view.dart: _signInButton: ERROR: $e');
-                _showLoginFailAlert(context);
-              }
-            },
-      child: !isLoading
-          ? Text(
-              "Sign In",
-              style: TextStyles.sendbirdButtonOnDark1,
-            )
-          : CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
+    return ChangeNotifierProvider<LoginViewModel>(
+      create: (context) => model,
+      child: Consumer<LoginViewModel>(
+        builder: (context, value, child) {
+          return FlatButton(
+            height: 48,
+            color: enabled ? Theme.of(context).buttonColor : Colors.grey,
+            textColor: Colors.white,
+            disabledColor: Colors.grey,
+            disabledTextColor: Colors.black,
+            onPressed: !enabled && model.isLoading
+                ? null
+                : () async {
+                    try {
+                      await model.login(
+                          userIdController.text, nicknameController.text);
+                      Navigator.pushNamed(context, '/channel_list');
+                    } catch (e) {
+                      print('login_view.dart: _signInButton: ERROR: $e');
+                      model.showLoginFailAlert(context);
+                    }
+                  },
+            child: !model.isLoading
+                ? Text(
+                    "Sign In",
+                    style: TextStyles.sendbirdButtonOnDark1,
+                  )
+                : CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+          );
+        },
+      ),
     );
   }
 
@@ -143,53 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyles.sendbirdCaption1OnLight2,
         ),
       ),
-    );
-  }
-
-  void _showLoginFailAlert(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: RichText(
-            textAlign: TextAlign.left,
-            softWrap: true,
-            text: TextSpan(
-              text: 'Login Failed:  ',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Check connectivity and App Id',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(15),
-          ),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text(
-                "OK",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              textColor: Theme.of(context).buttonColor,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

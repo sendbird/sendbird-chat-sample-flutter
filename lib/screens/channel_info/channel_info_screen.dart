@@ -91,25 +91,13 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
         style: TextStyles.sendbirdH2OnLight1,
       ),
       actions: [
-        FlatButton(
-          textColor: Theme.of(context).primaryColor,
-          onPressed: () {
-            model.showChannelOptions(context);
-          },
+        TextButton(
           child: Text(
             "Edit",
             style: TextStyles.sendbirdBody1Primary300,
           ),
+          onPressed: () => model.showChannelOptions(context),
         )
-        // InkWell(
-        //   child: Text(
-        //     'Edit',
-        //     style: TextStyles.sendbirdBody1Primary300,
-        //   ),
-        //   onTap: () {
-        //     //show bottom up
-        //   },
-        // )
       ],
       centerTitle: true,
     );
@@ -130,6 +118,8 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
             SizedBox(height: 8),
             Text(
               widget.channel?.name ?? 'channel name',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyles.sendbirdH1OnLight1,
             )
           ],

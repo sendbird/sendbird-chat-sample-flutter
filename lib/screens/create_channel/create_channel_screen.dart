@@ -109,6 +109,8 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           selection.user.nickname.isEmpty
               ? selection.user.userId
               : selection.user.nickname,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyles.sendbirdSubtitle1OnLight1),
       controlAffinity: ListTileControlAffinity.platform,
       value: SendbirdSdk().getCurrentUser().userId == selection.user.userId ||
