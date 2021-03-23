@@ -18,7 +18,7 @@ class ChannelListItem extends StatelessWidget {
     return Container(
       height: 76,
       color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
