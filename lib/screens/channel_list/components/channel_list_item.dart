@@ -45,25 +45,22 @@ class ChannelListItem extends StatelessWidget {
     }
 
     return Expanded(
-      child: Row(
-        children: [
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ChannelTitleTextView(this.channel, currentUserId),
-                SizedBox(height: 2),
-                Text(
-                  message,
-                  maxLines: 2,
-                  style: TextStyles.sendbirdBody2OnLight3,
-                ),
-              ],
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ChannelTitleTextView(this.channel, currentUserId),
+            SizedBox(height: 2),
+            Text(
+              message,
+              maxLines: 2,
+              style: TextStyles.sendbirdBody2OnLight3,
+              overflow: TextOverflow.ellipsis,
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

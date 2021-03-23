@@ -26,7 +26,9 @@ class ChannelTitleTextView extends StatelessWidget {
     //otherwise just text
     return Text(
       titleText,
+      maxLines: 1,
       style: TextStyles.sendbirdSubtitle1OnLight1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

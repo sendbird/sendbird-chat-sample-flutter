@@ -25,10 +25,8 @@ class AvatarView extends StatelessWidget {
 
     var images = <Widget>[];
     if (channel != null) {
-      if (channel.memberCount > 3) {
+      if (channel.memberCount >= 3) {
         crossAxisCount = 2;
-      } else {
-        (channel.memberCount / 2).round();
       }
 
       images = [
