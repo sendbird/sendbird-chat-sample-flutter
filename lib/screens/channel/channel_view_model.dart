@@ -229,7 +229,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     if (message.sendingStatus != MessageSendingStatus.succeeded)
       return MessageState.none;
 
-    final readAll = channel.getUnreadMembers(message, false).length == 0;
+    final readAll = channel.getUnreadMembers(message).length == 0;
     final deliverAll = channel.getUndeliveredMembers(message).length == 0;
 
     if (readAll)
