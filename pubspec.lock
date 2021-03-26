@@ -398,9 +398,9 @@ packages:
     dependency: "direct main"
     description:
       name: sendbirdsdk
-      url: "https://dl.cloudsmith.io/public/sendbird/sendbird-sdk-flutter/dart/"
+      url: "https://repo.sendbird.com/public/dart"
     source: hosted
-    version: "3.0.4"
+    version: "3.0.5"
   shared_preferences:
     dependency: transitive
     description:
