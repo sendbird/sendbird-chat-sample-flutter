@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/screens/channel_info/channel_info_view_model.dart';

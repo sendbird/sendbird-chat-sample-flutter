@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
-import '../../styles/color.dart';
-import '../../styles/text_style.dart';
 import 'package:sendbird_flutter/screens/login/login_view_model.dart';
+import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/styles/text_style.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

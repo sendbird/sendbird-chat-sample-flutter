@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/utils.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart' as s;
+import 'package:sendbird_sdk/sendbird_sdk.dart' as s;
 
 class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   final sdk = s.SendbirdSdk();

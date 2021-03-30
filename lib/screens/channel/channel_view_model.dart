@@ -3,15 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:sendbird_flutter/screens/channel/components/attachment_modal.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/screens/channel/components/user_profile.dart';
 import 'package:sendbird_flutter/styles/color.dart';
-import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/debounce.dart';
 import 'package:sendbird_flutter/utils/extensions.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 enum PopupMenuType { edit, delete, copy }
 enum UserEngagementState { typing, online, last_seen, none }

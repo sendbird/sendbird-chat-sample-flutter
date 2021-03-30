@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart' as s;
+import 'package:sendbird_sdk/sendbird_sdk.dart' as s;
 
 class LoginViewModel with ChangeNotifier {
   String appId;

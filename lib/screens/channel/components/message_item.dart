@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sendbird_flutter/components/avatar_view.dart';
+import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
-
-import '../../../components/avatar_view.dart';
-import '../channel_view_model.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 enum MessagePosition {
   continuous,

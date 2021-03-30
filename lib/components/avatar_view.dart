@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class AvatarView extends StatelessWidget {
   final GroupChannel channel;

@@ -394,13 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.25.0"
-  sendbirdsdk:
+  sendbird_sdk:
     dependency: "direct main"
     description:
-      name: sendbirdsdk
+      name: sendbird_sdk
       url: "https://repo.sendbird.com/public/dart"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   shared_preferences:
     dependency: transitive
     description:

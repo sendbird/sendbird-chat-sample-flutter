@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
-import 'package:sendbirdsdk/sendbirdsdk.dart';
+import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
+import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
-import '../channel_view_model.dart';
-import 'message_item.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class UserMessageItem extends MessageItem {
   UserMessageItem({

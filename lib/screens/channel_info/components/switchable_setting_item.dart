@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sendbird_flutter/screens/channel_info/components/setting_item.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-
-import 'setting_item.dart';
 
 class SwitchableSettingItem extends SettingItem {
   final bool isOn;

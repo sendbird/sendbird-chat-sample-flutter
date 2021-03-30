@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
+
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 const groupChannelDefaultName = 'Group Channel';
 

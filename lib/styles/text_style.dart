@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'color.dart';
+import 'package:sendbird_flutter/styles/color.dart';
 
 class TextStyles {
   static const fontFamily = "Roboto";

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
+import 'package:sendbird_flutter/screens/channel/channel_screen.dart';
+import 'package:sendbird_flutter/screens/create_channel/create_channel_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbirdsdk/sendbirdsdk.dart';
-
-import 'create_channel_view_model.dart';
-import '../channel/channel_screen.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class CreateChannelScreen extends StatefulWidget {
   @override

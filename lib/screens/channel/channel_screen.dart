@@ -3,15 +3,13 @@ import 'package:provider/provider.dart' as p;
 
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
-import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/screens/channel/components/admin_message_item.dart';
+import 'package:sendbird_flutter/screens/channel/components/file_message_item.dart';
+import 'package:sendbird_flutter/screens/channel/components/message_input.dart';
+import 'package:sendbird_flutter/screens/channel/components/user_message_item.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'components/file_message_item.dart';
-import 'components/message_input.dart';
-import 'components/user_message_item.dart';
-import 'components/admin_message_item.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
-
-import 'package:sendbirdsdk/sendbirdsdk.dart';
 
 class ChannelScreen extends StatefulWidget {
   final GroupChannel channel;
