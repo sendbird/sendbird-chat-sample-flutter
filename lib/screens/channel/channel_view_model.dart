@@ -413,10 +413,12 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
+    _messages = [message, ..._messages];
     if (index != -1) {
-      _messages = [message, ..._messages];
       _messages.removeAt(index);
       _messages[index] = message;
+    } else {
+      _messages.insert(0, message);
     }
 
     markAsReadDebounce();
@@ -427,11 +429,14 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   void onMessageUpdated(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
+    _messages = [message, ..._messages];
     if (index != -1) {
-      _messages = [message, ..._messages];
       _messages.removeAt(index);
       _messages[index] = message;
+    } else {
+      _messages.insert(0, message);
     }
+
     notifyListeners();
   }
 
