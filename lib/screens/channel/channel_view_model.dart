@@ -75,6 +75,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void dispose() async {
     super.dispose();
+    sdk.removeChannelHandler('channel_listener');
     channel.endTyping();
     isDisposed = true;
   }
@@ -406,14 +407,15 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   // handlers
 
   void markAsReadDebounce() {
-    readDebouncer.run(() => this.channel.markAsRead());
+    this.channel.markAsRead();
+    // readDebouncer.run(() => this.channel.markAsRead());
   }
 
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
-    _messages = [message, ..._messages];
+    _messages = [..._messages];
     if (index != -1) {
       _messages.removeAt(index);
       _messages[index] = message;
@@ -429,7 +431,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   void onMessageUpdated(BaseChannel channel, BaseMessage message) {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
-    _messages = [message, ..._messages];
+    _messages = [..._messages];
     if (index != -1) {
       _messages.removeAt(index);
       _messages[index] = message;

@@ -69,11 +69,11 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
     notifyListeners();
   }
 
-  // @override
-  // void onReadReceiptUpdated(GroupChannel channel) {
-  //   groupChannels = [...groupChannels];
-  //   notifyListeners();
-  // }
+  @override
+  void onReadReceiptUpdated(GroupChannel channel) {
+    groupChannels = [...groupChannels];
+    notifyListeners();
+  }
 
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
