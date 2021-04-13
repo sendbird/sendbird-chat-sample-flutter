@@ -15,7 +15,12 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   s.GroupChannel channel;
 
   ChannelInfoViewModel(s.GroupChannel channel) {
-    sdk.addChannelHandler('channel_info_view', this);
+    sdk.addChannelEventHandler('channel_info_view', this);
+  }
+
+  void dispose() {
+    super.dispose();
+    sdk.removeChannelEventHandler('channel_info_view');
   }
 
   bool isNotificationOn({s.GroupChannel channel}) {

@@ -202,13 +202,13 @@ class MessageItem extends StatelessWidget {
 
   Widget _stateAndTimeWidget(BaseMessage message) {
     final state = model.getMessageState(message);
-    final image = state == MessageState.delivered
-        ? Image(
-            image: AssetImage('assets/iconDoneAll@3x.png'),
-            color: Colors.grey,
-          )
-        : state == MessageState.read
-            ? Image(image: AssetImage('assets/iconDoneAll@3x.png'))
+    final image = state == MessageState.read
+        ? Image(image: AssetImage('assets/iconDoneAll@3x.png'))
+        : state == MessageState.delivered
+            ? Image(
+                image: AssetImage('assets/iconDoneAll@3x.png'),
+                color: Colors.grey,
+              )
             : Image(image: AssetImage('assets/iconDone@3x.png'));
 
     return Container(

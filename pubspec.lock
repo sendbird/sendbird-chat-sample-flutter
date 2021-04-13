@@ -181,6 +181,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  flutter_launcher_icons:
+    dependency: "direct main"
+    description:
+      name: flutter_launcher_icons
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -393,7 +400,7 @@ packages:
       name: sendbird_sdk
       url: "https://repo.sendbird.com/public/dart"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.8"
   shared_preferences:
     dependency: transitive
     description:

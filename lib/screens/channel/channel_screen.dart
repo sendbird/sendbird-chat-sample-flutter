@@ -44,9 +44,15 @@ class _ChannelScreenState extends State<ChannelScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              p.Selector<ChannelViewModel, List<BaseMessage>>(
-                selector: (_, model) => model.messages,
-                builder: (c, msgs, child) {
+              //TODO: message
+              // p.Selector<ChannelViewModel, List<BaseMessage>>(
+              //   selector: (_, model) => model.messages,
+              //   builder: (c, msgs, child) {
+              //     return _buildContent();
+              //   },
+              // ),
+              p.Consumer<ChannelViewModel>(
+                builder: (context, value, child) {
                   return _buildContent();
                 },
               ),

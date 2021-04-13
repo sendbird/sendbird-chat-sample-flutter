@@ -67,7 +67,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   List<BaseMessage> get messages => _messages;
 
   ChannelViewModel({this.channel}) {
-    sdk.addChannelHandler('channel_listener', this);
+    sdk.addChannelEventHandler('channel_listener', this);
     lstController.addListener(_scrollListener);
     channel.markAsRead();
   }
@@ -75,7 +75,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void dispose() async {
     super.dispose();
-    sdk.removeChannelHandler('channel_listener');
+    sdk.removeChannelEventHandler('channel_listener');
     channel.endTyping();
     isDisposed = true;
   }

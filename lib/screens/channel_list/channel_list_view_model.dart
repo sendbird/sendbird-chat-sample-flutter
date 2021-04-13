@@ -18,26 +18,31 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   bool get hasNext => query.hasNext;
 
   ChannelListViewModel() {
-    sdk.addChannelHandler('channel_list_view', this);
+    sdk.addChannelEventHandler('channel_list_view', this);
     lstController.addListener(_scrollListener);
   }
 
   @override
   void dispose() {
     super.dispose();
+    sdk.removeChannelEventHandler('channel_list_view');
   }
 
   Future<void> loadChannelList({bool reload = false}) async {
     isLoading = true;
 
     try {
-      if (reload) query = GroupChannelListQuery()..limit = 10;
+      if (reload)
+        query = GroupChannelListQuery()
+          ..limit = 10
+          ..order = GroupChannelListOrder.latestLastMessage;
       final res = await query.loadNext();
       isLoading = false;
       if (reload)
         groupChannels = res;
-      else
-        groupChannels.addAll(res);
+      else {
+        groupChannels = [...groupChannels] + res;
+      }
       notifyListeners();
     } catch (e) {
       isLoading = false;
@@ -72,13 +77,13 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void onReadReceiptUpdated(GroupChannel channel) {
     groupChannels = [...groupChannels];
+    print('READ CHANGE ${channel.unreadMessageCount}');
     notifyListeners();
   }
 
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
     groupChannels = [...groupChannels];
-
     final index = groupChannels
         .indexWhere((element) => element.channelUrl == channel.channelUrl);
 
