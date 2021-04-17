@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart' as s;
+import 'package:sendbird_flutter/main.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class LoginViewModel with ChangeNotifier {
-  String appId;
   bool isLoading = false;
 
-  LoginViewModel({this.appId});
+  LoginViewModel();
 
-  Future<s.User> login(String userId, String nickname) async {
-    if (userId == null || userId == '' || appId == null) {
+  Future<User> login(String userId, String nickname) async {
+    if (userId == null || userId == '') {
       throw Error();
     }
 
@@ -17,8 +17,7 @@ class LoginViewModel with ChangeNotifier {
 
     try {
       // initialize with app id
-      final sendbird = s.SendbirdSdk(appId: appId);
-      sendbird.setLogLevel(s.LogLevel.none);
+      sendbird.setLogLevel(LogLevel.none);
 
       // connect to sendbird server
       final user = await sendbird.connect(userId);
@@ -26,9 +25,10 @@ class LoginViewModel with ChangeNotifier {
 
       // update user nickname and profile url
       await sendbird.updateCurrentUserInfo(nickname: name);
+
       // imageInfo: s.ImageInfo.fromUrl(
       //     name: 'my pic',
-      //     url: 'https://avatars.githubusercontent.com/u/848531?s=60&v=4',
+      //     url: 'image url here',
       //     mimeType: 'image/jpeg'));
 
       isLoading = false;

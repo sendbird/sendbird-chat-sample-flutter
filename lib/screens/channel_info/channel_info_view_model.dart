@@ -2,29 +2,29 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/utils.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart' as s;
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
-class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
-  final sdk = s.SendbirdSdk();
+class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
   final textController = TextEditingController();
 
   BuildContext _context;
-  s.GroupChannel channel;
+  GroupChannel channel;
 
-  ChannelInfoViewModel(s.GroupChannel channel) {
-    sdk.addChannelEventHandler('channel_info_view', this);
+  ChannelInfoViewModel(GroupChannel channel) {
+    sendbird.addChannelEventHandler('channel_info_view', this);
   }
 
   void dispose() {
     super.dispose();
-    sdk.removeChannelEventHandler('channel_info_view');
+    sendbird.removeChannelEventHandler('channel_info_view');
   }
 
-  bool isNotificationOn({s.GroupChannel channel}) {
-    return channel.myPushTriggerOption != s.GroupChannelPushTriggerOption.off;
+  bool isNotificationOn({GroupChannel channel}) {
+    return channel.myPushTriggerOption != GroupChannelPushTriggerOption.off;
   }
 
   Future<void> setNotification(bool value) async {
@@ -32,8 +32,8 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
 
     try {
       final option = value
-          ? s.GroupChannelPushTriggerOption.all
-          : s.GroupChannelPushTriggerOption.off;
+          ? GroupChannelPushTriggerOption.all
+          : GroupChannelPushTriggerOption.off;
       await channel.setMyPushTriggerOption(option);
       notifyListeners();
     } catch (e) {
@@ -53,7 +53,7 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   }
 
   Future<void> updateChannel(
-      {s.GroupChannel channel, String name, File file}) async {
+      {GroupChannel channel, String name, File file}) async {
     if (name == '' && file == null) {
       return;
     }
@@ -61,9 +61,9 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
     showLoader(_context);
 
     try {
-      final params = s.GroupChannelParams()..name = name;
+      final params = GroupChannelParams()..name = name;
       if (file != null) {
-        params.coverImage = s.ImageInfo.fromData(
+        params.coverImage = FileInfo.fromData(
           name: 'image name',
           file: file,
           mimeType: 'image/jpeg',
@@ -160,7 +160,7 @@ class ChannelInfoViewModel with ChangeNotifier, s.ChannelEventHandler {
   }
 
   @override
-  void onChannelChanged(s.BaseChannel channel) {
+  void onChannelChanged(BaseChannel channel) {
     notifyListeners();
   }
 }

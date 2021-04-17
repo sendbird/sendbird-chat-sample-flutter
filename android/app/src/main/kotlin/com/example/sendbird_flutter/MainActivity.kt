@@ -1,4 +1,4 @@
-package com.example.sendbird_flutter
+package com.sendbird.flutter_example
 
 import io.flutter.embedding.android.FlutterActivity
 

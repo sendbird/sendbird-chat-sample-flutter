@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sendbird_flutter/main.dart';
 
 import 'package:sendbird_flutter/screens/channel/components/attachment_modal.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
@@ -15,16 +16,16 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 enum PopupMenuType { edit, delete, copy }
 enum UserEngagementState { typing, online, last_seen, none }
 
-class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
+class ChannelViewModel
+    with ChangeNotifier, ChannelEventHandler, ConnectionEventHandler {
   List<BaseMessage> _messages = [];
   GroupChannel channel;
+  String channelUrl;
   File uploadFile;
 
   BaseMessage selectedMessage;
 
-  SendbirdSdk sdk = SendbirdSdk();
-
-  User currentUser = SendbirdSdk().getCurrentUser();
+  User currentUser = sendbird.getCurrentUser();
 
   bool hasNext = false;
   bool isLoading = false;
@@ -66,16 +67,16 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
 
   List<BaseMessage> get messages => _messages;
 
-  ChannelViewModel({this.channel}) {
-    sdk.addChannelEventHandler('channel_listener', this);
+  ChannelViewModel(this.channelUrl) {
+    sendbird.addChannelEventHandler('channel_listener', this);
     lstController.addListener(_scrollListener);
-    channel.markAsRead();
+    // channel.markAsRead();
   }
 
   @override
   void dispose() async {
     super.dispose();
-    sdk.removeChannelEventHandler('channel_listener');
+    sendbird.removeChannelEventHandler('channel_listener');
     channel.endTyping();
     isDisposed = true;
   }
@@ -84,6 +85,11 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     final prev = isEditing;
     isEditing = value;
     if (value != prev) notifyListeners();
+  }
+
+  Future<void> loadChannel() async {
+    channel = await GroupChannel.getChannel(channelUrl);
+    channel.markAsRead();
   }
 
   Future<void> loadMessages({
@@ -250,7 +256,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
       Navigator.popAndPushNamed(
         context,
         '/channel',
-        arguments: newChannel,
+        arguments: newChannel.channelUrl,
       );
     }
   }
@@ -416,7 +422,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
     _messages = [..._messages];
-    if (index != -1) {
+    if (index != -1 && _messages.length != 0) {
       _messages.removeAt(index);
       _messages[index] = message;
     } else {
@@ -432,7 +438,7 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
     if (channel.channelUrl != this.channel.channelUrl) return;
     final index = _messages.indexWhere((e) => e.messageId == message.messageId);
     _messages = [..._messages];
-    if (index != -1) {
+    if (index != -1 && _messages.length != 0) {
       _messages.removeAt(index);
       _messages[index] = message;
     } else {
@@ -472,9 +478,11 @@ class ChannelViewModel with ChangeNotifier, ChannelEventHandler {
       notifyListeners();
     }
   }
+
+  @override
+  void onReconnectionSucceeded() {}
 }
 
 extension Message on BaseMessage {
-  bool get isMyMessage =>
-      sender?.userId == SendbirdSdk().getCurrentUser().userId;
+  bool get isMyMessage => sender?.userId == sendbird.getCurrentUser().userId;
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as p;
+import 'package:provider/provider.dart';
 
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/helper/push_handler.dart';
 import 'package:sendbird_flutter/screens/channel/components/admin_message_item.dart';
 import 'package:sendbird_flutter/screens/channel/components/file_message_item.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_input.dart';
@@ -10,23 +11,31 @@ import 'package:sendbird_flutter/screens/channel/components/user_message_item.da
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ChannelScreen extends StatefulWidget {
-  final GroupChannel channel;
+  final String channelUrl;
 
-  ChannelScreen({this.channel, Key key}) : super(key: key);
+  ChannelScreen({this.channelUrl, Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChannelScreenState();
 }
 
-class _ChannelScreenState extends State<ChannelScreen> {
+class _ChannelScreenState extends State<ChannelScreen>
+    with PushHandler, WidgetsBindingObserver {
   ChannelViewModel model;
+  bool channelLoaded = false;
 
   @override
   void initState() {
-    model = ChannelViewModel(channel: widget.channel);
-    model.loadMessages(reload: true);
+    model = ChannelViewModel(widget.channelUrl);
+    model.loadChannel().then((value) {
+      setState(() {
+        channelLoaded = true;
+      });
+      model.loadMessages(reload: true);
+    });
     super.initState();
   }
 
@@ -36,51 +45,77 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      model.loadMessages(reload: true);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return p.ChangeNotifierProvider<ChannelViewModel>(
+    return ChangeNotifierProvider<ChannelViewModel>(
       create: (context) => model,
-      child: Scaffold(
-        appBar: _buildNavigationBar(),
-        body: SafeArea(
-          child: Column(
-            children: [
-              //TODO: message
-              // p.Selector<ChannelViewModel, List<BaseMessage>>(
-              //   selector: (_, model) => model.messages,
-              //   builder: (c, msgs, child) {
-              //     return _buildContent();
-              //   },
-              // ),
-              p.Consumer<ChannelViewModel>(
-                builder: (context, value, child) {
-                  return _buildContent();
-                },
+      child: (model.channel == null)
+          ? Scaffold(
+              body: Center(
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(),
+                ),
               ),
-              p.Selector<ChannelViewModel, bool>(
-                selector: (_, model) => model.isEditing,
-                builder: (c, editing, child) {
-                  return MessageInput(
-                    onPressPlus: () {
-                      model.showPlusMenu(context);
-                    },
-                    onPressSend: (text) {
-                      model.onSendUserMessage(text);
-                    },
-                    onEditing: (text) {
-                      model.onUpdateMessage(text);
-                    },
-                    onChanged: (text) {
-                      model.onTyping(text != '');
-                    },
-                    placeholder: model.selectedMessage?.message,
-                    isEditing: editing,
-                  );
-                },
-              )
-            ],
-          ),
-        ),
-      ),
+            )
+          : VisibilityDetector(
+              onVisibilityChanged: (info) {
+                screenBecomeVisible(
+                  info.visibleFraction == 1,
+                  pop: PopType.replace,
+                );
+              },
+              key: Key('channel_key'),
+              child: Scaffold(
+                appBar: _buildNavigationBar(),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      //TODO: message
+                      // p.Selector<ChannelViewModel, List<BaseMessage>>(
+                      //   selector: (_, model) => model.messages,
+                      //   builder: (c, msgs, child) {
+                      //     return _buildContent();
+                      //   },
+                      // ),
+                      Consumer<ChannelViewModel>(
+                        builder: (context, value, child) {
+                          return _buildContent();
+                        },
+                      ),
+                      Selector<ChannelViewModel, bool>(
+                        selector: (_, model) => model.isEditing,
+                        builder: (c, editing, child) {
+                          return MessageInput(
+                            onPressPlus: () {
+                              model.showPlusMenu(context);
+                            },
+                            onPressSend: (text) {
+                              model.onSendUserMessage(text);
+                            },
+                            onEditing: (text) {
+                              model.onUpdateMessage(text);
+                            },
+                            onChanged: (text) {
+                              model.onTyping(text != '');
+                            },
+                            placeholder: model.selectedMessage?.message,
+                            isEditing: editing,
+                          );
+                        },
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 
@@ -101,13 +136,13 @@ class _ChannelScreenState extends State<ChannelScreen> {
               BackButton(color: Theme.of(context).primaryColor),
               SizedBox(width: 2),
               AvatarView(
-                channel: widget.channel,
+                channel: model.channel,
                 currentUserId: currentUser.userId,
                 width: 25,
                 height: 25,
               ),
               SizedBox(width: 12),
-              p.Selector<ChannelViewModel, UserEngagementState>(
+              Selector<ChannelViewModel, UserEngagementState>(
                 selector: (_, model) => model.engagementState,
                 builder: (context, value, child) {
                   return _buildTitle(value);
@@ -121,7 +156,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
                     Navigator.pushNamed(
                       context,
                       '/channel_info',
-                      arguments: widget.channel,
+                      arguments: model.channel,
                     );
                   },
                   shape: CircleBorder(),
@@ -141,7 +176,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
 
   Widget _buildTitle(UserEngagementState ue) {
     List<Widget> headers = [
-      ChannelTitleTextView(widget.channel, model.currentUser.userId)
+      ChannelTitleTextView(model.channel, model.currentUser.userId)
     ];
 
     switch (ue) {
@@ -154,37 +189,6 @@ class _ChannelScreenState extends State<ChannelScreen> {
           )
         ]);
         break;
-      //   case UserEngagementState.online:
-      //     headers.addAll([
-      //       SizedBox(height: 3),
-      //       Row(
-      //         children: [
-      //           Container(
-      //             width: 6,
-      //             height: 6,
-      //             margin: EdgeInsets.only(right: 6),
-      //             decoration: BoxDecoration(
-      //               color: Colors.green,
-      //               shape: BoxShape.circle,
-      //             ),
-      //           ),
-      //           Text(
-      //             'Online',
-      //             style: TextStyles.sendbirdCaption2OnLight1,
-      //           )
-      //         ],
-      //       )
-      //     ]);
-      //     break;
-      //   case UserEngagementState.last_seen:
-      //     headers.addAll([
-      //       SizedBox(height: 3),
-      //       Text(
-      //         model.lastSeenText,
-      //         style: TextStyles.sendbirdCaption2OnLight1,
-      //       )
-      //     ]);
-      //     break;
       default:
         break;
     }

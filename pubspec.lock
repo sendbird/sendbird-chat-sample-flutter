@@ -162,11 +162,46 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.2.1"
+  firebase_core:
+    dependency: transitive
+    description:
+      name: firebase_core
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.3"
+  firebase_core_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_core_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
+  firebase_core_web:
+    dependency: transitive
+    description:
+      name: firebase_core_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1+1"
+  firebase_messaging:
+    dependency: "direct main"
+    description:
+      name: firebase_messaging
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.0.3"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_apns:
+    dependency: "direct main"
+    description:
+      name: flutter_apns
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.1"
   flutter_blurhash:
     dependency: transitive
     description:
@@ -247,6 +282,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.2"
   json_annotation:
     dependency: transitive
     description:
@@ -387,6 +429,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.3.3"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.5"
   rxdart:
     dependency: transitive
     description:
@@ -400,7 +449,7 @@ packages:
       name: sendbird_sdk
       url: "https://repo.sendbird.com/public/dart"
     source: hosted
-    version: "3.0.8"
+    version: "3.0.9"
   shared_preferences:
     dependency: transitive
     description:
@@ -532,6 +581,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0-nullsafety.3"
+  visibility_detector:
+    dependency: "direct main"
+    description:
+      name: visibility_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5"
   win32:
     dependency: transitive
     description:

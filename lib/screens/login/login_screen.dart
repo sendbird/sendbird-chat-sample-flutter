@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_flutter/screens/login/login_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
+
+  // @override
+
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -24,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return true;
   }
 
-  final model = LoginViewModel(appId: 'D56438AE-B4DB-4DC9-B440-E032D7B35CEB');
+  final model = LoginViewModel();
 
   @override
   void initState() {
@@ -133,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Align(
         alignment: FractionalOffset.bottomCenter,
         child: Text(
-          'SDK ' + SendbirdSdk().getSdkVersion(),
+          'SDK ' + sendbird.getSdkVersion(),
           style: TextStyles.sendbirdCaption1OnLight2,
         ),
       ),

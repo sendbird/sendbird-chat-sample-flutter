@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as p;
+import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_flutter/screens/channel/channel_screen.dart';
 import 'package:sendbird_flutter/screens/create_channel/create_channel_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class CreateChannelScreen extends StatefulWidget {
   @override
@@ -51,7 +51,8 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChannelScreen(channel: channel),
+                  builder: (context) =>
+                      ChannelScreen(channelUrl: channel.channelUrl),
                 ),
               );
             }).catchError((error) {
@@ -112,7 +113,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyles.sendbirdSubtitle1OnLight1),
       controlAffinity: ListTileControlAffinity.platform,
-      value: SendbirdSdk().getCurrentUser().userId == selection.user.userId ||
+      value: sendbird.getCurrentUser().userId == selection.user.userId ||
           selection.isSelected,
       activeColor: Theme.of(context).primaryColor,
       onChanged: (bool value) {

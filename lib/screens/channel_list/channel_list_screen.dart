@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:sendbird_flutter/helper/push_handler.dart';
 import 'package:sendbird_flutter/screens/channel_list/channel_list_view_model.dart';
 import 'package:sendbird_flutter/screens/channel_list/components/channel_list_item.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ChannelListScreen extends StatefulWidget {
   @override
@@ -14,33 +16,46 @@ class ChannelListScreen extends StatefulWidget {
 }
 
 class _ChannelListScreenState extends State<ChannelListScreen>
-    with ChannelEventHandler {
+    with ChannelEventHandler, WidgetsBindingObserver, PushHandler {
   ChannelListViewModel model = ChannelListViewModel();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     model.loadChannelList();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      model.loadChannelList(reload: true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: navigationBar(),
-        body: p.ChangeNotifierProvider<ChannelListViewModel>(
-          create: (context) => model,
-          child: p.Consumer<ChannelListViewModel>(
-            builder: (context, value, child) {
-              return _buildList(value);
-            },
+      child: VisibilityDetector(
+        onVisibilityChanged: (info) {
+          screenBecomeVisible(info.visibleFraction == 1);
+        },
+        key: Key('channel_list_key'),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: navigationBar(),
+          body: ChangeNotifierProvider<ChannelListViewModel>(
+            create: (context) => model,
+            child: Consumer<ChannelListViewModel>(
+              builder: (context, value, child) {
+                return _buildList(value);
+              },
+            ),
           ),
         ),
       ),
       onWillPop: () async {
-        print('disconnect');
-        SendbirdSdk().disconnect();
+        model.logout();
         return true;
       },
     );
@@ -121,7 +136,7 @@ class _ChannelListScreenState extends State<ChannelListScreen>
                 Navigator.pushNamed(
                   context,
                   '/channel',
-                  arguments: channel,
+                  arguments: channel.channelUrl,
                 );
               },
             ),

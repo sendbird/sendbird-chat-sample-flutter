@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:sendbird_flutter/components/avatar_view.dart';
 import 'package:sendbird_flutter/components/channel_title_text_view.dart';
+import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_flutter/utils/extensions.dart';
@@ -9,7 +10,7 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChannelListItem extends StatelessWidget {
   final GroupChannel channel;
-  final currentUserId = SendbirdSdk().getCurrentUser()?.userId;
+  final currentUserId = sendbird.getCurrentUser()?.userId;
 
   ChannelListItem(this.channel);
 

@@ -1,15 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
-  SendbirdSdk sdk = SendbirdSdk();
-
   GroupChannelListQuery query = GroupChannelListQuery()..limit = 10;
-  User currentUser = SendbirdSdk().getCurrentUser();
+  User currentUser = sendbird.getCurrentUser();
   List<GroupChannel> groupChannels = [];
 
   bool isLoading = false;
-
+  String destChannelUrl;
+  bool isVisible = true;
   final ScrollController lstController = ScrollController();
 
   int get itemCount =>
@@ -17,19 +19,26 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
 
   bool get hasNext => query.hasNext;
 
-  ChannelListViewModel() {
-    sdk.addChannelEventHandler('channel_list_view', this);
+  ChannelListViewModel({this.destChannelUrl}) {
+    sendbird.addChannelEventHandler('channel_list_view', this);
     lstController.addListener(_scrollListener);
+    _registerTokenIfNeeded();
   }
 
   @override
   void dispose() {
     super.dispose();
-    sdk.removeChannelEventHandler('channel_list_view');
+    sendbird.removeChannelEventHandler('channel_list_view');
   }
 
   Future<void> loadChannelList({bool reload = false}) async {
     isLoading = true;
+    print('loading channels...');
+    if (destChannelUrl != null) {
+      navigatorKey.currentState
+          .pushNamed('/channel', arguments: destChannelUrl);
+      destChannelUrl = null;
+    }
 
     try {
       if (reload)
@@ -43,6 +52,7 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
       else {
         groupChannels = [...groupChannels] + res;
       }
+      //go to channel if exist
       notifyListeners();
     } catch (e) {
       isLoading = false;
@@ -50,10 +60,27 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
     }
   }
 
+  void logout() async {
+    appState.didRegisterToken = false;
+    if (appState.token != null)
+      await sendbird.unregisterPushToken(
+          type: PushTokenType.fcm, token: appState.token);
+    sendbird.disconnect();
+  }
+
+  _registerTokenIfNeeded() async {
+    if (appState.token != null)
+      await sendbird.registerPushToken(
+        type: Platform.isIOS ? PushTokenType.apns : PushTokenType.fcm,
+        token: appState.token,
+      );
+  }
+
   _scrollListener() {
     if (lstController.offset >= lstController.position.maxScrollExtent &&
         !lstController.position.outOfRange &&
-        !isLoading) {
+        !isLoading &&
+        query.hasNext) {
       loadChannelList();
     }
   }
@@ -77,7 +104,6 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   @override
   void onReadReceiptUpdated(GroupChannel channel) {
     groupChannels = [...groupChannels];
-    print('READ CHANGE ${channel.unreadMessageCount}');
     notifyListeners();
   }
 
