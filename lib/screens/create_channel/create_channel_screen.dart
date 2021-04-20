@@ -113,7 +113,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyles.sendbirdSubtitle1OnLight1),
       controlAffinity: ListTileControlAffinity.platform,
-      value: sendbird.getCurrentUser().userId == selection.user.userId ||
+      value: sendbird.currentUser.userId == selection.user.userId ||
           selection.isSelected,
       activeColor: Theme.of(context).primaryColor,
       onChanged: (bool value) {

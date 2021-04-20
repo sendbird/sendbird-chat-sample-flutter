@@ -6,7 +6,7 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   GroupChannelListQuery query = GroupChannelListQuery()..limit = 10;
-  User currentUser = sendbird.getCurrentUser();
+  User currentUser = sendbird.currentUser;
   List<GroupChannel> groupChannels = [];
 
   bool isLoading = false;

@@ -449,7 +449,7 @@ packages:
       name: sendbird_sdk
       url: "https://repo.sendbird.com/public/dart"
     source: hosted
-    version: "3.0.9"
+    version: "3.0.10"
   shared_preferences:
     dependency: transitive
     description:

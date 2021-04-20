@@ -25,7 +25,7 @@ class ChannelViewModel
 
   BaseMessage selectedMessage;
 
-  User currentUser = sendbird.getCurrentUser();
+  User currentUser = sendbird.currentUser;
 
   bool hasNext = false;
   bool isLoading = false;
@@ -484,5 +484,5 @@ class ChannelViewModel
 }
 
 extension Message on BaseMessage {
-  bool get isMyMessage => sender?.userId == sendbird.getCurrentUser().userId;
+  bool get isMyMessage => sender?.userId == sendbird.currentUser.userId;
 }

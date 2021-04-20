@@ -10,7 +10,7 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChannelListItem extends StatelessWidget {
   final GroupChannel channel;
-  final currentUserId = sendbird.getCurrentUser()?.userId;
+  final currentUserId = sendbird.currentUser?.userId;
 
   ChannelListItem(this.channel);
 
