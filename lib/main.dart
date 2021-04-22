@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/flutter_apns.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:sendbird_flutter/screens/channel/channel_screen.dart';
 import 'package:sendbird_flutter/screens/channel_info/channel_info_screen.dart';
 import 'package:sendbird_flutter/screens/channel_list/channel_list_screen.dart';
 import 'package:sendbird_flutter/screens/create_channel/create_channel_screen.dart';
 import 'package:sendbird_flutter/screens/login/login_screen.dart';
 import 'package:sendbird_flutter/styles/color.dart';
+import 'package:sendbird_flutter/utils/notification_service.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class MyHttpOverrides extends HttpOverrides {
@@ -63,7 +65,7 @@ class MyAppState extends State<MyApp> {
         //terminated? background
         print('onMessage: $data');
       },
-      onBackgroundMessage: null,
+      onBackgroundMessage: handleBackgroundMessage,
     );
     connector.token.addListener(() {
       print('Token ${connector.token.value}');
@@ -86,41 +88,53 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      initialRoute: initialRoute(),
-      navigatorKey: navigatorKey,
-      onGenerateRoute: (settings) {
-        var routes = <String, WidgetBuilder>{
-          '/': (context) => LoginScreen(),
-          '/channel_list': (context) => ChannelListScreen(),
-          '/create_channel': (context) => CreateChannelScreen(),
-          '/channel_info': (context) =>
-              ChannelInfoScreen(channel: settings.arguments),
-          '/channel': (context) =>
-              ChannelScreen(channelUrl: settings.arguments),
-        };
-        WidgetBuilder builder = routes[settings.name];
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (ctx) => builder(ctx),
-        );
-      },
-      theme: ThemeData(
-        fontFamily: "Gellix",
-        primaryColor: Color(0xff742DDD),
-        buttonColor: Color(0xff742DDD),
-        accentColor: SBColors.primary_300,
-        textTheme: TextTheme(
-            headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-            headline6: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold)),
-        textSelectionTheme: TextSelectionThemeData(
-          cursorColor: Color(0xff732cdd),
-          selectionHandleColor: Color(0xff732cdd),
-          selectionColor: Color(0xffD1BAF4),
+    return OverlaySupport(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        initialRoute: initialRoute(),
+        navigatorKey: navigatorKey,
+        onGenerateRoute: (settings) {
+          var routes = <String, WidgetBuilder>{
+            '/': (context) => LoginScreen(),
+            '/channel_list': (context) => ChannelListScreen(),
+            '/create_channel': (context) => CreateChannelScreen(),
+            '/channel_info': (context) =>
+                ChannelInfoScreen(channel: settings.arguments),
+            '/channel': (context) =>
+                ChannelScreen(channelUrl: settings.arguments),
+          };
+          WidgetBuilder builder = routes[settings.name];
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (ctx) => builder(ctx),
+          );
+        },
+        theme: ThemeData(
+          fontFamily: "Gellix",
+          primaryColor: Color(0xff742DDD),
+          buttonColor: Color(0xff742DDD),
+          accentColor: SBColors.primary_300,
+          textTheme: TextTheme(
+              headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+              headline6:
+                  TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold)),
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: Color(0xff732cdd),
+            selectionHandleColor: Color(0xff732cdd),
+            selectionColor: Color(0xffD1BAF4),
+          ),
         ),
       ),
     );
   }
+}
+
+Future<dynamic> handleBackgroundMessage(Map<String, dynamic> data) async {
+  print('onBackground $data'); // android only for firebase_messaging v7
+  NotificationService.showNotification(
+    'Sendbird Example',
+    data['data']['message'],
+    payload: data['data']['sendbird'],
+  );
 }

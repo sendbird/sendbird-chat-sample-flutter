@@ -39,8 +39,11 @@ dependencies:
   image_picker: ^0.6.7+22
   flutter_launcher_icons: "^0.8.0"
   visibility_detector: ^0.1.0
-  firebase_messaging:
+  firebase_core:
+  firebase_messaging: 
   flutter_apns: ^1.4.1
+  overlay_support:
+  flutter_local_notifications:
 
 flutter_icons:
   android: true
