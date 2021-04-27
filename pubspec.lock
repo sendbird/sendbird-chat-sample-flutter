@@ -352,13 +352,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
-  overlay_support:
-    dependency: "direct main"
-    description:
-      name: overlay_support
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
   path:
     dependency: transitive
     description:
@@ -468,9 +461,9 @@ packages:
     dependency: "direct main"
     description:
       name: sendbird_sdk
-      url: "https://repo.sendbird.com/public/dart"
+      url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.10"
+    version: "3.0.11"
   shared_preferences:
     dependency: transitive
     description:

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/flutter_apns.dart';
-import 'package:overlay_support/overlay_support.dart';
 import 'package:sendbird_flutter/screens/channel/channel_screen.dart';
 import 'package:sendbird_flutter/screens/channel_info/channel_info_screen.dart';
 import 'package:sendbird_flutter/screens/channel_list/channel_list_screen.dart';
@@ -88,42 +87,39 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return OverlaySupport(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        initialRoute: initialRoute(),
-        navigatorKey: navigatorKey,
-        onGenerateRoute: (settings) {
-          var routes = <String, WidgetBuilder>{
-            '/': (context) => LoginScreen(),
-            '/channel_list': (context) => ChannelListScreen(),
-            '/create_channel': (context) => CreateChannelScreen(),
-            '/channel_info': (context) =>
-                ChannelInfoScreen(channel: settings.arguments),
-            '/channel': (context) =>
-                ChannelScreen(channelUrl: settings.arguments),
-          };
-          WidgetBuilder builder = routes[settings.name];
-          return MaterialPageRoute(
-            settings: settings,
-            builder: (ctx) => builder(ctx),
-          );
-        },
-        theme: ThemeData(
-          fontFamily: "Gellix",
-          primaryColor: Color(0xff742DDD),
-          buttonColor: Color(0xff742DDD),
-          accentColor: SBColors.primary_300,
-          textTheme: TextTheme(
-              headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-              headline6:
-                  TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold)),
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: Color(0xff732cdd),
-            selectionHandleColor: Color(0xff732cdd),
-            selectionColor: Color(0xffD1BAF4),
-          ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
+      initialRoute: initialRoute(),
+      navigatorKey: navigatorKey,
+      onGenerateRoute: (settings) {
+        var routes = <String, WidgetBuilder>{
+          '/': (context) => LoginScreen(),
+          '/channel_list': (context) => ChannelListScreen(),
+          '/create_channel': (context) => CreateChannelScreen(),
+          '/channel_info': (context) =>
+              ChannelInfoScreen(channel: settings.arguments),
+          '/channel': (context) =>
+              ChannelScreen(channelUrl: settings.arguments),
+        };
+        WidgetBuilder builder = routes[settings.name];
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (ctx) => builder(ctx),
+        );
+      },
+      theme: ThemeData(
+        fontFamily: "Gellix",
+        primaryColor: Color(0xff742DDD),
+        buttonColor: Color(0xff742DDD),
+        accentColor: SBColors.primary_300,
+        textTheme: TextTheme(
+            headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+            headline6: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold)),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Color(0xff732cdd),
+          selectionHandleColor: Color(0xff732cdd),
+          selectionColor: Color(0xffD1BAF4),
         ),
       ),
     );

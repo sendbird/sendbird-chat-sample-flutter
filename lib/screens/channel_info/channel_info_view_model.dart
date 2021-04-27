@@ -14,7 +14,7 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
   BuildContext _context;
   GroupChannel channel;
 
-  ChannelInfoViewModel(GroupChannel channel) {
+  ChannelInfoViewModel(this.channel) {
     sendbird.addChannelEventHandler('channel_info_view', this);
   }
 
