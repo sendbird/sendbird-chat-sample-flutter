@@ -1,4 +1,4 @@
-# [Sendbird](https://sendbird.com) Chat SDK for Flutter
+# [Sendbird](https://sendbird.com) Chat SDK Sample for Flutter
 
 [![Platform](https://img.shields.io/badge/platform-flutter-blue)](https://flutter.dev/)
 
