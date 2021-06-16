@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool enableSignInButton = false;
 
   bool _shouldEnableSignInButton() {
-    if (userIdController.text == null || userIdController.text == "") {
+    if (userIdController.text == "") {
       return false;
     }
     return true;

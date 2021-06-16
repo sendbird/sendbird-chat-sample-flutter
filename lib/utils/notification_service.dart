@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
-  static showNotification(String title, String body, {String payload}) async {
+  static showNotification(String title, String body, {String? payload}) async {
     FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
 
@@ -37,10 +37,10 @@ class NotificationService {
 }
 
 // TODO: incomplete, not found a way to handle event from isolate
-Future selectNotification(String payload) async {
-  if (payload != null) {
-    debugPrint('notification payload: $payload');
-  }
+Future selectNotification(String? payload) async {
+  if (payload == null) return;
+
+  debugPrint('notification payload: $payload');
   final channel = jsonDecode(payload);
   print('channel: ${channel['channel_url']}');
 }

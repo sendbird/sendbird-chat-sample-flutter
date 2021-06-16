@@ -7,13 +7,13 @@ class SwitchableSettingItem extends SettingItem {
   final Function(bool) onChanged;
 
   SwitchableSettingItem({
-    String name,
-    String iconImageName,
-    Size iconSize,
-    Color iconColor,
-    double height,
-    this.isOn,
-    this.onChanged,
+    required String name,
+    required String iconImageName,
+    required Size iconSize,
+    required Color iconColor,
+    required double height,
+    required this.isOn,
+    required this.onChanged,
   }) : super(
           name: name,
           iconImageName: iconImageName,

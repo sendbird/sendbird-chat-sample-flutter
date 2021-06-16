@@ -61,7 +61,7 @@ class _ChannelListScreenState extends State<ChannelListScreen>
     );
   }
 
-  Widget navigationBar() {
+  AppBar navigationBar() {
     return AppBar(
       leading: BackButton(color: Theme.of(context).primaryColor),
       toolbarHeight: 65,

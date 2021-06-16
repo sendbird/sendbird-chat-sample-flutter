@@ -12,14 +12,14 @@ import 'package:sendbird_flutter/styles/text_style.dart';
 class ChannelInfoScreen extends StatefulWidget {
   final GroupChannel channel;
 
-  ChannelInfoScreen({this.channel, Key key}) : super(key: key);
+  ChannelInfoScreen({required this.channel, Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChannelInfoScreenState();
 }
 
 class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
-  ChannelInfoViewModel model;
+  late ChannelInfoViewModel model;
 
   @override
   void initState() {
@@ -79,7 +79,7 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
     );
   }
 
-  Widget _navigationBar() {
+  AppBar _navigationBar() {
     return AppBar(
       leading: BackButton(color: Theme.of(context).primaryColor),
       toolbarHeight: 65,
@@ -117,7 +117,7 @@ class _ChannelInfoScreenState extends State<ChannelInfoScreen> {
             ),
             SizedBox(height: 8),
             Text(
-              widget.channel?.name ?? 'channel name',
+              widget.channel.name ?? 'channel name',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.sendbirdH1OnLight1,

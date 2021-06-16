@@ -3,24 +3,24 @@ import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 
 class MessageInput extends StatefulWidget {
-  final String placeholder;
-  final Function onPressPlus;
+  final String? placeholder;
+  final VoidCallback? onPressPlus;
   final Function(String) onPressSend;
-  final Function(String) onEditing;
+  final Function(String?)? onEditing;
   final Function(String) onChanged;
-  final bool isEditing;
+  final bool? isEditing;
   final inputController = TextEditingController();
 
   MessageInput({
     this.placeholder,
     this.onPressPlus,
-    this.onPressSend,
-    this.onChanged,
+    required this.onPressSend,
+    required this.onChanged,
     this.onEditing,
-    this.isEditing,
-    Key key,
+    this.isEditing = false,
+    Key? key,
   }) : super(key: key) {
-    inputController.text = placeholder;
+    inputController.text = placeholder ?? '';
   }
 
   @override
@@ -93,7 +93,7 @@ class _MessageInputState extends State<MessageInput> {
                 // contentPadding: EdgeInsets.only(top: 2),
               ),
               onChanged: (text) {
-                if (widget.onChanged != null) widget.onChanged(text);
+                widget.onChanged(text);
                 setState(() {
                   shouldShowSendButton = text != '';
                 });
@@ -136,7 +136,7 @@ class _MessageInputState extends State<MessageInput> {
         children: [
           TextButton(
             onPressed: () {
-              if (widget.onEditing != null) widget.onEditing(null);
+              if (widget.onEditing != null) widget.onEditing!(null);
               widget.inputController.clear();
               setState(() {
                 shouldShowSendButton = false;
@@ -151,7 +151,7 @@ class _MessageInputState extends State<MessageInput> {
           RaisedButton(
             onPressed: () {
               if (widget.onEditing != null)
-                widget.onEditing(widget.inputController.text);
+                widget.onEditing!(widget.inputController.text);
               widget.inputController.clear();
               setState(() {
                 shouldShowSendButton = false;

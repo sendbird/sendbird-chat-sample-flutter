@@ -29,7 +29,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     );
   }
 
-  Widget navigationBar() {
+  AppBar navigationBar() {
     final selectedCountText =
         model.selectedUsers.length == 0 ? '' : model.selectedUsers.length;
 
@@ -113,16 +113,16 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyles.sendbirdSubtitle1OnLight1),
       controlAffinity: ListTileControlAffinity.platform,
-      value: sendbird.currentUser.userId == selection.user.userId ||
+      value: sendbird.currentUser?.userId == selection.user.userId ||
           selection.isSelected,
       activeColor: Theme.of(context).primaryColor,
-      onChanged: (bool value) {
+      onChanged: (bool? value) {
         //Display chat view
         setState(() {
           selection.isSelected = !selection.isSelected;
         });
       },
-      secondary: selection.user.profileUrl.isEmpty
+      secondary: selection.user.profileUrl?.isEmpty == true
           ? CircleAvatar(
               child: Text(
               (selection.user.nickname.isEmpty
@@ -132,7 +132,7 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
                   .toUpperCase(),
             ))
           : CircleAvatar(
-              backgroundImage: NetworkImage(selection.user.profileUrl),
+              backgroundImage: NetworkImage(selection.user.profileUrl ?? ''),
             ),
     );
   }
@@ -147,9 +147,11 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
           shape: RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(15)),
           actions: <Widget>[
-            new FlatButton(
-              child: new Text("Ok"),
-              textColor: Colors.greenAccent,
+            new TextButton(
+              child: new Text(
+                "Ok",
+                style: TextStyle(color: Colors.greenAccent),
+              ),
               onPressed: () {
                 Navigator.pop(context);
               },

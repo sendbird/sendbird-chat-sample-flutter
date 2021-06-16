@@ -11,7 +11,7 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
   final textController = TextEditingController();
 
-  BuildContext _context;
+  BuildContext? _context;
   GroupChannel channel;
 
   ChannelInfoViewModel(this.channel) {
@@ -23,13 +23,11 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
     sendbird.removeChannelEventHandler('channel_info_view');
   }
 
-  bool isNotificationOn({GroupChannel channel}) {
+  bool isNotificationOn({required GroupChannel channel}) {
     return channel.myPushTriggerOption != GroupChannelPushTriggerOption.off;
   }
 
   Future<void> setNotification(bool value) async {
-    if (channel == null) return;
-
     try {
       final option = value
           ? GroupChannelPushTriggerOption.all
@@ -42,8 +40,6 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
   }
 
   Future<bool> leave() async {
-    if (channel == null) return false;
-
     try {
       await channel.leave();
       return true;
@@ -52,13 +48,14 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
     }
   }
 
-  Future<void> updateChannel(
-      {GroupChannel channel, String name, File file}) async {
+  Future<void> updateChannel({String? name, File? file}) async {
     if (name == '' && file == null) {
       return;
     }
+    final context = _context;
+    if (context == null) return;
 
-    showLoader(_context);
+    showLoader(context);
 
     try {
       final params = GroupChannelParams()..name = name;
@@ -70,10 +67,10 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
         );
       }
       await channel.updateChannel(params);
-      Navigator.pop(_context);
+      Navigator.pop(context);
       notifyListeners();
     } catch (e) {
-      Navigator.pop(_context);
+      Navigator.pop(context);
     }
   }
 
@@ -130,16 +127,20 @@ class ChannelInfoViewModel with ChangeNotifier, ChannelEventHandler {
             decoration: InputDecoration(hintText: "Enter new name"),
           ),
           actions: [
-            FlatButton(
-              child: Text("Cancel"),
-              color: SBColors.primary_300,
+            TextButton(
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: SBColors.primary_300),
+              ),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
-            FlatButton(
-              child: Text("OK"),
-              color: SBColors.primary_300,
+            TextButton(
+              child: Text(
+                "OK",
+                style: TextStyle(color: SBColors.primary_300),
+              ),
               onPressed: () {
                 Navigator.pop(context);
                 updateChannel(name: textController.text);

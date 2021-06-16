@@ -7,13 +7,13 @@ import 'package:sendbird_flutter/styles/color.dart';
 
 class FileMessageItem extends MessageItem {
   FileMessageItem({
-    FileMessage curr,
-    BaseMessage prev,
-    BaseMessage next,
-    ChannelViewModel model,
-    bool isMyMessage,
-    Function onPress,
-    Function onLongPress,
+    required FileMessage curr,
+    BaseMessage? prev,
+    BaseMessage? next,
+    required ChannelViewModel model,
+    required bool isMyMessage,
+    Function(Offset)? onPress,
+    Function(Offset)? onLongPress,
   }) : super(
           curr: curr,
           prev: prev,
@@ -30,7 +30,7 @@ class FileMessageItem extends MessageItem {
         child: (curr as FileMessage).localFile != null
             ? Container(
                 child: FittedBox(
-                  child: Image.file((curr as FileMessage).localFile),
+                  child: Image.file((curr as FileMessage).localFile!),
                   fit: BoxFit.cover,
                 ),
                 height: 160,

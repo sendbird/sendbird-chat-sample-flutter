@@ -19,25 +19,25 @@ enum MessageState {
 
 class MessageItem extends StatelessWidget {
   final BaseMessage curr;
-  final BaseMessage prev;
-  final BaseMessage next;
-  final bool isMyMessage;
+  final BaseMessage? prev;
+  final BaseMessage? next;
+  final bool? isMyMessage;
   final ChannelViewModel model;
 
-  final Function(Offset) onLongPress;
-  final Function(Offset) onPress;
+  final Function(Offset)? onLongPress;
+  final Function(Offset)? onPress;
 
-  Widget get content => null;
+  Widget get content => throw UnimplementedError();
 
   String get _currTime => DateFormat('kk:mm a')
       .format(DateTime.fromMillisecondsSinceEpoch(curr.createdAt));
 
   MessageItem({
-    this.curr,
+    required this.curr,
     this.prev,
     this.next,
     this.isMyMessage,
-    this.model,
+    required this.model,
     this.onPress,
     this.onLongPress,
   });
@@ -54,12 +54,12 @@ class MessageItem extends StatelessWidget {
       child: Align(
         alignment: isCenter
             ? Alignment.center
-            : isMyMessage
+            : isMyMessage!
                 ? Alignment.topRight
                 : Alignment.topLeft,
         child: isCenter
             ? _buildCenterWidget()
-            : isMyMessage
+            : isMyMessage!
                 ? _bulidRightWidget()
                 : _buildLeftWidget(context),
       ),
@@ -78,8 +78,12 @@ class MessageItem extends StatelessWidget {
   Widget _bulidRightWidget() {
     final wrap = Container(
       child: GestureDetector(
-          onLongPressStart: (details) => onLongPress(details.globalPosition),
-          onTapDown: (details) => onPress(details.globalPosition),
+          onLongPressStart: (details) {
+            if (onLongPress != null) onLongPress!(details.globalPosition);
+          },
+          onTapDown: (details) {
+            if (onPress != null) onPress!(details.globalPosition);
+          },
           child: content),
       constraints: BoxConstraints(maxWidth: 240),
     );
@@ -102,8 +106,12 @@ class MessageItem extends StatelessWidget {
   Widget _buildLeftWidget(BuildContext ctx) {
     final wrap = Container(
       child: GestureDetector(
-          onLongPressStart: (details) => onLongPress(details.globalPosition),
-          onTapDown: (details) => onPress(details.globalPosition),
+          onLongPressStart: (details) {
+            if (onLongPress != null) onLongPress!(details.globalPosition);
+          },
+          onTapDown: (details) {
+            if (onPress != null) onPress!(details.globalPosition);
+          },
           child: content),
       constraints: BoxConstraints(maxWidth: 240),
     );
@@ -129,7 +137,7 @@ class MessageItem extends StatelessWidget {
     );
   }
 
-  bool _isContinuous(BaseMessage p, BaseMessage c) {
+  bool _isContinuous(BaseMessage? p, BaseMessage? c) {
     if (p == null || c == null) {
       return false;
     }
@@ -148,7 +156,7 @@ class MessageItem extends StatelessWidget {
     return false;
   }
 
-  bool _isSameDate(BaseMessage p, BaseMessage c) {
+  bool _isSameDate(BaseMessage? p, BaseMessage? c) {
     if (p == null || c == null) {
       return false;
     }
@@ -222,14 +230,17 @@ class MessageItem extends StatelessWidget {
   }
 
   List<Widget> _timestampDefaultWidget(BaseMessage message) {
+    final myMessage = isMyMessage;
+    if (myMessage == null) return [];
+
     return !_isContinuous(curr, next)
         ? [
-            if (!isMyMessage) SizedBox(width: 3),
+            if (!myMessage) SizedBox(width: 3),
             Text(
               _currTime,
               style: TextStyles.sendbirdCaption4OnLight3,
             ),
-            if (isMyMessage) SizedBox(width: 3)
+            if (myMessage) SizedBox(width: 3)
           ]
         : [];
   }
@@ -238,7 +249,7 @@ class MessageItem extends StatelessWidget {
     return !_isContinuous(prev, curr)
         ? [
             Text(
-              message.sender.nickname ?? '',
+              message.sender?.nickname ?? '',
               style: TextStyles.sendbirdCaption1OnLight2,
             ),
             SizedBox(height: 4),

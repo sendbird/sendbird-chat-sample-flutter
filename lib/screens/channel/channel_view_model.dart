@@ -19,13 +19,13 @@ enum UserEngagementState { typing, online, last_seen, none }
 class ChannelViewModel
     with ChangeNotifier, ChannelEventHandler, ConnectionEventHandler {
   List<BaseMessage> _messages = [];
-  GroupChannel channel;
-  String channelUrl;
-  File uploadFile;
+  late GroupChannel channel;
+  late String channelUrl;
+  File? uploadFile;
 
-  BaseMessage selectedMessage;
+  BaseMessage? selectedMessage;
 
-  User currentUser = sendbird.currentUser;
+  User currentUser = sendbird.currentUser!;
 
   bool hasNext = false;
   bool isLoading = false;
@@ -34,7 +34,7 @@ class ChannelViewModel
 
   final ScrollController lstController = ScrollController();
   final readDebouncer = Debouncer(milliseconds: 1000);
-  Timer _typingTimer;
+  Timer? _typingTimer;
 
   int get itemCount => hasNext ? _messages.length + 1 : _messages.length;
   bool get displayOnline => channel.members.length == 2;
@@ -45,13 +45,13 @@ class ChannelViewModel
         : UserEngagementState.none;
   }
 
-  String get lastSeenText {
+  String? get lastSeenText {
     if (channel.memberCount != 2) return null;
     final other =
         channel.members.where((e) => e.userId != currentUser.userId).first;
     final readStatus = channel.getReadStatus(false);
-    final receipt = readStatus[other.userId];
-    return (receipt['last_seen_at'] as int)?.readableLastSeen();
+    final receipt = readStatus[other.userId] ?? {};
+    return (receipt['last_seen_at'] as int).readableLastSeen();
   }
 
   String get typersText {
@@ -62,7 +62,7 @@ class ChannelViewModel
       return '${users.first.nickname} and ${users.last.nickname} is typing...';
     else if (users.length > 2)
       return '${users.first.nickname} and ${users.length - 1} more are typing...';
-    return null;
+    return '';
   }
 
   List<BaseMessage> get messages => _messages;
@@ -93,7 +93,7 @@ class ChannelViewModel
   }
 
   Future<void> loadMessages({
-    int timestamp,
+    int? timestamp,
     bool reload = false,
   }) async {
     if (isLoading) {
@@ -102,7 +102,10 @@ class ChannelViewModel
 
     isLoading = true;
 
-    final ts = reload ? DateTime.now().millisecondsSinceEpoch : timestamp;
+    final ts = reload
+        ? DateTime.now().millisecondsSinceEpoch
+        : timestamp ?? DateTime.now().millisecondsSinceEpoch;
+
     try {
       final params = MessageListParams()
         ..isInclusive = false
@@ -148,8 +151,6 @@ class ChannelViewModel
   }
 
   void onSendFileMessage(File file) async {
-    if (file == null) return;
-
     final params = FileMessageParams.withFile(file);
     final preMessage =
         channel.sendFileMessage(params, onCompleted: (msg, error) {
@@ -181,7 +182,7 @@ class ChannelViewModel
     }
   }
 
-  void onUpdateMessage(String updateText) async {
+  void onUpdateMessage(String? updateText) async {
     isEditing = false;
 
     if (updateText == null) {
@@ -194,7 +195,7 @@ class ChannelViewModel
 
     try {
       await channel.updateUserMessage(
-          selectedMessage.messageId, UserMessageParams(message: updateText));
+          selectedMessage!.messageId, UserMessageParams(message: updateText));
       selectedMessage = null;
       notifyListeners();
     } catch (e) {
@@ -248,7 +249,9 @@ class ChannelViewModel
 
   // ui helpers
 
-  void showProfile(BuildContext context, Sender sender) async {
+  void showProfile(BuildContext context, Sender? sender) async {
+    if (sender == null) return;
+
     final modal = ProfileModal(ctx: context, user: sender);
     final goToChannel = await modal.show();
     if (goToChannel) {
@@ -268,9 +271,9 @@ class ChannelViewModel
   }
 
   void showMessageMenu({
-    BuildContext context,
-    BaseMessage message,
-    Offset pos,
+    required BuildContext context,
+    required BaseMessage message,
+    required Offset pos,
   }) async {
     List<PopupMenuEntry> items = [];
     if (message is UserMessage) {
@@ -322,7 +325,7 @@ class ChannelViewModel
         setEditing(true);
         break;
       case PopupMenuType.copy:
-        onCopyText(selectedMessage.message);
+        onCopyText(message.message);
         selectedMessage = null;
         break;
       case PopupMenuType.delete:
@@ -337,17 +340,19 @@ class ChannelViewModel
 
   void _showDeleteConfirmation(BuildContext context) {
     // set up the buttons
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = TextButton(
       child: Text("Cancel"),
       onPressed: () {
         Navigator.pop(context);
       },
     );
-    Widget continueButton = FlatButton(
-      child: Text("Delete"),
-      color: Colors.red,
+    Widget continueButton = TextButton(
+      child: Text(
+        "Delete",
+        style: TextStyle(color: Colors.red),
+      ),
       onPressed: () {
-        onDeleteMessage(selectedMessage.messageId);
+        onDeleteMessage(selectedMessage!.messageId);
       },
     );
 
@@ -367,7 +372,8 @@ class ChannelViewModel
     );
   }
 
-  Widget _buildPopupItem(String text, String imageName, PopupMenuType value) {
+  PopupMenuEntry _buildPopupItem(
+      String text, String imageName, PopupMenuType value) {
     return PopupMenuItem(
         height: 40,
         child: Container(
@@ -484,5 +490,5 @@ class ChannelViewModel
 }
 
 extension Message on BaseMessage {
-  bool get isMyMessage => sender?.userId == sendbird.currentUser.userId;
+  bool get isMyMessage => sender?.userId == sendbird.currentUser?.userId;
 }

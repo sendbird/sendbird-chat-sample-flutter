@@ -37,10 +37,10 @@ class ChannelListItem extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    BaseMessage lastMessage = channel.lastMessage;
+    BaseMessage? lastMessage = channel.lastMessage;
     String message;
     if (lastMessage is FileMessage) {
-      message = lastMessage.name;
+      message = lastMessage.name ?? '';
     } else {
       message = lastMessage?.message ?? '';
     }
@@ -67,7 +67,7 @@ class ChannelListItem extends StatelessWidget {
   }
 
   Widget _buildTailing(BuildContext context) {
-    int lastDate = channel?.lastMessage?.createdAt ?? 0;
+    int lastDate = channel.lastMessage?.createdAt ?? 0;
     String lastMessageDateString = lastDate.readableTimestamp();
     final count = channel.unreadMessageCount <= 99
         ? '${channel.unreadMessageCount}'

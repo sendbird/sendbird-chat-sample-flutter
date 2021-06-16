@@ -16,7 +16,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 class ChannelScreen extends StatefulWidget {
   final String channelUrl;
 
-  ChannelScreen({this.channelUrl, Key key}) : super(key: key);
+  ChannelScreen({required this.channelUrl, Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChannelScreenState();
@@ -24,7 +24,7 @@ class ChannelScreen extends StatefulWidget {
 
 class _ChannelScreenState extends State<ChannelScreen>
     with PushHandler, WidgetsBindingObserver {
-  ChannelViewModel model;
+  late ChannelViewModel model;
   bool channelLoaded = false;
 
   @override
@@ -55,7 +55,7 @@ class _ChannelScreenState extends State<ChannelScreen>
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChannelViewModel>(
       create: (context) => model,
-      child: (model.channel == null)
+      child: (!channelLoaded)
           ? Scaffold(
               body: Center(
                 child: Container(
@@ -121,7 +121,7 @@ class _ChannelScreenState extends State<ChannelScreen>
 
   // build helpers
 
-  Widget _buildNavigationBar() {
+  AppBar _buildNavigationBar() {
     final currentUser = model.currentUser;
 
     return AppBar(
@@ -250,8 +250,8 @@ class _ChannelScreenState extends State<ChannelScreen>
                 },
               );
             } else if (message is AdminMessage) {
-              return AdminMessageItem(curr: message);
-            } else {
+              return AdminMessageItem(curr: message, model: model);
+            } else if (message is UserMessage) {
               return UserMessageItem(
                 curr: message,
                 prev: prev,
@@ -269,6 +269,9 @@ class _ChannelScreenState extends State<ChannelScreen>
                   );
                 },
               );
+            } else {
+              //undefined message type
+              return Container();
             }
           },
         ),

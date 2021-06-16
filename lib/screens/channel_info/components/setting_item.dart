@@ -13,15 +13,15 @@ class SettingItem extends StatelessWidget {
   final String iconImageName;
   final Size iconSize;
   final Color iconColor;
-  final Function onTap;
+  final Function()? onTap;
   final double height;
 
   SettingItem({
-    this.name,
-    this.iconImageName,
-    this.iconColor,
+    required this.name,
+    required this.iconImageName,
+    required this.iconColor,
     this.iconSize = const Size(20, 20),
-    this.height,
+    required this.height,
     this.onTap,
   });
 
@@ -49,9 +49,9 @@ class SettingItem extends StatelessWidget {
 }
 
 buildIcon({
-  String imageName,
+  required String imageName,
   Color color = SBColors.primary_300,
-  Size iconSize,
+  required Size iconSize,
 }) {
   return Container(
     height: iconSize.height,

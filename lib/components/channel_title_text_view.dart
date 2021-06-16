@@ -7,7 +7,7 @@ const groupChannelDefaultName = 'Group Channel';
 
 class ChannelTitleTextView extends StatelessWidget {
   final GroupChannel channel;
-  final String currentUserId;
+  final String? currentUserId;
 
   ChannelTitleTextView(this.channel, this.currentUserId);
 
@@ -21,7 +21,7 @@ class ChannelTitleTextView extends StatelessWidget {
       ];
       titleText = namesList.join(", ");
     } else {
-      titleText = channel.name;
+      titleText = channel.name ?? 'Channel';
     }
     //if channel members == 2 show last seen / online
     //otherwise just text

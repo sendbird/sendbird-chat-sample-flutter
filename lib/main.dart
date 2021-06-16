@@ -13,7 +13,7 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)..maxConnectionsPerHost = 10;
   }
 }
@@ -25,10 +25,10 @@ final appState = AppState();
 
 class AppState with ChangeNotifier {
   bool didRegisterToken = false;
-  String token;
-  String destChannelUrl;
+  String? token;
+  String? destChannelUrl;
 
-  void setDestination(String channelUrl) {
+  void setDestination(String? channelUrl) {
     destChannelUrl = channelUrl;
     notifyListeners();
   }
@@ -53,12 +53,14 @@ class MyAppState extends State<MyApp> {
       onLaunch: (data) async {
         //launch
         print('onLaunch: $data');
-        appState.setDestination(data['sendbird']['channel']['channel_url']);
+        final rawData = data.data;
+        appState.setDestination(rawData['sendbird']['channel']['channel_url']);
       },
       onResume: (data) async {
         //called when user tap on push notification
         print('onResume');
-        appState.setDestination(data['sendbird']['channel']['channel_url']);
+        final rawData = data.data;
+        appState.setDestination(rawData['sendbird']['channel']['channel_url']);
       },
       onMessage: (data) async {
         //terminated? background
@@ -98,11 +100,11 @@ class MyAppState extends State<MyApp> {
           '/channel_list': (context) => ChannelListScreen(),
           '/create_channel': (context) => CreateChannelScreen(),
           '/channel_info': (context) =>
-              ChannelInfoScreen(channel: settings.arguments),
+              ChannelInfoScreen(channel: settings.arguments as GroupChannel),
           '/channel': (context) =>
-              ChannelScreen(channelUrl: settings.arguments),
+              ChannelScreen(channelUrl: settings.arguments as String),
         };
-        WidgetBuilder builder = routes[settings.name];
+        WidgetBuilder builder = routes[settings.name]!;
         return MaterialPageRoute(
           settings: settings,
           builder: (ctx) => builder(ctx),
@@ -126,11 +128,11 @@ class MyAppState extends State<MyApp> {
   }
 }
 
-Future<dynamic> handleBackgroundMessage(Map<String, dynamic> data) async {
+Future<dynamic> handleBackgroundMessage(RemoteMessage data) async {
   print('onBackground $data'); // android only for firebase_messaging v7
   NotificationService.showNotification(
     'Sendbird Example',
-    data['data']['message'],
-    payload: data['data']['sendbird'],
+    data.data['data']['message'],
+    payload: data.data['data']['sendbird'],
   );
 }

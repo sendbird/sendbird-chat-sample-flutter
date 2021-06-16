@@ -10,7 +10,7 @@ class ProfileModal {
   final BuildContext ctx;
   final User user;
 
-  ProfileModal({@required this.ctx, this.user});
+  ProfileModal({required this.ctx, required this.user});
 
   Future<bool> show() {
     final wait = Completer<bool>();
@@ -39,10 +39,10 @@ class ProfileModal {
 }
 
 class UserProfile extends StatelessWidget {
-  final Sender sender;
-  final Function(String) onPressedMessage;
+  final User sender;
+  final Function(String)? onPressedMessage;
 
-  UserProfile({this.sender, this.onPressedMessage});
+  UserProfile({required this.sender, this.onPressedMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -70,16 +70,17 @@ class UserProfile extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextButton(
-                    child: Text(
-                      'Message',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                      child: Text(
+                        'Message',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    onPressed: () => onPressedMessage(sender.userId),
-                  ),
+                      onPressed: () => onPressedMessage != null
+                          ? onPressedMessage!(sender.userId)
+                          : null),
                 )
               ],
             ),

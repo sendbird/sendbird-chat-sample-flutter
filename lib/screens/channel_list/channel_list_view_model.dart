@@ -6,11 +6,11 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   GroupChannelListQuery query = GroupChannelListQuery()..limit = 10;
-  User currentUser = sendbird.currentUser;
+  User? currentUser = sendbird.currentUser;
   List<GroupChannel> groupChannels = [];
 
   bool isLoading = false;
-  String destChannelUrl;
+  String? destChannelUrl;
   bool isVisible = true;
   final ScrollController lstController = ScrollController();
 
@@ -36,7 +36,7 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
     print('loading channels...');
     if (destChannelUrl != null) {
       navigatorKey.currentState
-          .pushNamed('/channel', arguments: destChannelUrl);
+          ?.pushNamed('/channel', arguments: destChannelUrl);
       destChannelUrl = null;
     }
 
@@ -62,17 +62,18 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
 
   void logout() async {
     appState.didRegisterToken = false;
-    if (appState.token != null)
-      await sendbird.unregisterPushToken(
-          type: PushTokenType.fcm, token: appState.token);
+    final token = appState.token;
+    if (token != null)
+      await sendbird.unregisterPushToken(type: PushTokenType.fcm, token: token);
     sendbird.disconnect();
   }
 
   _registerTokenIfNeeded() async {
-    if (appState.token != null)
+    final token = appState.token;
+    if (token != null)
       await sendbird.registerPushToken(
         type: Platform.isIOS ? PushTokenType.apns : PushTokenType.fcm,
-        token: appState.token,
+        token: token,
       );
   }
 
@@ -87,6 +88,8 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
 
   @override
   void onChannelChanged(BaseChannel channel) {
+    if (channel is! GroupChannel) return;
+
     groupChannels = [...groupChannels];
 
     final index = groupChannels
@@ -109,6 +112,8 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
 
   @override
   void onMessageReceived(BaseChannel channel, BaseMessage message) {
+    if (channel is! GroupChannel) return;
+
     groupChannels = [...groupChannels];
     final index = groupChannels
         .indexWhere((element) => element.channelUrl == channel.channelUrl);
@@ -126,7 +131,7 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   void onUserLeaved(GroupChannel channel, User user) {
     groupChannels = [...groupChannels];
 
-    if (user.userId == currentUser.userId) {
+    if (user.userId == currentUser?.userId) {
       final index = groupChannels
           .indexWhere((element) => element.channelUrl == channel.channelUrl);
       if (index != -1) {

@@ -9,7 +9,7 @@ import 'package:sendbird_flutter/styles/text_style.dart';
 class AttachmentModal {
   final BuildContext context;
 
-  AttachmentModal({@required this.context});
+  AttachmentModal({required this.context});
 
   Future<File> getFile() {
     final wait = Completer<File>();
@@ -64,7 +64,7 @@ class AttachmentModal {
     return wait.future;
   }
 
-  Future<File> _showPicker(ImageSource source) async {
+  Future<File?> _showPicker(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: source);
     if (pickedFile != null) {

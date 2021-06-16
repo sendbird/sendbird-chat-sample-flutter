@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class AvatarView extends StatelessWidget {
-  final GroupChannel channel;
-  final User user;
-  final String currentUserId;
+  final GroupChannel? channel;
+  final User? user;
+  final String? currentUserId;
   final double width;
   final double height;
-  final Function onPressed;
+  final Function()? onPressed;
 
   AvatarView({
     this.channel,
@@ -25,19 +25,19 @@ class AvatarView extends StatelessWidget {
 
     var images = <Widget>[];
     if (channel != null) {
-      if (channel.memberCount >= 3) {
+      if (channel!.memberCount >= 3) {
         crossAxisCount = 2;
       }
 
       images = [
-        for (final member in channel.members)
+        for (final member in channel!.members)
           if (member.userId != currentUserId && member.profileUrl != '')
-            Image(image: NetworkImage(member.profileUrl), fit: BoxFit.cover)
+            Image(image: NetworkImage(member.profileUrl!), fit: BoxFit.cover)
       ];
     } else if (user != null) {
-      if (user.profileUrl != '')
+      if (user?.profileUrl != '')
         images = [
-          Image(image: NetworkImage(user.profileUrl), fit: BoxFit.cover)
+          Image(image: NetworkImage(user!.profileUrl!), fit: BoxFit.cover)
         ];
       else
         images = [Image(image: AssetImage('assets/iconAvatarLight@3x.png'))];

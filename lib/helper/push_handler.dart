@@ -8,26 +8,26 @@ enum PopType {
 }
 
 abstract class PushHandler {
-  void screenBecomeVisible(bool visible, {PopType pop}) {
+  void screenBecomeVisible(bool visible, {PopType pop = PopType.pop}) {
     if (appState.destChannelUrl != null && visible) {
       if (pop == PopType.replace)
-        navigatorKey.currentState.pushReplacementNamed(
+        navigatorKey.currentState?.pushReplacementNamed(
           '/channel',
           arguments: appState.destChannelUrl,
         );
       else if (pop == PopType.pop)
-        navigatorKey.currentState.popAndPushNamed(
+        navigatorKey.currentState?.popAndPushNamed(
           '/channel',
           arguments: appState.destChannelUrl,
         );
       else if (pop == PopType.popUntil)
-        navigatorKey.currentState.pushNamedAndRemoveUntil(
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
           '/channel',
           ModalRoute.withName('/channel_list'),
           arguments: appState.destChannelUrl,
         );
       else
-        navigatorKey.currentState.pushNamed(
+        navigatorKey.currentState?.pushNamed(
           '/channel',
           arguments: appState.destChannelUrl,
         );

@@ -8,7 +8,7 @@ class LoginViewModel with ChangeNotifier {
   LoginViewModel();
 
   Future<User> login(String userId, String nickname) async {
-    if (userId == null || userId == '') {
+    if (userId == '') {
       throw Error();
     }
 
@@ -21,11 +21,11 @@ class LoginViewModel with ChangeNotifier {
 
       // connect to sendbird server
       final user = await sendbird.connect(userId);
-      final name = nickname == '' || nickname == null ? user.userId : nickname;
+      final name = nickname == '' ? user.userId : nickname;
 
       // update user nickname and profile url
       await sendbird.updateCurrentUserInfo(nickname: name);
-
+      // await user.createMetaData({'phone': 'value222'});
       // imageInfo: s.ImageInfo.fromUrl(
       //     name: 'my pic',
       //     url: 'image url here',
@@ -73,12 +73,13 @@ class LoginViewModel with ChangeNotifier {
             borderRadius: new BorderRadius.circular(15),
           ),
           actions: <Widget>[
-            new FlatButton(
-              child: new Text(
+            TextButton(
+              child: Text(
                 "OK",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Theme.of(context).buttonColor,
+                    fontWeight: FontWeight.bold),
               ),
-              textColor: Theme.of(context).buttonColor,
               onPressed: () {
                 Navigator.pop(context);
               },
