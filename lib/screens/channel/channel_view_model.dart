@@ -329,7 +329,7 @@ class ChannelViewModel
         selectedMessage = null;
         break;
       case PopupMenuType.delete:
-        _showDeleteConfirmation(context);
+        await _showDeleteConfirmation(context);
         selectedMessage = null;
         break;
       default:
@@ -338,7 +338,7 @@ class ChannelViewModel
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  Future _showDeleteConfirmation(BuildContext context) async {
     // set up the buttons
     Widget cancelButton = TextButton(
       child: Text("Cancel"),
@@ -353,6 +353,7 @@ class ChannelViewModel
       ),
       onPressed: () {
         onDeleteMessage(selectedMessage!.messageId);
+        Navigator.pop(context);
       },
     );
 
@@ -364,7 +365,7 @@ class ChannelViewModel
     );
 
     // show the dialog
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
