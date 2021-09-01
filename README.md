@@ -41,8 +41,8 @@ This sample consists of several features, including:
 The minimum requirements for this demo are:
 
 - Xcode or Android studio 
-- Dart 2.10.4
-- Flutter 1.22.x or higher
+- Dart 2.13.0
+- Flutter 2.0.0 or higher
 
 <br />
 
