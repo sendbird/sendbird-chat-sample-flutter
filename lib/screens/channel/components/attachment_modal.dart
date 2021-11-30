@@ -53,7 +53,7 @@ class AttachmentModal {
                   title: Text('Cancel'),
                   onTap: () {
                     Navigator.pop(context);
-                    wait.complete(null);
+                    return null;
                   },
                 ),
               ],
