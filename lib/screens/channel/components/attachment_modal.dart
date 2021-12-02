@@ -11,8 +11,8 @@ class AttachmentModal {
 
   AttachmentModal({required this.context});
 
-  Future<File> getFile() {
-    final wait = Completer<File>();
+  Future<File?> getFile() {
+    final wait = Completer<File?>();
 
     showModalBottomSheet(
         context: context,
@@ -66,7 +66,7 @@ class AttachmentModal {
 
   Future<File?> _showPicker(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: source);
+    final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
       return File(pickedFile.path);
     }

@@ -8,6 +8,7 @@ import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_flutter/screens/channel/components/attachment_modal.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_flutter/screens/channel/components/user_profile.dart';
+import 'package:sendbird_flutter/screens/login/login_view_model.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/utils/debounce.dart';
 import 'package:sendbird_flutter/utils/extensions.dart';
@@ -267,7 +268,7 @@ class ChannelViewModel
   void showPlusMenu(BuildContext context) async {
     final modal = AttachmentModal(context: context);
     final file = await modal.getFile();
-    onSendFileMessage(file);
+    if (file != null) onSendFileMessage(file);
   }
 
   void showMessageMenu({
