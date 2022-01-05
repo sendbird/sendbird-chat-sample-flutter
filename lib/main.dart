@@ -10,6 +10,7 @@ import 'package:sendbird_flutter/screens/login/login_screen.dart';
 import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/utils/notification_service.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -20,7 +21,8 @@ class MyHttpOverrides extends HttpOverrides {
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 final sendbird = SendbirdSdk(appId: 'F1B15151-BBF2-487E-BCD1-623B621AAE94');
-final connector = createPushConnector();
+//* If web Do not create push connector
+final connector = kIsWeb ? null : createPushConnector();
 final appState = AppState();
 
 class AppState with ChangeNotifier {
@@ -45,10 +47,12 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final PushConnector connector = createPushConnector();
+  //* If web do not create push Connector
+  final PushConnector? connector = kIsWeb ? null : createPushConnector();
 
   Future<void> _register() async {
-    final connector = this.connector;
+    //if it is not web: connector will exist
+    final connector = this.connector!;
     connector.configure(
       onLaunch: (data) async {
         //launch
@@ -77,7 +81,11 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _register();
+    //* If web do not register
+    if (kIsWeb == false) {
+      _register();
+    }
+
     super.initState();
   }
 
