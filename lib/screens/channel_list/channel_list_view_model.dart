@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sendbird_flutter/main.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
   GroupChannelListQuery query = GroupChannelListQuery()..limit = 10;
@@ -72,7 +73,11 @@ class ChannelListViewModel with ChangeNotifier, ChannelEventHandler {
     final token = appState.token;
     if (token != null)
       await sendbird.registerPushToken(
-        type: Platform.isIOS ? PushTokenType.apns : PushTokenType.fcm,
+        type: kIsWeb
+            ? PushTokenType.none
+            : Platform.isIOS
+                ? PushTokenType.apns
+                : PushTokenType.fcm,
         token: token,
       );
   }

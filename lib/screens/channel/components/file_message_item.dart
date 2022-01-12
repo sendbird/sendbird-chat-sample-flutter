@@ -4,6 +4,7 @@ import 'package:sendbird_flutter/screens/channel/channel_view_model.dart';
 import 'package:sendbird_flutter/screens/channel/components/message_item.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:sendbird_flutter/styles/color.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class FileMessageItem extends MessageItem {
   FileMessageItem({
@@ -27,7 +28,7 @@ class FileMessageItem extends MessageItem {
   @override
   Widget get content => ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: (curr as FileMessage).localFile != null
+        child: ((curr as FileMessage).localFile != null && kIsWeb == false)
             ? Container(
                 child: FittedBox(
                   child: Image.file((curr as FileMessage).localFile!),

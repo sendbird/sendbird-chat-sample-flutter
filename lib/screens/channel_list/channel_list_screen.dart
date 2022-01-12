@@ -9,6 +9,7 @@ import 'package:sendbird_flutter/styles/color.dart';
 import 'package:sendbird_flutter/styles/text_style.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ChannelListScreen extends StatefulWidget {
   @override
@@ -67,7 +68,11 @@ class _ChannelListScreenState extends State<ChannelListScreen>
       toolbarHeight: 65,
       elevation: 1,
       backgroundColor: Colors.white,
-      automaticallyImplyLeading: Platform.isAndroid == true ? false : true,
+      automaticallyImplyLeading: kIsWeb
+          ? false
+          : Platform.isAndroid == true
+              ? false
+              : true,
       title: Text('Channels', style: TextStyles.sendbirdH2OnLight1),
       actions: [
         Container(
