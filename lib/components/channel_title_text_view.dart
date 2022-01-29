@@ -25,11 +25,33 @@ class ChannelTitleTextView extends StatelessWidget {
     }
     //if channel members == 2 show last seen / online
     //otherwise just text
-    return Text(
-      titleText,
-      maxLines: 1,
-      style: TextStyles.sendbirdSubtitle1OnLight1,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      children: [
+        Container(
+          height: 10,
+          width: 10,
+          margin: EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            color: connectionStatus,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        Text(
+          titleText,
+          maxLines: 1,
+          style: TextStyles.sendbirdSubtitle1OnLight1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
+  }
+
+  Color get connectionStatus {
+    var _countOnline = channel.members
+        .where(
+          (member) => member.connectionStatus == UserConnectionStatus.online,
+        )
+        .toList();
+    return (_countOnline.length > 1) ? Colors.green : Colors.grey;
   }
 }

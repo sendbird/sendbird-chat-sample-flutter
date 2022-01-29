@@ -176,7 +176,10 @@ class _ChannelScreenState extends State<ChannelScreen>
 
   Widget _buildTitle(UserEngagementState ue) {
     List<Widget> headers = [
-      ChannelTitleTextView(model.channel, model.currentUser.userId)
+      ChannelTitleTextView(
+        model.channel,
+        model.currentUser.userId,
+      )
     ];
 
     switch (ue) {
