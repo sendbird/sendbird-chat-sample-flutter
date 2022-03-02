@@ -1,7 +1,9 @@
 import 'dart:io';
-
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/flutter_apns.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sendbird_flutter/screens/channel/channel_screen.dart';
 import 'package:sendbird_flutter/screens/channel_info/channel_info_screen.dart';
 import 'package:sendbird_flutter/screens/channel_list/channel_list_screen.dart';
@@ -20,9 +22,10 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-final sendbird = SendbirdSdk(appId: 'F1B15151-BBF2-487E-BCD1-623B621AAE94');
+final sendbird = SendbirdSdk(appId: 'FF6E181B-6325-4A32-AA6D-B1ADA6BAEE95');
 //* If web Do not create push connector
 final connector = kIsWeb ? null : createPushConnector();
+
 final appState = AppState();
 
 class AppState with ChangeNotifier {
@@ -36,8 +39,21 @@ class AppState with ChangeNotifier {
   }
 }
 
-void main() {
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    'This channel is used for important notifications.', // description
+    importance: Importance.high,
+    playSound: true);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   HttpOverrides.global = MyHttpOverrides();
+
   runApp(MyApp());
 }
 
@@ -62,13 +78,54 @@ class MyAppState extends State<MyApp> {
       },
       onResume: (data) async {
         //called when user tap on push notification
-        print('onResume');
         final rawData = data.data;
         appState.setDestination(rawData['sendbird']['channel']['channel_url']);
+
+        //? Android Notification
+        RemoteNotification? notification = data.notification;
+        AndroidNotification? android = data.notification?.android;
+        if (notification != null && android != null) {
+          showDialog(
+              context: context,
+              builder: (_) {
+                return AlertDialog(
+                  title: Text(notification.title ?? 'Alert'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text(notification.body ?? 'empty body')],
+                    ),
+                  ),
+                );
+              });
+        }
       },
-      onMessage: (data) async {
+      onMessage: (RemoteMessage data) async {
         //terminated? background
         print('onMessage: $data');
+
+        //? Android Notification
+        RemoteNotification? notification = data.notification;
+        AndroidNotification? android = data.notification?.android;
+
+        var value = data.data['sendbird'];
+        var body = jsonDecode(value);
+
+        await flutterLocalNotificationsPlugin.show(
+            DateTime.now().second,
+            body['push_title'] ?? 'EMPTY',
+            body['message'],
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+        // }
       },
       onBackgroundMessage: handleBackgroundMessage,
     );
@@ -77,6 +134,23 @@ class MyAppState extends State<MyApp> {
       appState.token = connector.token.value;
     });
     connector.requestNotificationPermissions();
+
+    if (Platform.isAndroid) {
+      /// Android
+      FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
   }
 
   @override
@@ -138,9 +212,12 @@ class MyAppState extends State<MyApp> {
 
 Future<dynamic> handleBackgroundMessage(RemoteMessage data) async {
   print('onBackground $data'); // android only for firebase_messaging v7
+
+  var messageBody = data.data['message'];
+
   NotificationService.showNotification(
     'Sendbird Example',
-    data.data['data']['message'],
-    payload: data.data['data']['sendbird'],
+    messageBody,
+    payload: data.data['sendbird'],
   );
 }
