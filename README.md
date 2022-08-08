@@ -25,7 +25,6 @@ This sample consists of several features, including:
 * Create / fetch / update a group channel  
 * Send / update / delete a message (user and file message)
 * Receive channel events and handle appropriately
-* Push notification 
 
 <br />
 
@@ -54,7 +53,6 @@ This sample demonstrates a few example how you can use SDK on your application. 
 * Create / fetch / update a group channel  
 * Send / update / delete a message (user and file message)
 * Receive channel events and handle appropriately
-* Push notification 
 
 You can either download or clone this repository then run `flutter run` in the directory to run the sample.
 

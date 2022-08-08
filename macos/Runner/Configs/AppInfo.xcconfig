@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = sendbird_flutter
+PRODUCT_NAME = app
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.sendbird.sendbirdFlutter
+PRODUCT_BUNDLE_IDENTIFIER = com.example.app
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 com.sendbird. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2022 com.example. All rights reserved.
