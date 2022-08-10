@@ -9,11 +9,11 @@ This sample demonstrates how you can use [Sendbird's Flutter SDK](https://github
 
 ## Table of contents
 
-  1. [Introduction](#introduction)
-  1. [Requirements](#requirements)
-  1. [Getting started](#getting-started)
-  1. [Getting help](#getting-help)
-  1. [Hiring](#we-are-hiring)
+1. [Introduction](#introduction)
+1. [Requirements](#requirements)
+1. [Getting started](#getting-started)
+1. [Getting help](#getting-help)
+1. [Hiring](#we-are-hiring)
 
 <br />
 
@@ -21,10 +21,10 @@ This sample demonstrates how you can use [Sendbird's Flutter SDK](https://github
 
 This sample consists of several features, including:
 
-* Connecting and disconnecting from Sendbird 
-* Create / fetch / update a group channel  
-* Send / update / delete a message (user and file message)
-* Receive channel events and handle appropriately
+- Connecting and disconnecting from Sendbird
+- Create / fetch / update a group channel
+- Send / update / delete a message (user and file message)
+- Receive channel events and handle appropriately
 
 <br />
 
@@ -39,7 +39,7 @@ This sample consists of several features, including:
 
 The minimum requirements for this demo are:
 
-- Xcode or Android studio 
+- Xcode or Android studio
 - Dart 2.13.0
 - Flutter 2.0.0 or higher
 
@@ -49,19 +49,28 @@ The minimum requirements for this demo are:
 
 This sample demonstrates a few example how you can use SDK on your application. The sample consists of the following:
 
-* Connect and disconnect from Sendbird 
-* Create / fetch / update a group channel  
-* Send / update / delete a message (user and file message)
-* Receive channel events and handle appropriately
+- Connect and disconnect from Sendbird
+- Create / fetch / update/ delete a group channel
+- Send / fetch/ update / delete a message (user and file message)
+- Receive channel events and handle appropriately
+- Update/ Fetch user profile information (profile image/ nickname)
+- Retrieve a list of group channels
+- Retrieve last message of a channel
+- Mark messages as read
 
 You can either download or clone this repository then run `flutter run` in the directory to run the sample.
+
+To test with your own Senbird dashboard application.
+First create a dashboard application by visiting [Senbird Dashboard Page](https://dashboard.sendbird.com). After creating a dashboard application copy Application ID, which is located in the Overview tab in the application dashboard you have created, then paste the Application ID in the `authentication_controller.dart` file under "Replace Sendbird Dashboard appId". Then run `flutter run` in the directory to run the sample with your own dashboard application.
 
 <br />
 
 ## Getting Help
+
 Check out the Official Sendbird [Flutter docs](https://sendbird.com/docs/chat/v3/flutter/quickstart/send-first-message?&utm_source=github&utm_medium=referral&utm_campaign=repo&utm_content=sendbird-chat-flutter-sample) and Sendbird's [Developer Portal](https://sendbird.com/developer) for tutorials and videos. If you need any help in resolving any issues or have questions, visit our [community forums](https://community.sendbird.com?&utm_source=github&utm_medium=referral&utm_campaign=repo&utm_content=sendbird-chat-flutter-sample).
 
 <br />
 
 ## We are Hiring!
+
 Sendbird is made up of a diverse group of humble, friendly, and hardworking individuals united by a shared purpose to build the next generation of mobile & social technologies. Join our team remotely or at one of our locations in San Mateo, Seoul, New York, London, and Singapore. More information on a [careers page](https://sendbird.com/careers?&utm_source=github&utm_medium=referral&utm_campaign=repo&utm_content=sendbird-chat-flutter-sample).
