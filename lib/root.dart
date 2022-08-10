@@ -1,7 +1,7 @@
+import 'package:app/basic_examples/basic_example_route.dart';
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:app/features_example/features_example_route.dart';
 import 'package:app/login_route.dart';
-import 'package:app/main_examples/main_example_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,7 +57,7 @@ class RootRouteState extends State<RootRoute> {
       case AuthStatus.signedIn:
         switch (_examples) {
           case Examples.main:
-            return const MainExampleRoute();
+            return const BasicExampleRoute();
           case Examples.features:
             return const FeaturesExampleRoute();
         }
