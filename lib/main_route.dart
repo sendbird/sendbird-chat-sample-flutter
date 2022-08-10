@@ -28,12 +28,16 @@ class MainRoute extends StatelessWidget {
             const SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                Get.toNamed(
-                  '/RootRoute',
-                  arguments: Examples.features,
-                );
+                // TODO Unimplemented
+                // Get.toNamed(
+                //   '/RootRoute',
+                //   arguments: Examples.features,
+                // );
               },
-              child: const Text('Features Example'),
+              child: const Text(
+                'Features Example',
+                style: TextStyle(color: Colors.black26),
+              ),
             ),
           ],
         ),

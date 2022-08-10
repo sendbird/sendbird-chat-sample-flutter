@@ -64,7 +64,7 @@ class LoginRouteState extends State<LoginRoute> {
 
                   switch (widget.examples) {
                     case Examples.main:
-                      Get.toNamed('/MainExampleRoute');
+                      Get.toNamed('/BasicExampleRoute');
                       break;
                     case Examples.features:
                       Get.toNamed('/FeaturesExampleRoute');

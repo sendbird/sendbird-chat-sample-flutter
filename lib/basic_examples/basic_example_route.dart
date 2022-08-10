@@ -32,9 +32,13 @@ class MainExampleRouteState extends State<MainExampleRoute> {
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
-                  Get.toNamed('/OpenChannelRoute');
+                  //TODO Unimplemented
+                  // Get.toNamed('/OpenChannelRoute');
                 },
-                child: const Text('Open Channel Example'),
+                child: const Text(
+                  'Open Channel Example',
+                  style: TextStyle(color: Colors.black26),
+                ),
               ),
             ],
           ),
