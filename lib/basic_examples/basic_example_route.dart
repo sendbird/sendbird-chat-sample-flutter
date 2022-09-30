@@ -4,14 +4,14 @@ import 'package:app/controllers/authentication_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MainExampleRoute extends StatefulWidget {
-  const MainExampleRoute({Key? key}) : super(key: key);
+class BasicExampleRoute extends StatefulWidget {
+  const BasicExampleRoute({Key? key}) : super(key: key);
 
   @override
-  MainExampleRouteState createState() => MainExampleRouteState();
+  BasicExampleRouteState createState() => BasicExampleRouteState();
 }
 
-class MainExampleRouteState extends State<MainExampleRoute> {
+class BasicExampleRouteState extends State<BasicExampleRoute> {
   final BaseAuth _authentication = Get.find<AuthenticationController>();
 
   @override
