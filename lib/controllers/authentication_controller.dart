@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:app/main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:sendbird_sdk/request/channel/file_upload_request.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 abstract class BaseAuth {
   Future<User> login({
@@ -48,13 +53,28 @@ class AuthenticationController extends GetxController implements BaseAuth {
     String? wsHost,
   }) async {
     try {
-      return await _sendbird.connect(
+      final user = await _sendbird.connect(
         userId,
         nickname: nickName,
         accessToken: accessToken,
         apiHost: apiHost,
         wsHost: wsHost,
       );
+      final token = appState.token;
+      //register push notification token for sendbird notification
+      if (token != null) {
+        print('registering push token through sendbird server...');
+        await _sendbird.registerPushToken(
+          type: kIsWeb
+              ? PushTokenType.none
+              : Platform.isIOS
+                  ? PushTokenType.apns
+                  : PushTokenType.fcm,
+          token: token,
+        );
+      }
+
+      return user;
     } catch (e) {
       throw Exception([e, 'Connecting with Sendbird Server has failed']);
     }

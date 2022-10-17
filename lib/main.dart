@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:app/main_binding.dart';
 import 'package:app/routes.dart';
 import 'package:app/util/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/apns.dart';
@@ -12,6 +13,8 @@ import 'package:get/get.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   return runApp(const MyApp());
 }
 
@@ -53,9 +56,11 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   final PushConnector? connector = kIsWeb ? null : createPushConnector();
 
-  Future<void> registerNotification() async {
+  Future<void> _registerNotification() async {
+    print('registering nofication...');
     connector?.configure(
       onLaunch: (message) async {
+        print('launch');
         //launch
         print('onLaunch: $message');
         final rawData = message.data;
@@ -86,6 +91,7 @@ class MyAppState extends State<MyApp> {
         }
       },
       onMessage: (RemoteMessage data) async {
+        print('OnMessage: ');
         //terminated? background
         print('onMessage: $data');
 
@@ -114,7 +120,7 @@ class MyAppState extends State<MyApp> {
       },
       onBackgroundMessage: handleBackgroundMessage,
     );
-    connector?.token.addListener(() {
+    connector?.token.addListener(() async {
       print('Token ${connector?.token.value}');
       appState.token = connector?.token.value;
     });
@@ -140,6 +146,9 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    if (kIsWeb == false) {
+      _registerNotification();
+    }
     super.initState();
   }
 
