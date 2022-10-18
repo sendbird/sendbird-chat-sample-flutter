@@ -2,3 +2,6 @@
 build/
 .flutter-plugins*
 .packages
+.DS_Store
+.idea
+.vscode
