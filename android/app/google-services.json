@@ -1,40 +1,40 @@
 {
   "project_info": {
-    "project_number": "469658421008",
-    "project_id": "sendbird-flutter-f2eed",
-    "storage_bucket": "sendbird-flutter-f2eed.appspot.com"
+    "project_number": "922365158617",
+    "project_id": "sendbird-sample-v2",
+    "storage_bucket": "sendbird-sample-v2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:469658421008:android:5a831d02078f8f00f9c795",
+        "mobilesdk_app_id": "1:922365158617:android:4e6c26b583ddc839188ac8",
         "android_client_info": {
-          "package_name": "com.sendbird.flutter_example"
+          "package_name": "com.sendbird.sampleAppV2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "469658421008-k1hnnbeg4selh71m9tnn1d6bdb02ft4f.apps.googleusercontent.com",
+          "client_id": "922365158617-bbonnd4tuj2disqe9b92ie1h7nt84uiv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCVlJGiciuPXIYjYN-r_vHlyWMkkDFq68I"
+          "current_key": "AIzaSyCGlgMg3CKUDutQ-CsNR_vL2-2WLld2ODQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "469658421008-k1hnnbeg4selh71m9tnn1d6bdb02ft4f.apps.googleusercontent.com",
+              "client_id": "922365158617-bbonnd4tuj2disqe9b92ie1h7nt84uiv.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "469658421008-quvv29ni2gkhuq8rvugsam8qvje9tqlu.apps.googleusercontent.com",
+              "client_id": "922365158617-fk7c64ua9el8c7caqk2e6bnrif88ln96.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.sendbird.flutter"
+                "bundle_id": "com.sendbird.sv2"
               }
             }
           ]

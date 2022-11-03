@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:app/main_binding.dart';
@@ -7,10 +6,18 @@ import 'package:app/util/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_apns/apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'components/push_notification.dart';
+
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling background message: ${message.messageId}");
+  NotificationService.showNotification(
+    message.notification?.title ?? '',
+    message.notification?.body ?? '',
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +37,6 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 }
-
-//Creates correct type of push connector based on device (IOS, Android)
-final connector = kIsWeb ? null : createPushConnector();
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
@@ -54,101 +58,86 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final PushConnector? connector = kIsWeb ? null : createPushConnector();
+  late int _totalNotifications;
+  late final FirebaseMessaging _messaging;
+  PushNotification? _notificationInfo;
 
-  Future<void> _registerNotification() async {
-    print('registering nofication...');
-    connector?.configure(
-      onLaunch: (message) async {
-        print('launch');
-        //launch
-        print('onLaunch: $message');
-        final rawData = message.data;
-        appState.setDestination(rawData['sendbird']['channel']['channel_url']);
-      },
-      onResume: (data) async {
-        //called when user tap on push notification
-        final rawData = data.data;
-        appState.setDestination(rawData['sendbird']['channel']['channel_url']);
+  // [Push Notification Set Up]
+  void requestAndRegisterNotification() async {
+    // Initialize the Firebase app
+    await Firebase.initializeApp();
 
-        //? Android Notification
-        RemoteNotification? notification = data.notification;
-        AndroidNotification? android = data.notification?.android;
-        if (notification != null && android != null) {
-          showDialog(
-              context: context,
-              builder: (_) {
-                return AlertDialog(
-                  title: Text(notification.title ?? 'Alert'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Text(notification.body ?? 'empty body')],
-                    ),
-                  ),
-                );
-              });
-        }
-      },
-      onMessage: (RemoteMessage data) async {
-        print('OnMessage: ');
-        //terminated? background
-        print('onMessage: $data');
+    // Instantiate Firebase Messaging
+    _messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-        //? Android Notification
-        RemoteNotification? notification = data.notification;
-        AndroidNotification? android = data.notification?.android;
-
-        var value = data.data['sendbird'];
-        var body = jsonDecode(value);
-
-        await flutterLocalNotificationsPlugin.show(
-            DateTime.now().second,
-            body['push_title'] ?? 'EMPTY',
-            body['message'],
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channelDescription: channel.description,
-                color: Colors.blue,
-                playSound: true,
-                icon: '@mipmap/ic_launcher',
-              ),
-            ));
-        // }
-      },
-      onBackgroundMessage: handleBackgroundMessage,
+    // To enable foreground notification in firebase messaging for IOS
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true, // Required to display a heads up notification
+      badge: true,
+      sound: true,
     );
-    connector?.token.addListener(() async {
-      print('Token ${connector?.token.value}');
-      appState.token = connector?.token.value;
-    });
-    connector?.requestNotificationPermissions();
 
-    if (Platform.isAndroid) {
-      /// Android
-      FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+    // On iOS, this helps to take the user permissions
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      provisional: false,
+      sound: true,
+    );
 
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+      String? token;
 
-      await FirebaseMessaging.instance
-          .setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      if (Platform.isIOS) {
+        //Retrieve pushtoken for IOS
+        token = await _messaging.getAPNSToken();
+      } else {
+        // Retrieve pushtoken for FCM
+        token = await _messaging.getToken();
+      }
+
+      appState.token = token;
+      // For handling the received notifications
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('title: ${message.notification?.title}');
+        print('body: ${message.notification?.body}');
+        // Parse the message received
+        PushNotification notification = PushNotification(
+          title: message.notification?.title,
+          body: message.notification?.body,
+        );
+
+        setState(() {
+          _notificationInfo = notification;
+          _totalNotifications++;
+        });
+        if (_notificationInfo != null) {
+          NotificationService.showNotification(
+              _notificationInfo?.title ?? '', _notificationInfo?.body ?? '');
+        }
+      });
+    } else {
+      print('User declined or has not accepted permission');
     }
   }
 
   @override
   void initState() {
-    if (kIsWeb == false) {
-      _registerNotification();
-    }
+    requestAndRegisterNotification();
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      PushNotification notification = PushNotification(
+        title: message.notification?.title,
+        body: message.notification?.body,
+      );
+      setState(() {
+        _notificationInfo = notification;
+        _totalNotifications++;
+      });
+    });
+    _totalNotifications = 0;
     super.initState();
   }
 
@@ -162,16 +151,4 @@ class MyAppState extends State<MyApp> {
       initialBinding: MainBinding(),
     );
   }
-}
-
-Future<dynamic> handleBackgroundMessage(RemoteMessage data) async {
-  print('onBackground $data'); // android only for firebase_messaging v7
-
-  var messageBody = data.data['message'];
-
-  NotificationService.showNotification(
-    'Sendbird Example',
-    messageBody,
-    payload: data.data['sendbird'],
-  );
 }

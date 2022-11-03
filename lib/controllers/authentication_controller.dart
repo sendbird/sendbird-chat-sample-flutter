@@ -61,10 +61,12 @@ class AuthenticationController extends GetxController implements BaseAuth {
         wsHost: wsHost,
       );
       final token = appState.token;
-      //register push notification token for sendbird notification
+
+      // [Push Notification Set Up]
+      // register push notification token for sendbird notification
       if (token != null) {
         print('registering push token through sendbird server...');
-        await _sendbird.registerPushToken(
+        var result = await _sendbird.registerPushToken(
           type: kIsWeb
               ? PushTokenType.none
               : Platform.isIOS
@@ -72,6 +74,9 @@ class AuthenticationController extends GetxController implements BaseAuth {
                   : PushTokenType.fcm,
           token: token,
         );
+        // Result for register Push Token
+        // [success, pending, error]
+        print(result);
       }
 
       return user;
