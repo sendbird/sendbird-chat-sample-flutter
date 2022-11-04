@@ -1,11 +1,54 @@
+import 'dart:io';
+
 import 'package:app/main_binding.dart';
 import 'package:app/routes.dart';
+import 'package:app/util/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
+import 'components/push_notification.dart';
+
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling background message: ${message.messageId}");
+  NotificationService.showNotification(
+    message.notification?.title ?? '',
+    message.notification?.body ?? '',
+  );
+}
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   return runApp(const MyApp());
 }
+
+final appState = AppState();
+
+class AppState with ChangeNotifier {
+  bool didRegisterToken = false;
+  String? token;
+  String? destChannelUrl;
+
+  void setDestination(String? channelUrl) {
+    destChannelUrl = channelUrl;
+    notifyListeners();
+  }
+}
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  description:
+      'This channel is used for important notifications.', // description
+  importance: Importance.high,
+  playSound: true,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -15,8 +58,86 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+  late int _totalNotifications;
+  late final FirebaseMessaging _messaging;
+  PushNotification? _notificationInfo;
+
+  // [Push Notification Set Up]
+  void requestAndRegisterNotification() async {
+    // Initialize the Firebase app
+    await Firebase.initializeApp();
+
+    // Instantiate Firebase Messaging
+    _messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // To enable foreground notification in firebase messaging for IOS
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true, // Required to display a heads up notification
+      badge: true,
+      sound: true,
+    );
+
+    // On iOS, this helps to take the user permissions
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+      String? token;
+
+      if (Platform.isIOS) {
+        //Retrieve pushtoken for IOS
+        token = await _messaging.getAPNSToken();
+      } else {
+        // Retrieve pushtoken for FCM
+        token = await _messaging.getToken();
+      }
+
+      appState.token = token;
+      // For handling the received notifications
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('title: ${message.notification?.title}');
+        print('body: ${message.notification?.body}');
+        // Parse the message received
+        PushNotification notification = PushNotification(
+          title: message.notification?.title,
+          body: message.notification?.body,
+        );
+
+        setState(() {
+          _notificationInfo = notification;
+          _totalNotifications++;
+        });
+        if (_notificationInfo != null) {
+          NotificationService.showNotification(
+              _notificationInfo?.title ?? '', _notificationInfo?.body ?? '');
+        }
+      });
+    } else {
+      print('User declined or has not accepted permission');
+    }
+  }
+
   @override
   void initState() {
+    requestAndRegisterNotification();
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      PushNotification notification = PushNotification(
+        title: message.notification?.title,
+        body: message.notification?.body,
+      );
+      setState(() {
+        _notificationInfo = notification;
+        _totalNotifications++;
+      });
+    });
+    _totalNotifications = 0;
     super.initState();
   }
 
