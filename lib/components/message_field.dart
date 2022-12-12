@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:universal_io/io.dart';
 
 import 'package:app/components/dialog.dart';
 import 'package:app/components/padding.dart';

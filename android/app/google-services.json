@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "922365158617-fk7c64ua9el8c7caqk2e6bnrif88ln96.apps.googleusercontent.com",
+              "client_id": "922365158617-40nn8bvs751j02puhh0q6s1urfntnprr.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.sendbird.sv2"
+                "bundle_id": "com.example.app"
               }
             }
           ]
