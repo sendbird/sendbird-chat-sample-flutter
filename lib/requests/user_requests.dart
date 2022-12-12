@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:get/get.dart';
 import 'package:sendbird_sdk/core/models/file_info.dart';
