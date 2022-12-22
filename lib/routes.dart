@@ -4,9 +4,10 @@ import 'package:app/basic_examples/groupChannel/group_channel_route.dart';
 import 'package:app/basic_examples/openChannel/open_channel_route.dart';
 import 'package:app/features_example/features_example_route.dart';
 import 'package:app/main_route.dart';
-import 'package:app/models/chat_detail_route.dart';
-import 'package:app/models/chat_room_route.dart';
-import 'package:app/models/profile_route.dart';
+import 'package:app/routes/chat_detail_route.dart';
+import 'package:app/routes/chat_room_route.dart';
+import 'package:app/routes/poll/create_poll_route.dart';
+import 'package:app/routes/profile_route.dart';
 import 'package:app/root.dart';
 import 'package:get/get.dart';
 
@@ -22,4 +23,5 @@ final List<GetPage> routes = [
   GetPage(name: "/CreateChannelRoute", page: () => const CreateChannelRoute()),
   GetPage(name: "/ChatDetailRoute", page: () => const ChatDetailRoute()),
   GetPage(name: "/ProfileRoute", page: () => const ProfileRoute()),
+  GetPage(name: "/CreatePollRoute", page: () => const CreatePollRoute()),
 ];

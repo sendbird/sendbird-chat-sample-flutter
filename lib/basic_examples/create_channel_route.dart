@@ -71,8 +71,6 @@ class CreateChannelRouteState extends State<CreateChannelRoute> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
