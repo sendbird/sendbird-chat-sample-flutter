@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:app/color.dart';
 import 'package:app/components/padding.dart';
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:app/root.dart';
@@ -18,6 +21,7 @@ class LoginRouteState extends State<LoginRoute> {
   final BaseAuth _authentication = Get.find<AuthenticationController>();
   late TextEditingController _idController;
   String _errormsg = '';
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -42,7 +46,20 @@ class LoginRouteState extends State<LoginRoute> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const Spacer(),
+            const Center(
+              child: Text(
+                "Please Enter ANY UserID to connect to Sendbird ",
+                style: TextStyle(
+                  color: sendbirdColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             TextField(
+              cursorColor: sendbirdColor,
               controller: _idController,
               decoration: InputDecoration(
                 enabledBorder: const OutlineInputBorder(
@@ -52,21 +69,26 @@ class LoginRouteState extends State<LoginRoute> {
                 errorText: _errormsg == '' ? null : _errormsg,
               ),
             ),
-            const SizedBox(height: 6),
-            TextButton(
-              onPressed: () async {
+            const Spacer(),
+            GestureDetector(
+              onTap: () async {
+                setState(() {
+                  isLoading = true;
+                });
                 try {
                   if (_idController.value.text == '' ||
                       _idController.value.text.isEmpty) {
                     throw Exception('ID can NOT be empty');
                   }
-                  await _authentication.login(userId: _idController.value.text);
 
                   switch (widget.examples) {
                     case Examples.main:
+                      await _authentication.login(
+                          userId: _idController.value.text);
                       Get.toNamed('/BasicExampleRoute');
                       break;
                     case Examples.features:
+                      await _authentication.login(userId: "test");
                       Get.toNamed('/FeaturesExampleRoute');
                       break;
                   }
@@ -77,12 +99,33 @@ class LoginRouteState extends State<LoginRoute> {
                 } catch (e) {
                   _errormsg = 'Unknown Error: $e';
                 }
+                setState(() {
+                  isLoading = false;
+                });
               },
-              child: const Text(
-                'Connect',
-                style: TextStyle(fontSize: 16),
+              child: Container(
+                width: double.infinity,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: sendbirdColor,
+                ),
+                child: Center(
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Login",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
               ),
-            )
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

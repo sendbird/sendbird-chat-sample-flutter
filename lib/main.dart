@@ -1,5 +1,6 @@
 import 'package:universal_io/io.dart';
 
+import 'package:app/color.dart';
 import 'package:app/main_binding.dart';
 import 'package:app/routes.dart';
 import 'package:app/util/notification_service.dart';
@@ -149,6 +150,9 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      theme: ThemeData(
+        primaryColor: sendbirdColor,
+      ),
       debugShowCheckedModeBanner: false,
       title: 'Sendbird Example',
       initialRoute: "MainRoute",

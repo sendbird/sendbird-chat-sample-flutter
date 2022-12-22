@@ -34,7 +34,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   get: ^4.6.5
-  sendbird_sdk: ^3.1.13
+  sendbird_sdk: ^3.2.0
   image_picker: ^0.8.5+3
   cached_network_image: ^3.2.1
   liquid_pull_to_refresh: ^3.0.1
@@ -43,6 +43,10 @@ dependencies:
   firebase_messaging: ^14.0.1
   flutter_local_notifications: ^12.0.2
   firebase_core: ^2.0.0
+  font_awesome_flutter: ^10.3.0
+  flutter_polls: ^0.1.1
+  fluttertoast: ^8.1.2
+  connectivity_plus_web: ^1.2.5
   universal_io: ^2.0.4
 
 dev_dependencies:

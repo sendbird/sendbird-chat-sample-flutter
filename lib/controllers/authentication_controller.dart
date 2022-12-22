@@ -3,7 +3,6 @@ import 'package:universal_io/io.dart';
 import 'package:app/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/request/channel/file_upload_request.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 

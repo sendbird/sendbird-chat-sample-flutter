@@ -4,7 +4,7 @@ import 'package:app/components/message_field.dart';
 import 'package:app/components/padding.dart';
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:app/handlers/channel_event_handlers.dart';
-import 'package:app/models/edit_message_route.dart';
+import 'package:app/routes/edit_message_route.dart';
 import 'package:app/requests/message_requests.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
