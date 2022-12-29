@@ -1,3 +1,5 @@
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sendbird_sdk/utils/logger.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:app/components/app_bar.dart';
@@ -53,6 +55,8 @@ class ProfileRouteState extends State<ProfileRoute> {
   Future<void> uploadProfile() async {
     try {
       final profileImage = await _picker.pickImage(source: ImageSource.gallery);
+      //TODO send this information to backend and get image
+
       if (profileImage != null) {
         await updateUserInfo(file: File(profileImage.path));
         printInfo(info: 'User profile image updated');
@@ -92,9 +96,14 @@ class ProfileRouteState extends State<ProfileRoute> {
                         child: IconButton(
                           alignment: Alignment.bottomRight,
                           padding: const EdgeInsets.all(4),
-                          onPressed: () {
-                            //TODO
-                            // uploadProfile();
+                          onPressed: () async {
+                            try {
+                              await uploadProfile();
+                              Fluttertoast.showToast(msg: "profile uploaded");
+                            } catch (e) {
+                              logger.e(StackTrace.current, e);
+                              rethrow;
+                            }
                           },
                           icon: const Icon(Icons.edit),
                         ),
@@ -105,9 +114,14 @@ class ProfileRouteState extends State<ProfileRoute> {
                       child: IconButton(
                         alignment: Alignment.bottomRight,
                         padding: const EdgeInsets.all(4),
-                        onPressed: () {
-                          //TODO
-                          // uploadProfile();
+                        onPressed: () async {
+                          try {
+                            await uploadProfile();
+                            Fluttertoast.showToast(msg: "profile uploaded");
+                          } catch (e) {
+                            logger.e(StackTrace.current, e);
+                            rethrow;
+                          }
                         },
                         icon: const Icon(Icons.edit),
                       ),
