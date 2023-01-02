@@ -102,6 +102,10 @@ class ChannelEventHandlers with ChannelEventHandler {
     //TODO refactor
     if (isForce) {
       for (var message in messageList) {
+        if (message is FileMessage) {
+          print('FileMessage: ${message.requireAuth}');
+          print('FileMessage: ${message.secureUrl}');
+        }
         messages.add(message);
       }
     } else {

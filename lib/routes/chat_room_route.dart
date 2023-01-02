@@ -170,6 +170,7 @@ class ChatRoomRouteState extends State<ChatRoomRoute> {
                                   : MainAxisAlignment.start,
                               children: [
                                 CachedNetworkImage(
+                                  httpHeaders: {},
                                   height: 120,
                                   width: 180,
                                   fit: BoxFit.cover,
