@@ -1,3 +1,4 @@
+import 'package:app/color.dart';
 import 'package:app/components/app_bar.dart';
 import 'package:app/components/dialog.dart';
 import 'package:app/components/message_field.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class ChatRoomRoute extends StatefulWidget {
   const ChatRoomRoute({Key? key}) : super(key: key);
@@ -162,40 +164,78 @@ class ChatRoomRouteState extends State<ChatRoomRoute> {
                             );
                           } else if (_channelHandler.messages[index]
                               is FileMessage) {
-                            titleWidget = Row(
-                              mainAxisAlignment: _channelHandler
-                                          .messages[index].sender?.userId ==
-                                      _authentication.currentUser?.userId
-                                  ? MainAxisAlignment.end
-                                  : MainAxisAlignment.start,
-                              children: [
-                                CachedNetworkImage(
-                                  httpHeaders: {},
-                                  height: 120,
-                                  width: 180,
-                                  fit: BoxFit.cover,
-                                  imageUrl: (_channelHandler.messages[index]
-                                              as FileMessage)
-                                          .secureUrl ??
-                                      (_channelHandler.messages[index]
-                                              as FileMessage)
-                                          .url,
-                                  placeholder: (context, url) => const SizedBox(
-                                    width: 30,
-                                    height: 30,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
+                            if ((_channelHandler.messages[index] as FileMessage)
+                                    .type
+                                    ?.contains("mp4") ??
+                                false) {
+                              //* Video
+                              titleWidget = Row(
+                                mainAxisAlignment: _channelHandler
+                                            .messages[index].sender?.userId ==
+                                        _authentication.currentUser?.userId
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    height: 120,
+                                    width: 180,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: sendbirdColor,
+                                    ),
+                                    child: const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(4),
+                                        child: Text(
+                                          "Show MP4 File Message Here",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                ),
-                              ],
-                            );
+                                ],
+                              );
+                            } else {
+                              //* Image
+                              titleWidget = Row(
+                                mainAxisAlignment: _channelHandler
+                                            .messages[index].sender?.userId ==
+                                        _authentication.currentUser?.userId
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  CachedNetworkImage(
+                                    httpHeaders: {},
+                                    height: 120,
+                                    width: 180,
+                                    fit: BoxFit.cover,
+                                    imageUrl: (_channelHandler.messages[index]
+                                                as FileMessage)
+                                            .secureUrl ??
+                                        (_channelHandler.messages[index]
+                                                as FileMessage)
+                                            .url,
+                                    placeholder: (context, url) =>
+                                        const SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                ],
+                              );
+                            }
                           } else {
                             printError(info: 'Unknown Message Type');
                           }

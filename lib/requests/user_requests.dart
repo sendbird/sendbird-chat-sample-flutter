@@ -5,8 +5,11 @@ import 'package:get/get.dart';
 import 'package:sendbird_sdk/core/models/file_info.dart';
 import 'package:path/path.dart';
 
-Future<void> updateUserInfo(
-    {String? nickName, File? file, String? fileUrl}) async {
+Future<void> updateUserInfo({
+  String? nickName,
+  File? file,
+  String? fileUrl,
+}) async {
   late final BaseAuth authentication = Get.find<AuthenticationController>();
   FileInfo? fileInfo;
 

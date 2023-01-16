@@ -1,10 +1,13 @@
 import 'package:universal_io/io.dart';
-
+import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:app/components/dialog.dart';
 import 'package:app/components/padding.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+//? For Mobile Platform
+// import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:image_picker_web/image_picker_web.dart';
+import "dart:html" as html;
 
 class MessageField extends StatefulWidget {
   final TextEditingController controller;
@@ -23,8 +26,8 @@ class MessageField extends StatefulWidget {
 }
 
 class MessageFieldState extends State<MessageField> {
-  final ImagePicker picker = ImagePicker();
-  File? file;
+  final ImagePickerWeb picker = ImagePickerWeb();
+  html.File? file;
 
   @override
   void initState() {
@@ -51,12 +54,17 @@ class MessageFieldState extends State<MessageField> {
               buttonText1: 'Image',
               onTap1: () async {
                 try {
-                  final _file =
-                      await picker.pickImage(source: ImageSource.gallery);
+                  //? For Mobile Platform
+                  // final _file =
+                  //     await picker.pickImage(source: ImageSource.gallery);
+                  final _file = await ImagePickerWeb.getImageAsFile();
                   if (_file == null) {
                     throw Exception('File not chosen');
+                  } else {
+                    file = _file;
                   }
-                  file = File(_file.path);
+                  //? For Mobile Platform
+                  // file = File(_file.path);
                 } catch (e) {
                   throw Exception('File Message Send Failed');
                 }
@@ -66,12 +74,18 @@ class MessageFieldState extends State<MessageField> {
               buttonText2: 'Video',
               onTap2: () async {
                 try {
-                  final _file =
-                      await picker.pickVideo(source: ImageSource.gallery);
+                  //? For Mobile Platform
+                  // final _file =
+                  //     await picker.pickVideo(source: ImageSource.gallery);
+                  final _file = await ImagePickerWeb.getVideoAsFile();
                   if (_file == null) {
                     throw Exception('File not chosen');
+                  } else {
+                    file = _file;
                   }
-                  file = File(_file.path);
+
+                  //? For Mobile Platform
+                  // file = File(_file.path);
                 } catch (e) {
                   throw Exception('File Message Send Failed');
                 }
@@ -104,16 +118,36 @@ class MessageFieldState extends State<MessageField> {
             ),
           ),
           GestureDetector(
-            onTap: () {
+            onTap: () async {
               if (file != null) {
-                widget.channel.sendFileMessage(
-                  FileMessageParams.withFile(file!),
-                  onCompleted: (message, error) => {
-                    file = null,
-                    widget.controller.clear(),
-                    widget.onSend(),
-                  },
-                );
+                if (kIsWeb) {
+                  final reader = html.FileReader();
+                  reader.readAsArrayBuffer(file!);
+                  await reader.onLoad.first;
+                  //if web send as bytes
+
+                  widget.channel.sendFileMessage(
+                    FileMessageParams.withBytes(
+                      reader.result as Uint8List,
+                      fileExtensionType: file?.type,
+                    ),
+                    onCompleted: (message, error) => {
+                      file = null,
+                      widget.controller.clear(),
+                      widget.onSend(),
+                    },
+                  );
+                } else {
+                  //? For Mobile Platform
+                  // widget.channel.sendFileMessage(
+                  //   FileMessageParams.withFile(file!),
+                  //   onCompleted: (message, error) => {
+                  //     file = null,
+                  //     widget.controller.clear(),
+                  //     widget.onSend(),
+                  //   },
+                  // );
+                }
               } else if (widget.controller.value.text.isNotEmpty) {
                 widget.channel.sendUserMessage(
                   UserMessageParams(message: widget.controller.value.text),

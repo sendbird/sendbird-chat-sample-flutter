@@ -360,7 +360,7 @@ packages:
     source: hosted
     version: "0.8.5+3"
   image_picker_for_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker_for_web
       url: "https://pub.dartlang.org"
@@ -380,6 +380,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.6.2"
+  image_picker_web:
+    dependency: "direct main"
+    description:
+      name: image_picker_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0+1"
   js:
     dependency: transitive
     description:
@@ -579,10 +586,10 @@ packages:
   sendbird_sdk:
     dependency: "direct main"
     description:
-      name: sendbird_sdk
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.2.0"
+      path: sendbird_sdk
+      relative: true
+    source: path
+    version: "3.2.1"
   shared_preferences:
     dependency: transitive
     description:
@@ -742,6 +749,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  video_thumbnail:
+    dependency: "direct main"
+    description:
+      name: video_thumbnail
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.3"
   web_socket_channel:
     dependency: transitive
     description:

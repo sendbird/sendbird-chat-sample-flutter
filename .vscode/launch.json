@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Sendbird-Flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "Sendbird-Flutter (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "Sendbird-Flutter (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "sendbird_sdk",
+            "cwd": "sendbird_sdk",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "sendbird_sdk (profile mode)",
+            "cwd": "sendbird_sdk",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "sendbird_sdk (release mode)",
+            "cwd": "sendbird_sdk",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
