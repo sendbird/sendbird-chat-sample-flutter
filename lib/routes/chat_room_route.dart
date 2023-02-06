@@ -122,179 +122,196 @@ class ChatRoomRouteState extends State<ChatRoomRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _futureChannel,
-      builder: (BuildContext context, AsyncSnapshot<BaseChannel> messages) {
-        if (messages.hasData) {
-          _scrollToBottom();
-          return Scaffold(
-            appBar: appBarComponent(
-                title: 'Chat Room',
-                includeLeading: false,
-                actions: [_infoButton()]),
-            bottomNavigationBar: MessageField(
-              controller: _messageController,
-              channel: _channel!,
-              onSend: messageSent,
-            ),
-            body: LiquidPullToRefresh(
-              onRefresh: () => refresh(loadPrevious: true), // refresh callback
-              child: ListView(
-                // controller: _scrollController,
-                children: [
-                  SingleChildScrollView(
-                    physics: const ScrollPhysics(),
-                    child: paddingComponent(
-                      widget: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: _channelHandler.messages.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          Widget? titleWidget;
-                          if (_channelHandler.messages[index] is UserMessage) {
-                            titleWidget = Text(
-                              _channelHandler.messages[index].message,
-                              textAlign: _channelHandler
-                                          .messages[index].sender?.userId ==
-                                      _authentication.currentUser?.userId
-                                  ? TextAlign.right
-                                  : TextAlign.left,
-                            );
-                          } else if (_channelHandler.messages[index]
-                              is FileMessage) {
-                            titleWidget = Row(
-                              mainAxisAlignment: _channelHandler
-                                          .messages[index].sender?.userId ==
-                                      _authentication.currentUser?.userId
-                                  ? MainAxisAlignment.end
-                                  : MainAxisAlignment.start,
-                              children: [
-                                CachedNetworkImage(
-                                  height: 120,
-                                  width: 180,
-                                  fit: BoxFit.cover,
-                                  imageUrl: (_channelHandler.messages[index]
-                                              as FileMessage)
-                                          .secureUrl ??
-                                      (_channelHandler.messages[index]
-                                              as FileMessage)
-                                          .url,
-                                  placeholder: (context, url) => const SizedBox(
-                                    width: 30,
-                                    height: 30,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                ),
-                              ],
-                            );
-                          } else {
-                            printError(info: 'Unknown Message Type');
-                          }
-                          return ListTile(
-                            isThreeLine: true,
-                            leading: _channelHandler
-                                        .messages[index].sender?.userId ==
-                                    _authentication.currentUser?.userId
-                                ? null
-                                : const Icon(Icons.person),
-                            trailing: _channelHandler
-                                        .messages[index].sender?.userId ==
-                                    _authentication.currentUser?.userId
-                                ? const Icon(Icons.person)
-                                : null,
-                            title: titleWidget,
-                            subtitle: _channel!.channelType == ChannelType.group
-                                ? Text(
-                                    'Unread ${(_channel as GroupChannel).getUnreadMembers(_channelHandler.messages[index]).length}',
-                                    textAlign: _channelHandler.messages[index]
-                                                .sender?.userId ==
-                                            _authentication.currentUser?.userId
-                                        ? TextAlign.right
-                                        : TextAlign.left,
-                                  )
-                                : null,
-                            onLongPress: () {
-                              if (_channelHandler.messages[index]
-                                  is UserMessage) {
-                                dialogComponent(
-                                  context,
-                                  buttonText1: 'Edit',
-                                  onTap1: () async {
-                                    await Navigator.of(context)
-                                        .push(
-                                      MaterialPageRoute(
-                                        builder: ((context) => EditMessageRoute(
-                                              message: _channelHandler
-                                                      .messages[index]
-                                                  as UserMessage,
-                                              channel: _channel,
-                                            )),
-                                      ),
-                                    )
-                                        .then((value) async {
-                                      refresh();
-                                    });
-                                  },
-                                  buttonText2: 'Delete',
-                                  onTap2: () async {
-                                    await deleteMessage(
-                                      channel: _channel,
-                                      messageId: _channelHandler
-                                          .messages[index].messageId,
-                                    );
-                                    refresh();
-                                  },
-                                );
-                              } else if (_channelHandler.messages[index]
-                                  is FileMessage) {
-                                dialogComponent(
-                                  context,
-                                  type: DialogType.oneButton,
-                                  buttonText1: 'Delete',
-                                  onTap1: () async {
-                                    await deleteMessage(
-                                      channel: _channel,
-                                      messageId: _channelHandler
-                                          .messages[index].messageId,
-                                    );
-                                    refresh();
-                                  },
-                                );
-                              } else {
-                                printError(info: 'Unknown message type');
-                              }
-                              setState(() {});
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (messages.hasError) {
-          return const Center(
-            child: Text('Error retrieving Messages'),
-          );
-        } else {
-          return Scaffold(
-            appBar: appBarComponent(title: 'Chat Room', includeLeading: false),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+    return Listener(
+      onPointerDown: (_) {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.focusedChild?.unfocus();
         }
       },
+      child: FutureBuilder(
+        future: _futureChannel,
+        builder: (BuildContext context, AsyncSnapshot<BaseChannel> messages) {
+          if (messages.hasData) {
+            _scrollToBottom();
+            return Scaffold(
+              appBar: appBarComponent(
+                  title: 'Chat Room',
+                  includeLeading: false,
+                  actions: [_infoButton()]),
+              bottomNavigationBar: MessageField(
+                controller: _messageController,
+                channel: _channel!,
+                onSend: messageSent,
+              ),
+              body: LiquidPullToRefresh(
+                onRefresh: () =>
+                    refresh(loadPrevious: true), // refresh callback
+                child: ListView(
+                  // controller: _scrollController,
+                  children: [
+                    SingleChildScrollView(
+                      physics: const ScrollPhysics(),
+                      child: paddingComponent(
+                        widget: ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: _channelHandler.messages.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Widget? titleWidget;
+                            if (_channelHandler.messages[index]
+                                is UserMessage) {
+                              titleWidget = Text(
+                                _channelHandler.messages[index].message,
+                                textAlign: _channelHandler
+                                            .messages[index].sender?.userId ==
+                                        _authentication.currentUser?.userId
+                                    ? TextAlign.right
+                                    : TextAlign.left,
+                              );
+                            } else if (_channelHandler.messages[index]
+                                is FileMessage) {
+                              titleWidget = Row(
+                                mainAxisAlignment: _channelHandler
+                                            .messages[index].sender?.userId ==
+                                        _authentication.currentUser?.userId
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  CachedNetworkImage(
+                                    height: 120,
+                                    width: 180,
+                                    fit: BoxFit.cover,
+                                    imageUrl: (_channelHandler.messages[index]
+                                                as FileMessage)
+                                            .secureUrl ??
+                                        (_channelHandler.messages[index]
+                                                as FileMessage)
+                                            .url,
+                                    placeholder: (context, url) =>
+                                        const SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              printError(info: 'Unknown Message Type');
+                            }
+                            return ListTile(
+                              isThreeLine: true,
+                              leading: _channelHandler
+                                          .messages[index].sender?.userId ==
+                                      _authentication.currentUser?.userId
+                                  ? null
+                                  : const Icon(Icons.person),
+                              trailing: _channelHandler
+                                          .messages[index].sender?.userId ==
+                                      _authentication.currentUser?.userId
+                                  ? const Icon(Icons.person)
+                                  : null,
+                              title: titleWidget,
+                              subtitle:
+                                  _channel!.channelType == ChannelType.group
+                                      ? Text(
+                                          'Unread ${(_channel as GroupChannel).getUnreadMembers(_channelHandler.messages[index]).length}',
+                                          textAlign: _channelHandler
+                                                      .messages[index]
+                                                      .sender
+                                                      ?.userId ==
+                                                  _authentication
+                                                      .currentUser?.userId
+                                              ? TextAlign.right
+                                              : TextAlign.left,
+                                        )
+                                      : null,
+                              onLongPress: () {
+                                if (_channelHandler.messages[index]
+                                    is UserMessage) {
+                                  dialogComponent(
+                                    context,
+                                    buttonText1: 'Edit',
+                                    onTap1: () async {
+                                      await Navigator.of(context)
+                                          .push(
+                                        MaterialPageRoute(
+                                          builder: ((context) =>
+                                              EditMessageRoute(
+                                                message: _channelHandler
+                                                        .messages[index]
+                                                    as UserMessage,
+                                                channel: _channel,
+                                              )),
+                                        ),
+                                      )
+                                          .then((value) async {
+                                        refresh();
+                                      });
+                                    },
+                                    buttonText2: 'Delete',
+                                    onTap2: () async {
+                                      await deleteMessage(
+                                        channel: _channel,
+                                        messageId: _channelHandler
+                                            .messages[index].messageId,
+                                      );
+                                      refresh();
+                                    },
+                                  );
+                                } else if (_channelHandler.messages[index]
+                                    is FileMessage) {
+                                  dialogComponent(
+                                    context,
+                                    type: DialogType.oneButton,
+                                    buttonText1: 'Delete',
+                                    onTap1: () async {
+                                      await deleteMessage(
+                                        channel: _channel,
+                                        messageId: _channelHandler
+                                            .messages[index].messageId,
+                                      );
+                                      refresh();
+                                    },
+                                  );
+                                } else {
+                                  printError(info: 'Unknown message type');
+                                }
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else if (messages.hasError) {
+            return const Center(
+              child: Text('Error retrieving Messages'),
+            );
+          } else {
+            return Scaffold(
+              appBar:
+                  appBarComponent(title: 'Chat Room', includeLeading: false),
+              body: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

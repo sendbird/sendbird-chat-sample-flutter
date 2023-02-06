@@ -91,11 +91,12 @@ class MessageFieldState extends State<MessageField> {
                 suffixIcon: file != null
                     ? IconButton(
                         onPressed: () => {
-                              file = null,
-                              widget.controller.clear(),
-                              setState(() {}),
-                            },
-                        icon: const Icon(Icons.clear))
+                          file = null,
+                          widget.controller.clear(),
+                          setState(() {}),
+                        },
+                        icon: const Icon(Icons.clear),
+                      )
                     : null,
                 border: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),

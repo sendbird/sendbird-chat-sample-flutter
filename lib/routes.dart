@@ -24,4 +24,5 @@ final List<GetPage> routes = [
   GetPage(name: "/ChatDetailRoute", page: () => const ChatDetailRoute()),
   GetPage(name: "/ProfileRoute", page: () => const ProfileRoute()),
   GetPage(name: "/CreatePollRoute", page: () => const CreatePollRoute()),
+  GetPage(name: "/EmptyRoute", page: () => const CreatePollRoute()),
 ];
