@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sendbird-chat-sample-flutter
+  description: Flutter Chat Sample (for release)
+  annotations:
+    github.com/project-slug: sendbird/sendbird-chat-sample-flutter
+spec:
+  type: library
+  lifecycle: production
+  owner: dep-client-platform
+  system: sendbird-chat
