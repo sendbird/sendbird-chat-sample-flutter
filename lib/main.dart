@@ -1,3 +1,4 @@
+import 'package:sendbird_sdk/utils/logger.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:app/color.dart';
@@ -15,16 +16,63 @@ import 'components/push_notification.dart';
 
 Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling background message: ${message.messageId}");
+
   NotificationService.showNotification(
     message.notification?.title ?? '',
     message.notification?.body ?? '',
   );
 }
 
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  logger.i("notification tapped", response);
+  print("notification tapped");
+  Get.toNamed("EmptyRoute");
+}
+
+void onRecieveLocalNotification(
+    int i, String? one, String? two, String? three) {
+  logger.i("notification tapped");
+  print("notification tapped");
+  Get.toNamed("EmptyRoute");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-  //Use DefaultFirebaseOptions to allow web app
+  final DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+    onDidReceiveLocalNotification: onRecieveLocalNotification,
+  );
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsDarwin,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse:
+        (NotificationResponse notificationResponse) async {
+      print("Notification Recieved with flutterLocalNotificationsPlugin");
+    },
+    onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+  );
+
+  // Use DefaultFirebaseOptions to allow web app
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -52,9 +100,6 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   importance: Importance.high,
   playSound: true,
 );
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
