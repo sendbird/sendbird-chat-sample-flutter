@@ -4,7 +4,7 @@ import 'package:app/controllers/authentication_controller.dart';
 import 'package:app/requests/channel_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class CreateChannelRoute extends StatefulWidget {
   const CreateChannelRoute({Key? key}) : super(key: key);
@@ -99,7 +99,7 @@ class CreateChannelRouteState extends State<CreateChannelRoute> {
                   var params;
                   switch (_channelType) {
                     case ChannelType.group:
-                      params = GroupChannelParams()
+                      params = GroupChannelCreateParams()
                         ..name = _channelNameController.value.text
                         ..operatorUserIds = [
                           _authentication.currentUser!.userId

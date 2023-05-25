@@ -6,7 +6,7 @@ import 'package:app/requests/channel_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class GroupChannelRoute extends StatefulWidget {
   const GroupChannelRoute({Key? key}) : super(key: key);
@@ -31,7 +31,7 @@ class GroupChannelRouteState extends State<GroupChannelRoute> {
 
   Future<List<GroupChannel>> loadGroupChannelList() async {
     try {
-      return await GroupChannelListQuery().loadNext();
+      return await GroupChannelListQuery().next();
     } catch (e) {
       throw Exception([e, 'Error Retrieving Group Channel List']);
     }
@@ -40,7 +40,7 @@ class GroupChannelRouteState extends State<GroupChannelRoute> {
   Widget getGroupChannelIcon(GroupChannel? groupChannel) {
     if (groupChannel != null) {
       if (groupChannel.coverUrl != null && groupChannel.coverUrl == '') {
-        return SizedBox.square(child: Image.network(groupChannel.coverUrl!));
+        return SizedBox.square(child: Image.network(groupChannel.coverUrl));
       }
     }
 

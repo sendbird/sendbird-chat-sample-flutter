@@ -9,8 +9,8 @@ import 'package:app/requests/message_requests.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class ChatRoomRoute extends StatefulWidget {
   const ChatRoomRoute({Key? key}) : super(key: key);

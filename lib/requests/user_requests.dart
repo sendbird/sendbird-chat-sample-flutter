@@ -1,7 +1,7 @@
+import 'package:sendbird_chat/sendbird_chat.dart';
 import 'package:universal_io/io.dart';
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/core/models/file_info.dart';
 
 Future<void> updateUserInfo(
     {String? nickName, File? file, String? fileUrl}) async {
@@ -10,7 +10,7 @@ Future<void> updateUserInfo(
 
   try {
     if (fileUrl != null && fileUrl != '') {
-      _file = FileInfo.fromUrl(url: fileUrl);
+      _file = FileInfo.fromFileUrl(fileUrl: fileUrl);
     }
 
     await _authentication.updateCurrentInfo(

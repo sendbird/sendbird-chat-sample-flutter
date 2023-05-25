@@ -1,10 +1,10 @@
+import 'package:sendbird_chat/sendbird_chat.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:app/components/dialog.dart';
 import 'package:app/components/padding.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class MessageField extends StatefulWidget {
   final TextEditingController controller;
@@ -108,8 +108,8 @@ class MessageFieldState extends State<MessageField> {
             onTap: () {
               if (file != null) {
                 widget.channel.sendFileMessage(
-                  FileMessageParams.withFile(file!),
-                  onCompleted: (message, error) => {
+                  FileMessageCreateParams.withFile(file!),
+                  handler: (message, error) => {
                     file = null,
                     widget.controller.clear(),
                     widget.onSend(),
@@ -117,8 +117,9 @@ class MessageFieldState extends State<MessageField> {
                 );
               } else if (widget.controller.value.text.isNotEmpty) {
                 widget.channel.sendUserMessage(
-                  UserMessageParams(message: widget.controller.value.text),
-                  onCompleted: ((message, error) => {
+                  UserMessageCreateParams(
+                      message: widget.controller.value.text),
+                  handler: ((message, error) => {
                         widget.controller.clear(),
                         widget.onSend(),
                       }),

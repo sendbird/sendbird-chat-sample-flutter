@@ -6,10 +6,8 @@ import 'package:app/controllers/poll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/features/poll/poll.dart';
-import 'package:sendbird_sdk/params/poll_params.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class DeletePollRoute extends StatefulWidget {
   const DeletePollRoute({super.key});
@@ -27,7 +25,7 @@ class _DeletePollRouteState extends State<DeletePollRoute> {
   final _pollController = Get.find<PollController>();
   final titleController = TextEditingController();
   final optionController = TextEditingController();
-  late SendbirdSdk sendbirdSDK;
+  late SendbirdChat sendbirdSDK;
   bool isLoading = false;
   late Poll pollResult;
 
@@ -51,18 +49,19 @@ class _DeletePollRouteState extends State<DeletePollRoute> {
 
     final params = PollCreateParams(
       title: 'Delete Poll Title',
-      options: ['1', '2', '3'],
+      optionTexts: ['1', '2', '3'],
     );
 
     //Create Poll
-    pollResult = await Poll.create(params: params);
+    pollResult = await Poll.create(params);
     print('init poll created');
 
     //Send Message with Poll
-    final mParams = UserMessageParams(message: 'test', pollId: pollResult.id);
+    final mParams =
+        UserMessageCreateParams(message: 'test', pollId: pollResult.id);
     _channel!.sendUserMessage(
       mParams,
-      onCompleted: (message, error) {
+      handler: (message, error) {
         print("message with poll sent");
         wait.complete();
       },
@@ -77,7 +76,7 @@ class _DeletePollRouteState extends State<DeletePollRoute> {
 
   Future<void> deletePoll(int id) async {
     try {
-      await _channel!.deletePoll(pollId: id);
+      await (_channel! as GroupChannel).deletePoll(pollId: id);
       return;
     } catch (e) {
       print('Failed Updating Poll');

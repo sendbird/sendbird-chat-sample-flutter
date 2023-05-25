@@ -6,10 +6,7 @@ import 'package:app/controllers/poll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/features/poll/poll.dart';
-import 'package:sendbird_sdk/features/poll/poll_data.dart';
-import 'package:sendbird_sdk/params/poll_params.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class CreatePollRoute extends StatefulWidget {
@@ -25,7 +22,7 @@ class _CreatePollRouteState extends State<CreatePollRoute> {
   final _pollController = Get.find<PollController>();
   final titleController = TextEditingController();
   final optionController = TextEditingController();
-  late SendbirdSdk sendbirdSDK;
+  late SendbirdChat sendbirdSDK;
   bool isLoading = false;
 
   @override
@@ -92,11 +89,12 @@ class _CreatePollRouteState extends State<CreatePollRoute> {
                   });
 
                   final params = PollCreateParams(
-                      title: titleController.value.text,
-                      options: _pollController.pollOption.value);
+                    title: titleController.value.text,
+                    optionTexts: _pollController.pollOption.value,
+                  );
 
                   try {
-                    final result = await Poll.create(params: params);
+                    final result = await Poll.create(params);
                     Fluttertoast.showToast(
                       msg:
                           "Poll Created!\nTitle: ${result.title}\n Options List: ${result.options.length}",

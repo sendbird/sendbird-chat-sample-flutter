@@ -8,11 +8,8 @@ import 'package:app/controllers/poll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/features/poll/poll.dart';
-import 'package:sendbird_sdk/features/poll/poll_data.dart';
-import 'package:sendbird_sdk/params/poll_params.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class EditPollOptionRoute extends StatefulWidget {
   const EditPollOptionRoute({super.key});
@@ -31,7 +28,7 @@ class _EditPollOptionRouteState extends State<EditPollOptionRoute> {
   final _pollController = Get.find<PollController>();
   final titleController = TextEditingController();
   final optionController = TextEditingController();
-  late SendbirdSdk sendbirdSDK;
+  late SendbirdChat sendbirdSDK;
   bool isLoading = false;
   late Poll pollResult;
 
@@ -68,18 +65,20 @@ class _EditPollOptionRouteState extends State<EditPollOptionRoute> {
     _pollController.pollGroupChannel = _channel as GroupChannel;
 
     final params = PollCreateParams(
-        title: 'Is free will an illusion?', options: ['Yes', 'No', 'Maybe?'])
+        title: 'Is free will an illusion?',
+        optionTexts: ['Yes', 'No', 'Maybe?'])
       ..data = PollData(text: 'just random data');
 
     //Create Poll
-    pollResult = await Poll.create(params: params);
+    pollResult = await Poll.create(params);
     print('init poll created');
 
     //Send Message with Poll
-    final mParams = UserMessageParams(message: 'test', pollId: pollResult.id);
+    final mParams =
+        UserMessageCreateParams(message: 'test', pollId: pollResult.id);
     _channel!.sendUserMessage(
       mParams,
-      onCompleted: (message, error) {
+      handler: (message, error) {
         print("message with poll sent");
         wait.complete();
       },
@@ -108,7 +107,7 @@ class _EditPollOptionRouteState extends State<EditPollOptionRoute> {
           // Do NOT Update
         } else {
           // Do Update
-          poll = await _channel!.updatePollOption(
+          poll = await (_channel! as GroupChannel).updatePollOption(
             pollId: pollResult.id,
             pollOptionId: pollResult.options[i].id,
             optionText: controllers[i].value.text,

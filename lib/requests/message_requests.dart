@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 Future<void> loadMessages({
   required channel,
@@ -40,7 +40,7 @@ Future<void> deleteMessage({
 Future<void> editUserMessage({
   required channel,
   required int messageId,
-  required UserMessageParams params,
+  required UserMessageUpdateParams params,
 }) async {
   try {
     switch (channel.channelType) {
@@ -66,7 +66,7 @@ Future<FileMessage> sendFileMessage({
       case ChannelType.group:
         (channel as GroupChannel).sendFileMessage(
           params,
-          onCompleted: ((message, error) {
+          handler: ((message, error) {
             if (error != null) {
               completer.completeError(error);
               throw Exception('Failed sending file message');
@@ -78,7 +78,7 @@ Future<FileMessage> sendFileMessage({
       case ChannelType.open:
         (channel as OpenChannel).sendFileMessage(
           params,
-          onCompleted: ((message, error) {
+          handler: ((message, error) {
             if (error != null) {
               completer.completeError(error);
               throw Exception('Failed sending file message');

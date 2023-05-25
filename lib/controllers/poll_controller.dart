@@ -1,5 +1,5 @@
 import 'package:get/state_manager.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class PollController extends GetxController {
   Rx<List<String>> pollOption = Rx<List<String>>([]);

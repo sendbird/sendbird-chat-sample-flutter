@@ -4,7 +4,7 @@ import 'package:app/components/padding.dart';
 import 'package:app/requests/message_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class EditMessageRoute extends StatefulWidget {
   final UserMessage message;
@@ -54,8 +54,9 @@ class EditMessageRouteState extends State<EditMessageRoute> {
                   await editUserMessage(
                     channel: widget.channel,
                     messageId: widget.message.messageId,
-                    params: UserMessageParams(
-                        message: _messageController.value.text),
+                    params: UserMessageUpdateParams(
+                      message: _messageController.value.text,
+                    ),
                   );
                   Get.back();
                 } else {

@@ -1,9 +1,9 @@
+import 'package:sendbird_chat/sendbird_chat.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:app/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 abstract class BaseAuth {
@@ -18,7 +18,7 @@ abstract class BaseAuth {
   User? get currentUser;
   bool get isSigned;
   Future<void> dispose();
-  SendbirdSdk get sendbirdSdk;
+  SendbirdChat get sendbirdSdk;
   Future<void> updateCurrentInfo({
     String? nickName,
     FileInfo? file,
@@ -28,8 +28,11 @@ abstract class BaseAuth {
 
 class AuthenticationController extends GetxController implements BaseAuth {
   // ----> Replace Sendbird Dashboard appId <----
-  final SendbirdSdk _sendbird =
-      SendbirdSdk(appId: 'FF6E181B-6325-4A32-AA6D-B1ADA6BAEE95');
+  late SendbirdChat _sendbird;
+
+  Future<void> initialize() async {
+    SendbirdChat.init(appId: 'FF6E181B-6325-4A32-AA6D-B1ADA6BAEE95');
+  }
 
   @override
   Future<void> dispose() async {
@@ -38,10 +41,10 @@ class AuthenticationController extends GetxController implements BaseAuth {
   }
 
   @override
-  User? get currentUser => _sendbird.currentUser;
+  User? get currentUser => SendbirdChat.currentUser;
 
   @override
-  bool get isSigned => _sendbird.currentUser != null;
+  bool get isSigned => SendbirdChat.currentUser != null;
 
   @override
   Future<User> login({
@@ -52,7 +55,7 @@ class AuthenticationController extends GetxController implements BaseAuth {
     String? wsHost,
   }) async {
     try {
-      final user = await _sendbird.connect(
+      final user = await SendbirdChat.connect(
         userId,
         nickname: nickName,
         accessToken: accessToken,
@@ -65,7 +68,7 @@ class AuthenticationController extends GetxController implements BaseAuth {
       // register push notification token for sendbird notification
       if (token != null) {
         print('registering push token through sendbird server...');
-        var result = await _sendbird.registerPushToken(
+        var result = await SendbirdChat.registerPushToken(
           type: kIsWeb
               ? PushTokenType.none
               : Platform.isIOS
@@ -87,14 +90,14 @@ class AuthenticationController extends GetxController implements BaseAuth {
   @override
   Future<void> logout() async {
     try {
-      await _sendbird.disconnect();
+      await SendbirdChat.disconnect();
     } catch (e) {
       throw Exception([e, 'Disconnectin with Sendbird Server has failed']);
     }
   }
 
   @override
-  SendbirdSdk get sendbirdSdk => _sendbird;
+  SendbirdChat get sendbirdSdk => _sendbird;
 
   @override
   Future<void> updateCurrentInfo({
@@ -103,9 +106,9 @@ class AuthenticationController extends GetxController implements BaseAuth {
     List<String>? preferredLanguage,
   }) async {
     try {
-      await _sendbird.updateCurrentUserInfo(
+      await SendbirdChat.updateCurrentUserInfo(
         nickname: nickName,
-        fileInfo: file,
+        profileFileInfo: file,
         preferredLanguages: preferredLanguage,
       );
     } catch (e) {

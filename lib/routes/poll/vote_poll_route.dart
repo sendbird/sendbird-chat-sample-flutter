@@ -5,9 +5,7 @@ import 'package:app/controllers/poll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polls/flutter_polls.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/features/poll/poll.dart';
-import 'package:sendbird_sdk/params/poll_params.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart' as sc;
 
 class VotePollRoute extends StatefulWidget {
   const VotePollRoute({super.key});
@@ -17,7 +15,7 @@ class VotePollRoute extends StatefulWidget {
 }
 
 class _VotePollRouteState extends State<VotePollRoute> {
-  BaseChannel? _channel;
+  sc.BaseChannel? _channel;
   late String? _channelUrl;
 
   List<String> optionTextList = [];
@@ -25,9 +23,9 @@ class _VotePollRouteState extends State<VotePollRoute> {
   final _pollController = Get.find<PollController>();
   final titleController = TextEditingController();
   final optionController = TextEditingController();
-  late SendbirdSdk sendbirdSDK;
+  late sc.SendbirdChat sendbirdSDK;
   bool isLoading = false;
-  late Poll pollResult;
+  late sc.Poll pollResult;
 
   @override
   void initState() {
@@ -37,30 +35,31 @@ class _VotePollRouteState extends State<VotePollRoute> {
     super.initState();
   }
 
-  Future<BaseChannel?> initialSetup({
+  Future<sc.BaseChannel?> initialSetup({
     bool loadPrevious = false,
     bool isForce = false,
   }) async {
     final wait = Completer();
-    _channel ??= await GroupChannel.getChannel(_channelUrl!);
+    _channel ??= await sc.GroupChannel.getChannel(_channelUrl!);
 
     if (_channel == null) throw Exception("Unable to retrieve group channel");
-    _pollController.pollGroupChannel = _channel as GroupChannel;
+    _pollController.pollGroupChannel = _channel as sc.GroupChannel;
 
-    final params = PollCreateParams(
+    final params = sc.PollCreateParams(
       title: 'What is your favorite animal?',
-      options: ['Cat', 'Dog', 'Bird'],
+      optionTexts: ['Cat', 'Dog', 'Bird'],
     );
 
     //Create Poll
-    pollResult = await Poll.create(params: params);
+    pollResult = await sc.Poll.create(params);
     print('init poll created');
 
     //Send Message with Poll
-    final mParams = UserMessageParams(message: 'test', pollId: pollResult.id);
+    final mParams =
+        sc.UserMessageCreateParams(message: 'test', pollId: pollResult.id);
     _channel!.sendUserMessage(
       mParams,
-      onCompleted: (message, error) {
+      handler: (message, error) {
         print("message with poll sent");
         wait.complete();
       },
@@ -73,9 +72,9 @@ class _VotePollRouteState extends State<VotePollRoute> {
     return _channel;
   }
 
-  Future<Poll> votePoll(int pollId, List<int> pollOptionIds) async {
+  Future<sc.PollVoteEvent> votePoll(int pollId, List<int> pollOptionIds) async {
     try {
-      Poll poll = await _channel!
+      sc.PollVoteEvent poll = await (_channel! as sc.GroupChannel)
           .votePoll(pollId: pollId, pollOptionIds: pollOptionIds);
       return poll;
     } catch (e) {
@@ -144,7 +143,7 @@ class _VotePollRouteState extends State<VotePollRoute> {
                             ),
                           ),
                         ),
-                        pollOptions: List<PollOption>.from(
+                        pollOptions: List.from(
                           pollResult.options.map(
                             (option) {
                               var a = PollOption(

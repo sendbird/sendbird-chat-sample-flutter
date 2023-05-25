@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sendbird_sdk/features/poll/poll.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class PollResult extends StatelessWidget {
   final String? appBarTitle;

@@ -4,8 +4,7 @@ import 'package:app/components/padding.dart';
 import 'package:app/requests/channel_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/core/channel/base/base_channel.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 class ChatDetailRoute extends StatefulWidget {
   const ChatDetailRoute({Key? key}) : super(key: key);
@@ -57,11 +56,11 @@ class ChatDetailRouteState extends State<ChatDetailRoute> {
                 Object params;
                 switch (_channel.channelType) {
                   case ChannelType.group:
-                    params = GroupChannelParams()
+                    params = GroupChannelCreateParams()
                       ..name = _channelNameController.value.text;
                     break;
                   case ChannelType.open:
-                    params = OpenChannelParams()
+                    params = OpenChannelCreateParams()
                       ..name = _channelNameController.value.text;
                     break;
                 }

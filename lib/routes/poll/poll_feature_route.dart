@@ -7,7 +7,7 @@ import 'package:app/routes/poll/get_poll_route.dart';
 import 'package:app/routes/poll/vote_poll_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 import 'edit_poll_option_route.dart';
 
@@ -23,7 +23,7 @@ class _PollFeatureRouteState extends State<PollFeatureRoute> {
   final _pollController = Get.find<PollController>();
   Future<List<GroupChannel>> loadGroupChannelList() async {
     try {
-      return await GroupChannelListQuery().loadNext();
+      return await GroupChannelListQuery().next();
     } catch (e) {
       throw Exception([e, 'Error Retrieving Group Channel List']);
     }

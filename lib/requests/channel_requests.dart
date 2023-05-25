@@ -1,14 +1,14 @@
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
 Future<BaseChannel> createChannel(
     {required ChannelType channelType, required dynamic channelParams}) async {
   try {
     switch (channelType) {
       case ChannelType.group:
-        final params = channelParams as GroupChannelParams;
+        final params = channelParams as GroupChannelCreateParams;
         return await GroupChannel.createChannel(params);
       case ChannelType.open:
-        final params = channelParams as OpenChannelParams;
+        final params = channelParams as OpenChannelCreateParams;
         return await OpenChannel.createChannel(params);
     }
   } catch (e) {

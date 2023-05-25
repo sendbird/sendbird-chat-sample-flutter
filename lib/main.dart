@@ -1,4 +1,4 @@
-import 'package:sendbird_sdk/utils/logger.dart';
+// import 'package:sendbird_sdk/utils/logger.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:app/color.dart';
@@ -25,14 +25,14 @@ Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) {
-  logger.i("notification tapped", response);
+  // logger.i("notification tapped", response);
   print("notification tapped");
   Get.toNamed("EmptyRoute");
 }
 
 void onRecieveLocalNotification(
     int i, String? one, String? two, String? three) {
-  logger.i("notification tapped");
+  // logger.i("notification tapped");
   print("notification tapped");
   Get.toNamed("EmptyRoute");
 }

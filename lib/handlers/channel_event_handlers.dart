@@ -1,9 +1,9 @@
 import 'package:app/controllers/authentication_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_sdk/sendbird_sdk.dart';
+import 'package:sendbird_chat/sendbird_chat.dart';
 
-class ChannelEventHandlers with ChannelEventHandler {
+class ChannelEventHandlers with BaseChannelHandler {
   final BaseAuth _authentication = Get.find<AuthenticationController>();
   late VoidCallback? callback;
   List<BaseMessage> messages = RxList.empty(growable: true);
@@ -21,8 +21,8 @@ class ChannelEventHandlers with ChannelEventHandler {
         channelType: channelType, channelUrl: channelUrl)
       ..limit = 5;
     callback = refresh;
-    _authentication.sendbirdSdk
-        .addChannelEventHandler('ChannelEventHandler', this);
+    SendbirdChat.addChannelHandler('ChannelEventHandler', this);
+
     getChannel(channelUrl, channelType: channelType);
   }
 
@@ -42,8 +42,7 @@ class ChannelEventHandlers with ChannelEventHandler {
   }
 
   void dispose() {
-    _authentication.sendbirdSdk
-        .removeChannelEventHandler('ChannelEventHandler');
+    SendbirdChat.removeChannelHandler('ChannelEventHandler');
   }
 
   @override
@@ -97,7 +96,7 @@ class ChannelEventHandlers with ChannelEventHandler {
       )..limit = 5;
     }
 
-    List<BaseMessage> messageList = await _messageListQuery.loadNext();
+    List<BaseMessage> messageList = await _messageListQuery.next();
 
     //TODO refactor
     if (isForce) {
