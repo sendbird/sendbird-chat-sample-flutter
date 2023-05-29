@@ -5,6 +5,7 @@ import 'package:app/controllers/poll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polls/flutter_polls.dart';
 import 'package:get/get.dart';
+import 'package:sendbird_sdk/events/poll_vote_event.dart';
 import 'package:sendbird_sdk/features/poll/poll.dart';
 import 'package:sendbird_sdk/params/poll_params.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
@@ -73,9 +74,9 @@ class _VotePollRouteState extends State<VotePollRoute> {
     return _channel;
   }
 
-  Future<Poll> votePoll(int pollId, List<int> pollOptionIds) async {
+  Future<PollVoteEvent> votePoll(int pollId, List<int> pollOptionIds) async {
     try {
-      Poll poll = await _channel!
+      PollVoteEvent poll = await _channel!
           .votePoll(pollId: pollId, pollOptionIds: pollOptionIds);
       return poll;
     } catch (e) {
