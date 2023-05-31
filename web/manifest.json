@@ -1,11 +1,11 @@
 {
-    "name": "app",
-    "short_name": "app",
+    "name": "Sendbird Chat Sample",
+    "short_name": "Sendbird Chat Sample",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Sendbird Chat Sample for Flutter",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
