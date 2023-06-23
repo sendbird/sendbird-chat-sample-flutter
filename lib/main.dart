@@ -27,7 +27,7 @@ import 'package:sendbird_chat_sample/page/user/user_nickname_update_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_profile_update_page.dart';
 
-const sampleVersion = '4.0.0';
+const sampleVersion = '4.0.2';
 const yourAppId = '728E8736-5D0C-47CE-B934-E39B656900F3';
 
 void main() {

@@ -10,8 +10,8 @@ This sample demonstrates how you can use the [Sendbird Chat SDK for Flutter](htt
 ## Requirements
 
 The minimum requirements for the Chat SDK for Flutter are:
-- Dart 2.17.0 or later
-- Flutter 2.11.0 or later
+- Dart 2.19.0 or later
+- Flutter 3.7.0 or later
 
 ## Sample page links
 
