@@ -5,12 +5,10 @@ import 'package:app/color.dart';
 import 'package:app/main_binding.dart';
 import 'package:app/routes.dart';
 import 'package:app/util/notification_service.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'firebase_options.dart';
 
 import 'components/push_notification.dart';
 
@@ -72,10 +70,6 @@ Future<void> main() async {
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
   );
 
-  // Use DefaultFirebaseOptions to allow web app
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   return runApp(const MyApp());
 }
 
@@ -109,15 +103,12 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  late int _totalNotifications;
+  int _totalNotifications = 0;
   late final FirebaseMessaging _messaging;
   PushNotification? _notificationInfo;
 
   // [Push Notification Set Up]
   void requestAndRegisterNotification() async {
-    // Initialize the Firebase app
-    await Firebase.initializeApp();
-
     // Instantiate Firebase Messaging
     _messaging = FirebaseMessaging.instance;
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

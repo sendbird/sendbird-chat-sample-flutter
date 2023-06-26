@@ -218,7 +218,7 @@ packages:
     source: hosted
     version: "6.1.4"
   firebase_core:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_core
       sha256: "66be6e1582c98755d574421eed12f61760c8ca3c34ed39384b32c93c08e4d8c3"
@@ -660,10 +660,10 @@ packages:
     dependency: "direct main"
     description:
       name: sendbird_sdk
-      sha256: "634458d4c4ac349b065ea7d58b477ca279d0f4c344c7ff7b7376653203657e72"
+      sha256: "401e7fa7e4d129cfe7651318877bc002a3ce2f5abb0dd229e20c97be7ceb4ad8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.3"
+    version: "3.2.12"
   shared_preferences:
     dependency: transitive
     description:

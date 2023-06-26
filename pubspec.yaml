@@ -42,7 +42,7 @@ dependencies:
   dependencies:
   firebase_messaging: ^14.0.1
   flutter_local_notifications: ^12.0.2
-  firebase_core: ^2.0.0
+  # firebase_core: ^2.0.0
   font_awesome_flutter: ^10.3.0
   flutter_polls: ^0.1.1
   fluttertoast: ^8.1.2
