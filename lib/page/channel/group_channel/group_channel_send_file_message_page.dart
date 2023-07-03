@@ -6,8 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelSendFileMessagePage extends StatefulWidget {
   const GroupChannelSendFileMessagePage({Key? key}) : super(key: key);
@@ -27,6 +27,17 @@ class _GroupChannelSendFileMessagePageState
 
   Uint8List? fileBytes; // For Web
   String? filePath; // For Android and iOS
+
+  GroupChannel? groupChannel;
+
+  @override
+  void initState() {
+    super.initState();
+
+    GroupChannel.getChannel(channelUrl).then((channel) {
+      groupChannel = channel;
+    });
+  }
 
   @override
   void dispose() {
@@ -58,11 +69,14 @@ class _GroupChannelSendFileMessagePageState
                 }
 
                 if (params != null) {
-                  final channel = await GroupChannel.getChannel(channelUrl);
-                  channel.sendFileMessage(
+                  groupChannel?.sendFileMessage(
                     params,
-                    handler: (FileMessage message, SendbirdException? e) {
-                      Get.back();
+                    handler: (message, e) async {
+                      if (e != null) {
+                        await _showDialogToResendFileMessage(message);
+                      } else {
+                        Get.back();
+                      }
                     },
                     progressHandler: (sentBytes, totalBytes) {
                       setState(() {
@@ -77,6 +91,43 @@ class _GroupChannelSendFileMessagePageState
       ),
       body: _sendFileMessageBox(),
     );
+  }
+
+  Future<void> _showDialogToResendFileMessage(FileMessage message) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+                'Resend: ${message.messageCreateParams?.fileInfo.fileName}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  groupChannel?.resendFileMessage(
+                    message,
+                    handler: (message, e) async {
+                      if (e != null) {
+                        await _showDialogToResendFileMessage(message);
+                      } else {
+                        Get.back();
+                      }
+                    },
+                  );
+
+                  Get.back();
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
   }
 
   Widget _sendFileMessageBox() {

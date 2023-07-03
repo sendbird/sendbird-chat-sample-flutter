@@ -5,8 +5,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class OpenChannelPage extends StatefulWidget {
   const OpenChannelPage({Key? key}) : super(key: key);
@@ -26,6 +26,8 @@ class OpenChannelPageState extends State<OpenChannelPage> {
   List<BaseMessage> messageList = [];
   int? participantCount;
 
+  OpenChannel? openChannel;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +35,7 @@ class OpenChannelPageState extends State<OpenChannelPage> {
     SendbirdChat.addConnectionHandler('OpenChannel', MyConnectionHandler(this));
 
     OpenChannel.getChannel(channelUrl).then((openChannel) {
+      this.openChannel = openChannel;
       openChannel.enter().then((_) => _initialize());
     });
   }
@@ -220,14 +223,16 @@ class OpenChannelPageState extends State<OpenChannelPage> {
                 return;
               }
 
-              final channel = await OpenChannel.getChannel(channelUrl);
-              channel.sendUserMessage(
+              openChannel?.sendUserMessage(
                 UserMessageCreateParams(
                   message: textEditingController.value.text,
                 ),
-                handler: (UserMessage message, SendbirdException? e) {
-                  if (e != null) throw Exception(e.toString());
-                  _addMessage(message);
+                handler: (UserMessage message, SendbirdException? e) async {
+                  if (e != null) {
+                    await _showDialogToResendUserMessage(message);
+                  } else {
+                    _addMessage(message);
+                  }
                 },
               );
 
@@ -238,6 +243,42 @@ class OpenChannelPageState extends State<OpenChannelPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _showDialogToResendUserMessage(UserMessage message) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            content: Text('Resend: ${message.message}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  openChannel?.resendUserMessage(
+                    message,
+                    handler: (message, e) async {
+                      if (e != null) {
+                        await _showDialogToResendUserMessage(message);
+                      } else {
+                        _addMessage(message);
+                      }
+                    },
+                  );
+
+                  Get.back();
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
   }
 
   void _addMessage(BaseMessage message) {

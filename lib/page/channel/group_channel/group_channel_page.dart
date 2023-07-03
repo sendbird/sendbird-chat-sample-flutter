@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelPage extends StatefulWidget {
   const GroupChannelPage({Key? key}) : super(key: key);
@@ -320,8 +320,10 @@ class GroupChannelPageState extends State<GroupChannelPage> {
                 UserMessageCreateParams(
                   message: textEditingController.value.text,
                 ),
-                handler: (UserMessage message, SendbirdException? e) {
-                  if (e != null) throw Exception(e.toString());
+                handler: (UserMessage message, SendbirdException? e) async {
+                  if (e != null) {
+                    await _showDialogToResendUserMessage(message);
+                  }
                 },
               );
 
@@ -332,6 +334,40 @@ class GroupChannelPageState extends State<GroupChannelPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _showDialogToResendUserMessage(UserMessage message) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            content: Text('Resend: ${message.message}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  collection?.channel.resendUserMessage(
+                    message,
+                    handler: (message, e) async {
+                      if (e != null) {
+                        await _showDialogToResendUserMessage(message);
+                      }
+                    },
+                  );
+
+                  Get.back();
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
   }
 
   void _refresh({bool markAsRead = false}) {
