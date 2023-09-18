@@ -149,7 +149,7 @@ class _VotePollRouteState extends State<VotePollRoute> {
                           pollResult.options.map(
                             (option) {
                               var a = PollOption(
-                                id: option.id,
+                                id: option.id.toString(),
                                 title: Text(
                                   option.text,
                                   style: const TextStyle(
