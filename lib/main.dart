@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
-import 'package:sendbird_chat_sample/notifications/firebase_manager.dart';
+import 'package:sendbird_chat_sample/notifications/local_notifications_manager.dart';
+import 'package:sendbird_chat_sample/notifications/push_manager.dart';
+import 'package:sendbird_chat_sample/page/channel/feed_channel/feed_channel_list_page.dart';
+import 'package:sendbird_chat_sample/page/channel/feed_channel/feed_channel_page.dart';
 import 'package:sendbird_chat_sample/page/channel/group_channel/group_channel_create_page.dart';
 import 'package:sendbird_chat_sample/page/channel/group_channel/group_channel_invite_page.dart';
 import 'package:sendbird_chat_sample/page/channel/group_channel/group_channel_list_page.dart';
@@ -27,7 +30,7 @@ import 'package:sendbird_chat_sample/page/user/user_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_profile_update_page.dart';
 import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
-const sampleVersion = '4.0.4';
+const sampleVersion = '4.1.0';
 const yourAppId = '728E8736-5D0C-47CE-B934-E39B656900F3';
 
 void main() {
@@ -43,7 +46,9 @@ void main() {
         );
       };
 
-      await FirebaseManager.initialize();
+      await PushManager.initialize();
+      await LocalNotificationsManager.initialize();
+
       runApp(MyApp());
     },
     (error, stackTrace) async {
@@ -148,6 +153,14 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/message/update/:channel_type/:channel_url/:message_id',
           page: () => const MessageUpdatePage(),
+        ),
+        GetPage(
+          name: '/feed_channel/list',
+          page: () => const FeedChannelListPage(),
+        ),
+        GetPage(
+          name: '/feed_channel/:channel_url',
+          page: () => const FeedChannelPage(),
         ),
       ],
     );

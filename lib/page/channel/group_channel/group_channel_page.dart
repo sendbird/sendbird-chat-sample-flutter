@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sample/page/main_page.dart';
 import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelPage extends StatefulWidget {
@@ -455,7 +456,7 @@ class MyMessageCollectionHandler extends MessageCollectionHandler {
 
   @override
   void onChannelDeleted(GroupChannelContext context, String deletedChannelUrl) {
-    Get.back();
+    Get.offAll(() => const MainPage());
   }
 
   @override

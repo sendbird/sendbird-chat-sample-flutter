@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class MessageUpdatePage extends StatefulWidget {
   const MessageUpdatePage({Key? key}) : super(key: key);
@@ -22,21 +22,12 @@ class _MessageUpdatePageState extends State<MessageUpdatePage> {
   void initState() {
     super.initState();
 
-    BaseChannel.getBaseChannel(
-      ChannelType.group.toString() == channelType
-          ? ChannelType.group
-          : ChannelType.open,
-      channelUrl,
-    ).then((channel) {
-      final params = MessageListParams()
-        ..inclusive = true
-        ..previousResultSize = 0
-        ..nextResultSize = 0;
-      channel.getMessagesByMessageId(messageId, params).then((messages) {
-        if (messages.isNotEmpty) {
-          textEditingController.text = messages[0].message;
-        }
-      });
+    BaseMessage.getMessage(MessageRetrievalParams(
+      channelType: ChannelType.group,
+      channelUrl: channelUrl,
+      messageId: messageId,
+    )).then((message) {
+      textEditingController.text = message.message;
     });
   }
 

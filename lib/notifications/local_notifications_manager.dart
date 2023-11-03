@@ -1,52 +1,24 @@
 // Copyright (c) 2023 Sendbird, Inc. All rights reserved.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) {
-  debugPrint('[notificationTapBackground()]');
+void _notificationTapOnBackground(NotificationResponse notificationResponse) {
+  debugPrint('[LocalNotificationsManager][_notificationTapOnBackground()]');
 }
 
 class LocalNotificationsManager {
-  LocalNotificationsManager._();
-
   static int id = 0;
 
   static Future<bool?> initialize() async {
-    debugPrint('[LocalNotificationsManager.initialize()]');
-
-    final notificationCategories = [
-      DarwinNotificationCategory(
-        'demoCategory',
-        actions: <DarwinNotificationAction>[
-          DarwinNotificationAction.plain('id_1', 'Action 1'),
-          DarwinNotificationAction.plain(
-            'id_2',
-            'Action 2',
-            options: <DarwinNotificationActionOption>{
-              DarwinNotificationActionOption.destructive,
-            },
-          ),
-          DarwinNotificationAction.plain(
-            'id_3',
-            'Action 3',
-            options: <DarwinNotificationActionOption>{
-              DarwinNotificationActionOption.foreground,
-            },
-          ),
-        ],
-        options: <DarwinNotificationCategoryOption>{
-          DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
-        },
-      )
-    ];
+    debugPrint('[LocalNotificationsManager][initialize()]');
 
     final initializationSettings = InitializationSettings(
       android: const AndroidInitializationSettings('mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: true,
-        requestBadgePermission: false,
+        requestBadgePermission: true,
         requestSoundPermission: true,
         onDidReceiveLocalNotification: (
           int id,
@@ -54,30 +26,33 @@ class LocalNotificationsManager {
           String? body,
           String? payload,
         ) {
-          debugPrint('[onDidReceiveLocalNotification()]');
+          debugPrint(
+              '[LocalNotificationsManager][iOS][onDidReceiveLocalNotification()]');
         },
-        notificationCategories: notificationCategories,
       ),
     );
 
     bool? result = await FlutterLocalNotificationsPlugin().initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (final notificationResponse) async {
-        debugPrint('[onDidReceiveNotificationResponse]');
-        if (notificationResponse.payload != null) {
-          debugPrint('notification payload: ${notificationResponse.payload}');
-        }
-      },
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+      onDidReceiveNotificationResponse: _notificationTapOnForeground,
+      onDidReceiveBackgroundNotificationResponse: _notificationTapOnBackground,
     );
     return result;
+  }
+
+  static void _notificationTapOnForeground(
+    NotificationResponse notificationResponse,
+  ) async {
+    debugPrint('[LocalNotificationsManager][_notificationTapOnForeground()]');
   }
 
   static Future<void> showNotification({
     required String? title,
     required String? body,
+    required String? payload,
   }) async {
-    debugPrint('[showNotification()]');
+    debugPrint('[LocalNotificationsManager][showNotification()]');
+
     const notificationDetails = NotificationDetails(
         android: AndroidNotificationDetails(
           'channelId',
@@ -90,12 +65,13 @@ class LocalNotificationsManager {
         iOS: DarwinNotificationDetails(
           badgeNumber: 1,
         ));
+
     await FlutterLocalNotificationsPlugin().show(
       id++,
       title,
       body,
       notificationDetails,
-      payload: 'payload',
+      payload: payload,
     );
   }
 }
