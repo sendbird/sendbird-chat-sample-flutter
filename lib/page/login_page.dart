@@ -1,12 +1,14 @@
 // Copyright (c) 2023 Sendbird, Inc. All rights reserved.
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
 import 'package:sendbird_chat_sample/main.dart';
-import 'package:sendbird_chat_sample/notifications/firebase_manager.dart';
-import 'package:sendbird_chat_sample/notifications/local_notifications_manager.dart';
+import 'package:sendbird_chat_sample/notifications/push_manager.dart';
+import 'package:sendbird_chat_sample/utils/user_prefs.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
+import 'package:sendbird_chat_widget/sendbird_chat_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,11 +20,43 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final textEditingController = TextEditingController();
 
+  bool? isLoginUserId;
+
   @override
   void initState() {
+    PushManager.removeBadge();
+
+    UserPrefs.getLoginUserId().then((loginUserId) {
+      if (loginUserId != null) {
+        setState(() => isLoginUserId = true);
+        _login(loginUserId);
+      } else {
+        setState(() => isLoginUserId = false);
+      }
+    });
     super.initState();
-    FirebaseManager.listenOnForegroundMessage();
-    LocalNotificationsManager.initialize();
+  }
+
+  Future<void> _login(String userId) async {
+    final isGranted = await PushManager.requestPermission();
+    if (isGranted) {
+      await SendbirdChat.connect(userId);
+      await UserPrefs.setLoginUserId();
+      if (SendbirdChat.getPendingPushToken() != null) {
+        await PushManager.registerPushToken();
+      }
+      await SendbirdChatWidget.cacheNotificationInfo();
+
+      if ((await PushManager.checkPushNotification()) == false) {
+        Get.offAndToNamed('/main');
+      }
+    } else {
+      Fluttertoast.showToast(
+        msg: 'The permission was not granted regarding push notifications.',
+        gravity: ToastGravity.CENTER,
+        toastLength: Toast.LENGTH_LONG,
+      );
+    }
   }
 
   @override
@@ -45,7 +79,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
         actions: const [],
       ),
-      body: _loginBox(),
+      body: isLoginUserId != null
+          ? isLoginUserId!
+              ? Container()
+              : _loginBox()
+          : Container(),
     );
   }
 
@@ -60,18 +98,8 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(width: 8.0),
           ElevatedButton(
             onPressed: () async {
-              if (textEditingController.value.text.isEmpty) {
-                return;
-              }
-
-              await SendbirdChat.connect(textEditingController.value.text);
-              if (SendbirdChat.getPendingPushToken() != null) {
-                await FirebaseManager.registerPushToken();
-              }
-
-              Get.toNamed('/main')?.then((value) async {
-                await SendbirdChat.disconnect();
-              });
+              if (textEditingController.value.text.isEmpty) return;
+              _login(textEditingController.value.text);
             },
             child: const Text('Login'),
           ),
