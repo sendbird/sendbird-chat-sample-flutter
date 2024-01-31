@@ -1,11 +1,13 @@
 // Copyright (c) 2023 Sendbird, Inc. All rights reserved.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
 import 'package:sendbird_chat_sample/main.dart';
 import 'package:sendbird_chat_sample/notifications/push_manager.dart';
+import 'package:sendbird_chat_sample/utils/app_prefs.dart';
 import 'package:sendbird_chat_sample/utils/user_prefs.dart';
 import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_widget/sendbird_chat_widget.dart';
@@ -21,26 +23,42 @@ class _LoginPageState extends State<LoginPage> {
   final textEditingController = TextEditingController();
 
   bool? isLoginUserId;
+  bool useCollectionCaching = AppPrefs.defaultUseCollectionCaching;
 
   @override
   void initState() {
+    super.initState();
+    init();
+  }
+
+  Future<void> init() async {
     PushManager.removeBadge();
 
-    UserPrefs.getLoginUserId().then((loginUserId) {
-      if (loginUserId != null) {
-        setState(() => isLoginUserId = true);
-        _login(loginUserId);
-      } else {
-        setState(() => isLoginUserId = false);
-      }
+    final loginUserId = await UserPrefs.getLoginUserId();
+    final useCaching = AppPrefs().getUseCollectionCaching();
+
+    setState(() {
+      isLoginUserId = (loginUserId != null);
+      useCollectionCaching = useCaching;
     });
-    super.initState();
+
+    if (loginUserId != null) {
+      _login(loginUserId);
+    }
   }
 
   Future<void> _login(String userId) async {
     final isGranted = await PushManager.requestPermission();
     if (isGranted) {
+      await SendbirdChat.init(
+        appId: yourAppId,
+        options: SendbirdChatOptions(
+          useCollectionCaching: useCollectionCaching,
+        ),
+      );
+
       await SendbirdChat.connect(userId);
+
       await UserPrefs.setLoginUserId();
       if (SendbirdChat.getPendingPushToken() != null) {
         await PushManager.registerPushToken();
@@ -90,19 +108,42 @@ class _LoginPageState extends State<LoginPage> {
   Widget _loginBox() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: Widgets.textField(textEditingController, 'User ID'),
+          Row(
+            children: [
+              Expanded(
+                child: Widgets.textField(textEditingController, 'User ID'),
+              ),
+              const SizedBox(width: 8.0),
+              ElevatedButton(
+                onPressed: () async {
+                  if (textEditingController.value.text.isEmpty) return;
+                  _login(textEditingController.value.text);
+                },
+                child: const Text('Login'),
+              ),
+            ],
           ),
-          const SizedBox(width: 8.0),
-          ElevatedButton(
-            onPressed: () async {
-              if (textEditingController.value.text.isEmpty) return;
-              _login(textEditingController.value.text);
-            },
-            child: const Text('Login'),
-          ),
+          if (!kIsWeb) const SizedBox(width: 8.0),
+          if (!kIsWeb)
+            Row(
+              children: [
+                Checkbox(
+                  value: useCollectionCaching,
+                  onChanged: (value) async {
+                    if (value != null) {
+                      if (await AppPrefs().setUseCollectionCaching(value)) {
+                        setState(() => useCollectionCaching = value);
+                      }
+                    }
+                  },
+                ),
+                const Expanded(
+                  child: Text('useCollectionCaching'),
+                ),
+              ],
+            ),
         ],
       ),
     );

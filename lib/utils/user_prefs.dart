@@ -4,7 +4,7 @@ import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefs {
-  static String prefLoginUserId = 'loginUserId';
+  static const String prefLoginUserId = 'prefLoginUserId';
 
   static Future<bool> setLoginUserId() async {
     bool result = false;
@@ -17,17 +17,13 @@ class UserPrefs {
   }
 
   static Future<String?> getLoginUserId() async {
-    String? result;
     final prefs = await SharedPreferences.getInstance();
-    result = prefs.getString(prefLoginUserId);
-    return result;
+    return prefs.getString(prefLoginUserId);
   }
 
   static Future<bool> removeLoginUserId() async {
-    bool result = false;
     final prefs = await SharedPreferences.getInstance();
-    result = await prefs.remove(prefLoginUserId);
-    return result;
+    return await prefs.remove(prefLoginUserId);
   }
 
   static Future<bool> setUserPushOn(bool isPushOn) async {

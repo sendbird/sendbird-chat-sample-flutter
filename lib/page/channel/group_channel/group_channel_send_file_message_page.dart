@@ -15,12 +15,61 @@ class GroupChannelSendFileMessagePage extends StatefulWidget {
   @override
   State<GroupChannelSendFileMessagePage> createState() =>
       _GroupChannelSendFileMessagePageState();
+
+  static Future<void> showDialogToResendFileMessage({
+    required BuildContext context,
+    required GroupChannel? groupChannel,
+    required FileMessage message,
+    bool goBackAfterSent = true,
+  }) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+                'Resend: ${message.messageCreateParams?.fileInfo.fileName}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  groupChannel?.resendFileMessage(
+                    message,
+                    handler: (message, e) async {
+                      if (e != null) {
+                        await showDialogToResendFileMessage(
+                          context: context,
+                          groupChannel: groupChannel,
+                          message: message,
+                        );
+                      } else {
+                        if (goBackAfterSent) {
+                          Get.back();
+                        }
+                      }
+                    },
+                  );
+
+                  Get.back();
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
+  }
 }
 
 class _GroupChannelSendFileMessagePageState
     extends State<GroupChannelSendFileMessagePage> {
   final channelUrl = Get.parameters['channel_url']!;
   final textEditingController = TextEditingController();
+  final FocusNode textFieldFocusNode = FocusNode();
 
   String title = 'Send FileMessage';
   double? uploadProgressValue;
@@ -42,6 +91,7 @@ class _GroupChannelSendFileMessagePageState
   @override
   void dispose() {
     textEditingController.dispose();
+    textFieldFocusNode.dispose();
     super.dispose();
   }
 
@@ -73,7 +123,16 @@ class _GroupChannelSendFileMessagePageState
                     params,
                     handler: (message, e) async {
                       if (e != null) {
-                        await _showDialogToResendFileMessage(message);
+                        if (!SendbirdChat.getOptions().useCollectionCaching) {
+                          await GroupChannelSendFileMessagePage
+                              .showDialogToResendFileMessage(
+                            context: context,
+                            groupChannel: groupChannel,
+                            message: message,
+                          );
+                        } else {
+                          Get.back();
+                        }
                       } else {
                         Get.back();
                       }
@@ -93,56 +152,25 @@ class _GroupChannelSendFileMessagePageState
     );
   }
 
-  Future<void> _showDialogToResendFileMessage(FileMessage message) async {
-    await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(
-                'Resend: ${message.messageCreateParams?.fileInfo.fileName}'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  groupChannel?.resendFileMessage(
-                    message,
-                    handler: (message, e) async {
-                      if (e != null) {
-                        await _showDialogToResendFileMessage(message);
-                      } else {
-                        Get.back();
-                      }
-                    },
-                  );
-
-                  Get.back();
-                },
-                child: const Text('Yes'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text('No'),
-              ),
-            ],
-          );
-        });
-  }
-
   Widget _sendFileMessageBox() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(
-            child: Widgets.textField(textEditingController, 'File Name'),
+            child: Widgets.textField(
+              textEditingController,
+              'File Name',
+              focusNode: textFieldFocusNode,
+            ),
           ),
           const SizedBox(width: 8.0),
           (uploadProgressValue != null)
               ? CircularProgressIndicator(value: uploadProgressValue)
               : ElevatedButton(
                   onPressed: () async {
+                    textFieldFocusNode.unfocus();
+
                     final result = await FilePicker.platform
                         .pickFiles(type: FileType.any, allowMultiple: false);
 

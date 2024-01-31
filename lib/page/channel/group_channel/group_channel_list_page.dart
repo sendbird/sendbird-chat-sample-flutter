@@ -2,8 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sample/utils/app_prefs.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelListPage extends StatefulWidget {
   const GroupChannelListPage({Key? key}) : super(key: key);
@@ -24,7 +25,8 @@ class GroupChannelListPageState extends State<GroupChannelListPage> {
     super.initState();
     collection = GroupChannelCollection(
       query: GroupChannelListQuery()
-        ..order = GroupChannelListQueryOrder.latestLastMessage,
+        ..order = GroupChannelListQueryOrder.latestLastMessage
+        ..limit = AppPrefs().getCollectionResultSize(),
       handler: MyGroupChannelCollectionHandler(this),
     )..loadMore();
   }
@@ -67,6 +69,8 @@ class GroupChannelListPageState extends State<GroupChannelListPage> {
     return ListView.builder(
       itemCount: channelList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= channelList.length) return Container();
+
         final groupChannel = channelList[index];
         final userIds = groupChannel.members.map((e) => e.userId).toList();
         userIds.sort((a, b) => a.compareTo(b));
@@ -181,9 +185,9 @@ class GroupChannelListPageState extends State<GroupChannelListPage> {
       child: IconButton(
         icon: const Icon(Icons.expand_more, size: 16.0),
         color: Colors.white,
-        onPressed: () {
+        onPressed: () async {
           if (collection.hasMore && !collection.isLoading) {
-            collection.loadMore();
+            await collection.loadMore();
           }
         },
       ),
@@ -191,13 +195,15 @@ class GroupChannelListPageState extends State<GroupChannelListPage> {
   }
 
   void _refresh() {
-    setState(() {
-      channelList = collection.channelList;
-      title = channelList.isEmpty
-          ? 'GroupChannels'
-          : 'GroupChannels (${channelList.length})';
-      hasMore = collection.hasMore;
-    });
+    if (mounted) {
+      setState(() {
+        channelList = collection.channelList;
+        title = channelList.isEmpty
+            ? 'GroupChannels'
+            : 'GroupChannels (${channelList.length})';
+        hasMore = collection.hasMore;
+      });
+    }
   }
 }
 
@@ -207,12 +213,14 @@ class MyGroupChannelCollectionHandler extends GroupChannelCollectionHandler {
   MyGroupChannelCollectionHandler(this.state);
 
   @override
-  void onChannelsAdded(GroupChannelContext context, List<GroupChannel> channels) {
+  void onChannelsAdded(
+      GroupChannelContext context, List<GroupChannel> channels) {
     state._refresh();
   }
 
   @override
-  void onChannelsUpdated(GroupChannelContext context, List<GroupChannel> channels) {
+  void onChannelsUpdated(
+      GroupChannelContext context, List<GroupChannel> channels) {
     state._refresh();
   }
 

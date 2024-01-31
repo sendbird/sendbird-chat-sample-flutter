@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelInvitePage extends StatefulWidget {
   const GroupChannelInvitePage({Key? key}) : super(key: key);
@@ -88,21 +88,24 @@ class _GroupChannelInvitePageState extends State<GroupChannelInvitePage> {
   }
 
   Widget _selectedUserIdBox() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Text(
-              selectedUserIdList.toString(),
-              textAlign: TextAlign.left,
-              style: const TextStyle(fontSize: 12.0, color: Colors.green),
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Text(
+                selectedUserIdList.toString(),
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 12.0, color: Colors.green),
+              ),
             ),
           ),
-        ),
-        const Divider(height: 1),
-      ],
+          const Divider(height: 1),
+        ],
+      ),
     );
   }
 
@@ -170,23 +173,26 @@ class _GroupChannelInvitePageState extends State<GroupChannelInvitePage> {
   }
 
   Widget _userIdFilterBox() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Widgets.textField(textEditingController, 'User ID'),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton(
-            onPressed: () {
-              userIdFilter = textEditingController.value.text;
-              _initialize();
-              textEditingController.clear();
-            },
-            child: const Text('Find'),
-          ),
-        ],
+    return Container(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Widgets.textField(textEditingController, 'User ID'),
+            ),
+            const SizedBox(width: 8.0),
+            ElevatedButton(
+              onPressed: () {
+                userIdFilter = textEditingController.value.text;
+                _initialize();
+                textEditingController.clear();
+              },
+              child: const Text('Find'),
+            ),
+          ],
+        ),
       ),
     );
   }
