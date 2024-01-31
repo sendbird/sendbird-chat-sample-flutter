@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Sendbird, Inc. All rights reserved.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -32,8 +34,6 @@ class FeedChannelPageState extends State<FeedChannelPage> {
   @override
   void initState() {
     super.initState();
-    SendbirdChat.addChannelHandler('FeedChannel', MyFeedChannelHandler());
-
     _initializeNotificationCollection();
   }
 
@@ -59,8 +59,6 @@ class FeedChannelPageState extends State<FeedChannelPage> {
 
   @override
   void dispose() {
-    SendbirdChat.removeChannelHandler('FeedChannel');
-
     _disposeNotificationCollection();
     textEditingController.dispose();
     super.dispose();
@@ -168,6 +166,8 @@ class FeedChannelPageState extends State<FeedChannelPage> {
       itemScrollController: itemScrollController,
       itemCount: messageList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= messageList.length) return Container();
+
         NotificationMessage message = messageList[index];
 
         // [SendbirdChatWidget]
@@ -175,7 +175,7 @@ class FeedChannelPageState extends State<FeedChannelPage> {
             SendbirdChatWidget.buildNotificationBubbleWidget(
           message: message,
           onError: (NotificationWidgetError error) {
-            debugPrint('[Widget Loading Error] ${error.name}');
+            debugPrint('[NotificationWidgetError] ${error.name}');
 
             switch (error) {
               case NotificationWidgetError.notificationDisabledError:
@@ -325,28 +325,25 @@ class FeedChannelPageState extends State<FeedChannelPage> {
     );
   }
 
-  void _refresh({bool markAsRead = false}) {
-    if (markAsRead) {
-      debugPrint(
-          '[Notifications] _refresh() => collection?.channel.markAsRead()');
-      collection?.channel.markAsRead();
+  void _refresh() async {
+    if (mounted) {
+      setState(() {
+        if (collection != null) {
+          messageList = collection!.messageList;
+          title = '${collection!.channel.name} (${messageList.length})';
+          hasPrevious = collection!.params.reverse
+              ? collection!.hasNext
+              : collection!.hasPrevious;
+          hasNext = collection!.params.reverse
+              ? collection!.hasPrevious
+              : collection!.hasNext;
+          memberIdList = collection!.channel.members
+              .map((member) => member.userId)
+              .toList();
+          memberIdList.sort((a, b) => a.compareTo(b));
+        }
+      });
     }
-
-    setState(() {
-      if (collection != null) {
-        messageList = collection!.messageList;
-        title = '${collection!.channel.name} (${messageList.length})';
-        hasPrevious = collection!.params.reverse
-            ? collection!.hasNext
-            : collection!.hasPrevious;
-        hasNext = collection!.params.reverse
-            ? collection!.hasPrevious
-            : collection!.hasNext;
-        memberIdList =
-            collection!.channel.members.map((member) => member.userId).toList();
-        memberIdList.sort((a, b) => a.compareTo(b));
-      }
-    });
   }
 
   void _scrollToAddedMessages(CollectionEventSource eventSource) async {
@@ -376,78 +373,55 @@ class FeedChannelPageState extends State<FeedChannelPage> {
 
 class MyNotificationCollectionHandler extends NotificationCollectionHandler {
   final FeedChannelPageState _state;
+  bool isScrolling = false;
 
   MyNotificationCollectionHandler(this._state);
 
   @override
   void onMessagesAdded(NotificationContext context, FeedChannel channel,
       List<NotificationMessage> messages) async {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onMessagesAdded()');
-    _state._refresh(markAsRead: true);
+    _state._refresh();
+    _state.collection?.markAsRead(context);
 
     if (context.collectionEventSource !=
-        CollectionEventSource.messageInitialize) {
-      Future.delayed(
-        const Duration(milliseconds: 100),
-        () => _state._scrollToAddedMessages(context.collectionEventSource),
-      );
+            CollectionEventSource.messageCacheInitialize &&
+        context.collectionEventSource !=
+            CollectionEventSource.messageInitialize) {
+      if (!isScrolling) {
+        isScrolling = true;
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _state._scrollToAddedMessages(context.collectionEventSource);
+          isScrolling = false;
+        });
+      }
     }
   }
 
   @override
   void onMessagesUpdated(NotificationContext context, FeedChannel channel,
       List<NotificationMessage> messages) async {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onMessagesUpdated()');
     _state._refresh();
   }
 
   @override
   void onMessagesDeleted(NotificationContext context, FeedChannel channel,
       List<NotificationMessage> messages) {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onMessagesDeleted()');
     _state._refresh();
   }
 
   @override
   void onChannelUpdated(FeedChannelContext context, FeedChannel channel) {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onChannelUpdated()');
     _state._refresh();
   }
 
   @override
   void onChannelDeleted(FeedChannelContext context, String deletedChannelUrl) {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onChannelDeleted()');
     Get.back();
   }
 
   @override
   void onHugeGapDetected() {
-    debugPrint(
-        '[Notifications][MyNotificationCollectionHandler] onHugeGapDetected()');
     _state._disposeNotificationCollection();
     _state._initializeNotificationCollection();
-  }
-}
-
-class MyFeedChannelHandler extends FeedChannelHandler {
-  @override
-  void onMessageReceived(BaseChannel channel, NotificationMessage message) {
-    debugPrint(
-        '[Notifications][MyFeedChannelHandler] onMessageReceived() => ${message.notificationId}');
-  }
-
-  @override
-  void onChannelChanged(FeedChannel channel) {
-    debugPrint('[Notifications][MyFeedChannelHandler] onChannelChanged()');
-  }
-
-  @override
-  void onReadStatusUpdated(FeedChannel channel) {
-    debugPrint('[Notifications][MyFeedChannelHandler] onReadStatusUpdated()');
   }
 }

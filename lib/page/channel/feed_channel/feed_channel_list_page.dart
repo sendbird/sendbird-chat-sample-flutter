@@ -69,6 +69,8 @@ class FeedChannelListPageState extends State<FeedChannelListPage> {
     return ListView.builder(
       itemCount: channelList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= channelList.length) return Container();
+
         final feedChannel = channelList[index];
 
         return GestureDetector(
@@ -135,7 +137,7 @@ class FeedChannelListPageState extends State<FeedChannelListPage> {
           if (query.hasNext && !query.isLoading) {
             final channels = await query.next();
             setState(() {
-              channelList.addAll(channels);
+              _upsertChannels(channels);
               title = _getTitle();
               hasNext = query.hasNext;
             });
@@ -156,28 +158,31 @@ class FeedChannelListPageState extends State<FeedChannelListPage> {
         FeedChannelChangeLogsParams());
 
     if (changeLogs.updatedChannels.isNotEmpty) {
-      for (final updatedChannel in changeLogs.updatedChannels) {
-        bool isFoundUpdatedChannel = false;
-
-        for (int index = 0; index < channelList.length; index++) {
-          final channel = channelList[index];
-
-          if (updatedChannel.channelUrl == channel.channelUrl) {
-            channelList.insert(index, updatedChannel);
-            isFoundUpdatedChannel = true;
-            break;
-          }
-        }
-
-        if (!isFoundUpdatedChannel) {
-          channelList.add(updatedChannel);
-        }
-      }
+      _upsertChannels(changeLogs.updatedChannels);
     }
 
     if (changeLogs.deletedChannelUrls.isNotEmpty) {
       for (final channelUrl in changeLogs.deletedChannelUrls) {
         channelList.removeWhere((e) => e.channelUrl == channelUrl);
+      }
+    }
+  }
+
+  void _upsertChannels(List<FeedChannel> updatedChannels) {
+    for (final updatedChannel in updatedChannels) {
+      bool isFoundUpdatedChannel = false;
+
+      for (int index = 0; index < channelList.length; index++) {
+        final channel = channelList[index];
+        if (updatedChannel.channelUrl == channel.channelUrl) {
+          channelList[index] = updatedChannel;
+          isFoundUpdatedChannel = true;
+          break;
+        }
+      }
+
+      if (!isFoundUpdatedChannel) {
+        channelList.add(updatedChannel);
       }
     }
   }

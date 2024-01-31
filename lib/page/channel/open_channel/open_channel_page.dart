@@ -138,6 +138,8 @@ class OpenChannelPageState extends State<OpenChannelPage> {
       itemScrollController: itemScrollController,
       itemCount: messageList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= messageList.length) return Container();
+
         BaseMessage message = messageList[index];
 
         return GestureDetector(

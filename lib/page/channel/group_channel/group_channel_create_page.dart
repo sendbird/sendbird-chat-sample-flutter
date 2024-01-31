@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelCreatePage extends StatefulWidget {
   const GroupChannelCreatePage({Key? key}) : super(key: key);
@@ -78,10 +78,13 @@ class _GroupChannelCreatePageState extends State<GroupChannelCreatePage> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Widgets.textField(
-                textEditingControllerForChannelName, 'GroupChannel Name'),
+          Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Widgets.textField(
+                  textEditingControllerForChannelName, 'GroupChannel Name'),
+            ),
           ),
           selectedUserIdList.isNotEmpty ? _selectedUserIdBox() : Container(),
           const Divider(height: 1),
@@ -94,20 +97,23 @@ class _GroupChannelCreatePageState extends State<GroupChannelCreatePage> {
   }
 
   Widget _selectedUserIdBox() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Text(
-              selectedUserIdList.toString(),
-              textAlign: TextAlign.left,
-              style: const TextStyle(fontSize: 12.0, color: Colors.green),
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Text(
+                selectedUserIdList.toString(),
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 12.0, color: Colors.green),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -175,23 +181,27 @@ class _GroupChannelCreatePageState extends State<GroupChannelCreatePage> {
   }
 
   Widget _userIdFilterBox() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Widgets.textField(textEditingControllerForUserId, 'User ID'),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton(
-            onPressed: () {
-              userIdFilter = textEditingControllerForUserId.value.text;
-              _initialize();
-              textEditingControllerForUserId.clear();
-            },
-            child: const Text('Find'),
-          ),
-        ],
+    return Container(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child:
+                  Widgets.textField(textEditingControllerForUserId, 'User ID'),
+            ),
+            const SizedBox(width: 8.0),
+            ElevatedButton(
+              onPressed: () {
+                userIdFilter = textEditingControllerForUserId.value.text;
+                _initialize();
+                textEditingControllerForUserId.clear();
+              },
+              child: const Text('Find'),
+            ),
+          ],
+        ),
       ),
     );
   }

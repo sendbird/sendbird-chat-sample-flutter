@@ -28,9 +28,9 @@ import 'package:sendbird_chat_sample/page/message/message_update_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_nickname_update_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_profile_update_page.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
+import 'package:sendbird_chat_sample/utils/app_prefs.dart';
 
-const sampleVersion = '4.1.0';
+const sampleVersion = '4.2.0';
 const yourAppId = '728E8736-5D0C-47CE-B934-E39B656900F3';
 
 void main() {
@@ -48,8 +48,9 @@ void main() {
 
       await PushManager.initialize();
       await LocalNotificationsManager.initialize();
+      await AppPrefs().initialize();
 
-      runApp(MyApp());
+      runApp(const MyApp());
     },
     (error, stackTrace) async {
       debugPrint('[Error] $error\n$stackTrace');
@@ -63,9 +64,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key}) {
-    SendbirdChat.init(appId: yourAppId);
-  }
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

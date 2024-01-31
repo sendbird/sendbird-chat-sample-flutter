@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class OpenChannelListPage extends StatefulWidget {
   const OpenChannelListPage({Key? key}) : super(key: key);
@@ -70,6 +70,8 @@ class OpenChannelListPageState extends State<OpenChannelListPage> {
     return ListView.builder(
       itemCount: channelList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= channelList.length) return Container();
+
         final openChannel = channelList[index];
 
         return GestureDetector(

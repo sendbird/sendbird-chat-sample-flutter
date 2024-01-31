@@ -1,10 +1,13 @@
 // Copyright (c) 2023 Sendbird, Inc. All rights reserved.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sendbird_chat_sample/component/widgets.dart';
-import 'package:sendbird_chat_sample/page/main_page.dart';
+import 'package:sendbird_chat_sample/page/channel/group_channel/group_channel_send_file_message_page.dart';
+import 'package:sendbird_chat_sample/utils/app_prefs.dart';
 import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class GroupChannelPage extends StatefulWidget {
@@ -18,6 +21,7 @@ class GroupChannelPageState extends State<GroupChannelPage> {
   final channelUrl = Get.parameters['channel_url']!;
   final itemScrollController = ItemScrollController();
   final textEditingController = TextEditingController();
+  final FocusNode textFieldFocusNode = FocusNode();
   MessageCollection? collection;
 
   String title = '';
@@ -34,9 +38,26 @@ class GroupChannelPageState extends State<GroupChannelPage> {
 
   void _initializeMessageCollection() {
     GroupChannel.getChannel(channelUrl).then((channel) {
+      final reverse = AppPrefs().getMessageCollectionReverse();
+      final resultSize = AppPrefs().getCollectionResultSize();
+
+      MessageListParams params;
+      if (reverse) {
+        params = MessageListParams()
+          ..reverse = true
+          ..previousResultSize = 0
+          ..nextResultSize = resultSize;
+      } else {
+        params = MessageListParams()
+          ..reverse = false
+          ..previousResultSize = resultSize
+          ..nextResultSize = 0;
+      }
+
       collection = MessageCollection(
         channel: channel,
-        params: MessageListParams(),
+        params: params,
+        startingPoint: reverse ? 0 : null,
         handler: MyMessageCollectionHandler(this),
       )..initialize();
 
@@ -56,6 +77,7 @@ class GroupChannelPageState extends State<GroupChannelPage> {
   void dispose() {
     _disposeMessageCollection();
     textEditingController.dispose();
+    textFieldFocusNode.dispose();
     super.dispose();
   }
 
@@ -145,8 +167,12 @@ class GroupChannelPageState extends State<GroupChannelPage> {
 
           setState(() {
             if (collection != null) {
-              hasPrevious = collection!.hasPrevious;
-              hasNext = collection!.hasNext;
+              hasPrevious = collection!.params.reverse
+                  ? collection!.hasNext
+                  : collection!.hasPrevious;
+              hasNext = collection!.params.reverse
+                  ? collection!.hasPrevious
+                  : collection!.hasNext;
             }
           });
         },
@@ -163,12 +189,29 @@ class GroupChannelPageState extends State<GroupChannelPage> {
       itemScrollController: itemScrollController,
       itemCount: messageList.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index >= messageList.length) return Container();
+
         BaseMessage message = messageList[index];
         final unreadMembers = (collection != null)
             ? collection!.channel.getUnreadMembers(message)
             : [];
 
         return GestureDetector(
+          onTap: () async {
+            if (message.sendingStatus == SendingStatus.failed) {
+              if (message is UserMessage) {
+                await _showDialogToResendUserMessage(message);
+              } else if (message is FileMessage) {
+                await GroupChannelSendFileMessagePage
+                    .showDialogToResendFileMessage(
+                  context: context,
+                  groupChannel: collection!.channel,
+                  message: message,
+                  goBackAfterSent: false,
+                );
+              }
+            }
+          },
           onDoubleTap: () async {
             if (message is UserMessage) {
               final groupChannel = await GroupChannel.getChannel(channelUrl);
@@ -187,7 +230,11 @@ class GroupChannelPageState extends State<GroupChannelPage> {
             }
           },
           onLongPress: () async {
-            await collection?.channel.deleteMessage(message.messageId);
+            if (message.sendingStatus == SendingStatus.succeeded) {
+              await collection?.channel.deleteMessage(message.messageId);
+            } else {
+              await collection?.removeFailedMessages(messages: [message]);
+            }
           },
           child: Column(
             children: [
@@ -224,15 +271,27 @@ class GroupChannelPageState extends State<GroupChannelPage> {
                     if (message.sender != null && message.sender!.isCurrentUser)
                       Container(
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          unreadMembers.isNotEmpty
-                              ? '${unreadMembers.length}'
-                              : '',
-                          style: const TextStyle(
-                            fontSize: 12.0,
-                            color: Colors.green,
-                          ),
-                        ),
+                        child: message.sendingStatus == SendingStatus.pending
+                            ? const Icon(
+                                Icons.pending,
+                                size: 12.0,
+                                color: Colors.grey,
+                              )
+                            : message.sendingStatus == SendingStatus.failed
+                                ? const Icon(
+                                    Icons.refresh,
+                                    size: 12.0,
+                                    color: Colors.red,
+                                  )
+                                : Text(
+                                    unreadMembers.isNotEmpty
+                                        ? '${unreadMembers.length}'
+                                        : '',
+                                    style: const TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
                       ),
                   ],
                 ),
@@ -293,8 +352,12 @@ class GroupChannelPageState extends State<GroupChannelPage> {
 
           setState(() {
             if (collection != null) {
-              hasPrevious = collection!.hasPrevious;
-              hasNext = collection!.hasNext;
+              hasPrevious = collection!.params.reverse
+                  ? collection!.hasNext
+                  : collection!.hasPrevious;
+              hasNext = collection!.params.reverse
+                  ? collection!.hasPrevious
+                  : collection!.hasNext;
             }
           });
         },
@@ -308,11 +371,17 @@ class GroupChannelPageState extends State<GroupChannelPage> {
       child: Row(
         children: [
           Expanded(
-            child: Widgets.textField(textEditingController, 'Message'),
+            child: Widgets.textField(
+              textEditingController,
+              'Message',
+              focusNode: textFieldFocusNode,
+            ),
           ),
           const SizedBox(width: 8.0),
           ElevatedButton(
             onPressed: () {
+              textFieldFocusNode.unfocus();
+
               if (textEditingController.value.text.isEmpty) {
                 return;
               }
@@ -323,7 +392,9 @@ class GroupChannelPageState extends State<GroupChannelPage> {
                 ),
                 handler: (UserMessage message, SendbirdException? e) async {
                   if (e != null) {
-                    await _showDialogToResendUserMessage(message);
+                    if (!SendbirdChat.getOptions().useCollectionCaching) {
+                      await _showDialogToResendUserMessage(message);
+                    }
                   }
                 },
               );
@@ -371,33 +442,34 @@ class GroupChannelPageState extends State<GroupChannelPage> {
         });
   }
 
-  void _refresh({bool markAsRead = false}) {
-    if (markAsRead) {
-      SendbirdChat.markAsRead(channelUrls: [channelUrl]);
+  void _refresh() async {
+    if (mounted) {
+      setState(() {
+        if (collection != null) {
+          messageList = collection!.messageList;
+          title = '${collection!.channel.name} (${messageList.length})';
+          hasPrevious = collection!.params.reverse
+              ? collection!.hasNext
+              : collection!.hasPrevious;
+          hasNext = collection!.params.reverse
+              ? collection!.hasPrevious
+              : collection!.hasNext;
+          memberIdList = collection!.channel.members
+              .map((member) => member.userId)
+              .toList();
+          memberIdList.sort((a, b) => a.compareTo(b));
+        }
+      });
     }
-
-    setState(() {
-      if (collection != null) {
-        messageList = collection!.messageList;
-        title = '${collection!.channel.name} (${messageList.length})';
-        hasPrevious = collection!.params.reverse
-            ? collection!.hasNext
-            : collection!.hasPrevious;
-        hasNext = collection!.params.reverse
-            ? collection!.hasPrevious
-            : collection!.hasNext;
-        memberIdList =
-            collection!.channel.members.map((member) => member.userId).toList();
-        memberIdList.sort((a, b) => a.compareTo(b));
-      }
-    });
   }
 
   void _scrollToAddedMessages(CollectionEventSource eventSource) async {
     if (collection == null || collection!.messageList.length <= 1) return;
 
     final reverse = collection!.params.reverse;
-    final previous = eventSource == CollectionEventSource.messageLoadPrevious;
+    final previous =
+        (eventSource == CollectionEventSource.messageCacheLoadPrevious ||
+            eventSource == CollectionEventSource.messageLoadPrevious);
 
     final int index;
     if ((reverse && previous) || (!reverse && !previous)) {
@@ -420,20 +492,27 @@ class GroupChannelPageState extends State<GroupChannelPage> {
 
 class MyMessageCollectionHandler extends MessageCollectionHandler {
   final GroupChannelPageState _state;
+  bool isScrolling = false;
 
   MyMessageCollectionHandler(this._state);
 
   @override
   void onMessagesAdded(MessageContext context, GroupChannel channel,
       List<BaseMessage> messages) async {
-    _state._refresh(markAsRead: true);
+    _state._refresh();
+    _state.collection?.markAsRead(context);
 
     if (context.collectionEventSource !=
-        CollectionEventSource.messageInitialize) {
-      Future.delayed(
-        const Duration(milliseconds: 100),
-        () => _state._scrollToAddedMessages(context.collectionEventSource),
-      );
+            CollectionEventSource.messageCacheInitialize &&
+        context.collectionEventSource !=
+            CollectionEventSource.messageInitialize) {
+      if (!isScrolling) {
+        isScrolling = true;
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _state._scrollToAddedMessages(context.collectionEventSource);
+          isScrolling = false;
+        });
+      }
     }
   }
 
@@ -456,7 +535,7 @@ class MyMessageCollectionHandler extends MessageCollectionHandler {
 
   @override
   void onChannelDeleted(GroupChannelContext context, String deletedChannelUrl) {
-    Get.offAll(() => const MainPage());
+    Get.back();
   }
 
   @override
