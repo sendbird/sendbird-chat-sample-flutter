@@ -30,7 +30,7 @@ import 'package:sendbird_chat_sample/page/user/user_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_profile_update_page.dart';
 import 'package:sendbird_chat_sample/utils/app_prefs.dart';
 
-const sampleVersion = '4.2.0';
+const sampleVersion = '4.2.7';
 const yourAppId = '728E8736-5D0C-47CE-B934-E39B656900F3';
 
 void main() {
@@ -72,6 +72,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Sendbird Chat Sample',
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: _createMaterialColor(
           const Color.fromARGB(196, 90, 24, 196),
         ),
