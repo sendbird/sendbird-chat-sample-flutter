@@ -138,7 +138,8 @@ class PushManager {
       if (channelUrl != null) {
         if (SendbirdChat.currentUser != null &&
             SendbirdChat.currentUser!.userId == sendbird['recipient']['id']) {
-          if (sendbird['channel_type'] == 'group_messaging') {
+          if (sendbird['channel_type'] == 'group_messaging' ||
+              sendbird['channel_type'] == 'messaging') {
             if (offCurrentPage != null && offCurrentPage) {
               Get.offAndToNamed('/group_channel/$channelUrl');
             } else {
@@ -175,7 +176,8 @@ class PushManager {
       }
     } catch (_) {
       Fluttertoast.showToast(
-        msg: 'Replace \'google-service.json\' in \'android/app\' with your file.',
+        msg:
+            'Replace \'google-service.json\' in \'android/app\' with your file.',
         gravity: ToastGravity.CENTER,
         toastLength: Toast.LENGTH_LONG,
       );
