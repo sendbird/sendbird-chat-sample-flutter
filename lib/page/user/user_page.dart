@@ -326,8 +326,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Widget _appIdBox() {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         SizedBox(
           width: 80.0,
           child: Text(
@@ -351,8 +351,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Widget _sampleVersionBox() {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         SizedBox(
           width: 80.0,
           child: Text(
@@ -401,8 +401,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Widget _widgetSdkVersionBox() {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         SizedBox(
           width: 80.0,
           child: Text(
