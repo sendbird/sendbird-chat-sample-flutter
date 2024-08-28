@@ -23,12 +23,12 @@ class PushManager {
       }
     });
 
-    Push.instance.onMessage.listen((message) async {
+    Push.instance.addOnMessage((message) async {
       // Foreground
       await _showNotification(message.data, isBackgroundMessage: false);
     });
 
-    Push.instance.onBackgroundMessage.listen((message) async {
+    Push.instance.addOnBackgroundMessage((message) async {
       // Background
       await _showNotification(message.data, isBackgroundMessage: true);
     });
