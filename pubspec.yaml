@@ -44,7 +44,7 @@ dependencies:
   get: ^4.6.5
   flutter_local_notifications: ^17.2.2
   push: ^2.3.0
-  flutter_app_badger: ^1.5.0
+  app_badge_plus: ^1.1.6
   file_picker: ^8.0.3
   scrollable_positioned_list: ^0.3.5
 

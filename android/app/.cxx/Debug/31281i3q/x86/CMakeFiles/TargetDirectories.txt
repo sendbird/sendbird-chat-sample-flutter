@@ -1,0 +1,2 @@
+/Users/tyler.jeong/git/sendbird-chat-sample-flutter-dev/android/app/.cxx/Debug/31281i3q/x86/CMakeFiles/rebuild_cache.dir
+/Users/tyler.jeong/git/sendbird-chat-sample-flutter-dev/android/app/.cxx/Debug/31281i3q/x86/CMakeFiles/edit_cache.dir

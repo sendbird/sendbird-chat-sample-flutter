@@ -30,13 +30,18 @@ if (flutterVersionName == null) {
 
 android {
     compileSdkVersion 34 // flutter.compileSdkVersion // for [flutter_local_notifications]
-    ndkVersion flutter.ndkVersion
+    ndkVersion "28.0.13004108" // flutter.ndkVersion
 
     defaultConfig {
         multiDexEnabled true
     }
 
     compileOptions {
+        //+ for [flutter_local_notifications]
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+        //- for [flutter_local_notifications]
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -67,6 +72,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.sendbird.chat.sample.flutter'
 }
 
 flutter {
@@ -75,8 +81,8 @@ flutter {
 
 dependencies {
     //+ for [flutter_local_notifications]
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation 'androidx.window:window:1.0.0'
     implementation 'androidx.window:window-java:1.0.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
     //- for [flutter_local_notifications]
 }

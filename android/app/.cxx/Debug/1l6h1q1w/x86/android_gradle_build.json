@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/Users/tyler.jeong/dev/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/tyler.jeong/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/tyler.jeong/git/sendbird-chat-sample-flutter/android/app/.cxx/Debug/1l6h1q1w/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/tyler.jeong/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/tyler.jeong/git/sendbird-chat-sample-flutter/android/app/.cxx/Debug/1l6h1q1w/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/tyler.jeong/Library/Android/sdk/ndk/28.0.13004108/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/tyler.jeong/Library/Android/sdk/ndk/28.0.13004108/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}
