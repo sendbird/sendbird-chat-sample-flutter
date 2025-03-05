@@ -508,10 +508,10 @@ packages:
     dependency: "direct main"
     description:
       name: sendbird_chat_sdk
-      sha256: b7286abda2156d023775db21cab101778ec42c1352815fcc7d044675dae523e0
+      sha256: "3ce8e05e9018dfdeb75c2907dc7b78c4b430a30b03a5fd75b4ea54850ef345fe"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.30"
+    version: "4.2.31"
   sendbird_chat_widget:
     dependency: "direct main"
     description:
