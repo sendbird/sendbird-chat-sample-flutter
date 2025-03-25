@@ -13,6 +13,14 @@ The minimum requirements for the Chat SDK for Flutter are:
 - Dart 2.19.0 or later
 - Flutter 3.7.0 or later
 
+## Running
+
+To run locally from the root directory of the repository, run the following commands:
+
+1. `flutter pub get` to install dependencies.
+2. `flutter run` to run the app.
+
+
 ## Sample page links
 
 - [LoginPage](https://github.com/sendbird/sendbird-chat-sample-flutter/blob/master/lib/page/login_page.dart)
