@@ -3,6 +3,8 @@
 [![Platform](https://img.shields.io/badge/platform-flutter-blue)](https://flutter.dev/)
 [![Language](https://img.shields.io/badge/language-dart-blue)](https://dart.dev/)
 
+![Flutter Example](assets/flutter_example.gif)
+
 ## Introduction
 
 This sample demonstrates how you can use the [Sendbird Chat SDK for Flutter](https://github.com/sendbird/sendbird-chat-sdk-flutter) in your own Flutter application.
@@ -12,6 +14,14 @@ This sample demonstrates how you can use the [Sendbird Chat SDK for Flutter](htt
 The minimum requirements for the Chat SDK for Flutter are:
 - Dart 2.19.0 or later
 - Flutter 3.7.0 or later
+
+## Running
+
+To run locally from the root directory of the repository, run the following commands:
+
+1. `flutter pub get` to install dependencies.
+2. `flutter run` to run the app.
+
 
 ## Sample page links
 
