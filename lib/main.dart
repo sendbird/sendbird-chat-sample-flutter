@@ -30,9 +30,8 @@ import 'package:sendbird_chat_sample/page/user/user_page.dart';
 import 'package:sendbird_chat_sample/page/user/user_profile_update_page.dart';
 import 'package:sendbird_chat_sample/utils/app_prefs.dart';
 
-const sampleVersion = '4.2.22';
-// const yourAppId = 'AA73FE3F-C658-451D-A3AD-66EA4022E5A2'; // FlutterTest
-const yourAppId = '95F23916-9F8A-48D0-8400-D52D3BE1FA52'; // Notifications
+const sampleVersion = '4.7.0';
+const yourAppId = '728E8736-5D0C-47CE-B934-E39B656900F3';
 
 void main() {
   runZonedGuarded<Future<void>>(
