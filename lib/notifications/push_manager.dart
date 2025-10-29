@@ -3,8 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:push/push.dart';
@@ -92,10 +92,12 @@ class PushManager {
     return isGranted;
   }
 
-  static void removeBadge() {
+  static void removeBadge() async {
     if (kIsWeb) return;
 
-    FlutterAppBadger.removeBadge();
+    if (await AppBadgePlus.isSupported()) {
+      await AppBadgePlus.updateBadge(0);
+    }
   }
 
   static Future<bool> checkPushNotification() async {
