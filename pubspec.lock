@@ -256,22 +256,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  isar:
+  isar_community:
     dependency: transitive
     description:
-      name: isar
-      sha256: "99165dadb2cf2329d3140198363a7e7bff9bbd441871898a87e26914d25cf1ea"
+      name: isar_community
+      sha256: "28f59e54636c45ba0bb1b3b7f2656f1c50325f740cea6efcd101900be3fba546"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0+1"
-  isar_flutter_libs:
+    version: "3.3.0-dev.3"
+  isar_community_flutter_libs:
     dependency: transitive
     description:
-      name: isar_flutter_libs
-      sha256: bc6768cc4b9c61aabff77152e7f33b4b17d2fc93134f7af1c3dd51500fe8d5e8
+      name: isar_community_flutter_libs
+      sha256: c2934fe755bb3181cb67602fd5df0d080b3d3eb52799f98623aa4fc5acbea010
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0+1"
+    version: "3.3.0-dev.3"
   js:
     dependency: transitive
     description:
@@ -508,10 +508,10 @@ packages:
     dependency: "direct main"
     description:
       name: sendbird_chat_sdk
-      sha256: "3ce8e05e9018dfdeb75c2907dc7b78c4b430a30b03a5fd75b4ea54850ef345fe"
+      sha256: "99eea52bf61f2e8423a7062a9a040b31fae7c2f2ffcbaabbdafe165992e5f8c4"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.31"
+    version: "4.7.0"
   sendbird_chat_widget:
     dependency: "direct main"
     description:
